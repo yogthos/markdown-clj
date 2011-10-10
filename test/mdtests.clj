@@ -6,7 +6,7 @@
 (defn convert [text]
   (let [input (new StringReader text)
         output (new StringWriter)] 
-    (markdown/process-stream input output)
+    (markdown/markdown-to-html input output)
     (.toString output)))
 
 (deftest heading1 

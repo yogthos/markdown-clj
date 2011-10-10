@@ -265,7 +265,9 @@
 
 ;;TODO links, nested lists
 
-(defn process-stream [in out]    
+(defn markdown-to-html 
+  "reads markdown content from the input stream and writes HTML to the provided output stream"
+  [in out]    
   (with-open [reader (new BufferedReader in)
               writer (new BufferedWriter out)]    
     (loop [c (.read reader)
