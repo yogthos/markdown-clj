@@ -1,4 +1,6 @@
 ##Markdown parser written in Clojure
 
-Currently, nested lists and links aren't supported
-Only basic Markdown syntax is implemented
+Currently, nested lists  aren't supported, for list of supported syntax see the tests
+
+
+
