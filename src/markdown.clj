@@ -27,7 +27,7 @@
         
         (:found-token cur-state)
         (if (= (first tokens) [\* \*])
-          (recur (into out (flatten [\< \b \> buf \< \/ \b \>]))
+          (recur (concat out [\< \b \>] buf [\< \/ \b \>])
                  []
                  (rest tokens)
                  (assoc cur-state :found-token false))
@@ -55,7 +55,7 @@
         
         (:found-token cur-state)
         (if (= (first tokens) [\*])
-          (recur (into out (flatten [\< \i \> buf \< \/ \i \>]))
+          (recur (concat out [\< \i \>] buf  [\< \/ \i \>])
                  []
                  (rest tokens)
                  (assoc cur-state :found-token false))
@@ -175,6 +175,26 @@
         [(str "<blockquote><p>" (apply str (rest text))), (assoc state :blockquote true)]
         [text, state]))))
 
+(defn- link-transformer [text, state]
+  (if (:code state)
+    [text, state]
+    (loop [out []
+           tokens (seq text)]
+      (if (empty? tokens)
+        [(apply str out), state]
+                
+        (let [[head, xs] (split-with (partial not= \[) tokens)
+              [title, ys] (split-with (partial not= \]) xs)
+              [dud, zs] (split-with (partial not= \() ys)
+              [link, tail] (split-with (partial not= \)) zs)]
+          
+          [(count title) (count link)]
+          (if (or (< (count title) 2) 
+                  (< (count link) 2))
+            (recur (concat out head title dud link), tail)
+            (recur 
+              (concat out head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>"))
+              (rest tail))))))))
 
 (defn markdown-to-html 
   "reads markdown content from the input stream and writes HTML to the provided output stream"
@@ -184,12 +204,13 @@
     (let [transformer (init-transformer 
                         writer
                         inline-code-transformer
-                        code-transformer
+                        code-transformer                        
                         hr-transformer
                         heading-transformer
                         italics-transformer
                         bold-transformer
                         list-transformer
+                        link-transformer
                         blockquote-transformer
                         paragraph-transformer)] 
       (loop [line (.readLine reader)
@@ -198,3 +219,6 @@
         (recur (.readLine reader) (transformer line state))
         (transformer "" (assoc state :eof true)))))
     (.flush writer)))
+
+
+(markdown-to-html (new FileReader "text.txt") *out*)

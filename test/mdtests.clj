@@ -52,8 +52,14 @@
   (is (= "foo bar baz <pre>x = y + z;</pre> foo"
          (convert "foo bar baz `x = y + z;` foo"))))
 
-(deftest multiline code
+(deftest multiline-code
   (is (= "<pre>    x = 5\n    y = 6\n    z = x + y</pre>"
          (convert "    x = 5\n    y = 6\n    z = x + y")))) 
 
+(deftest link
+  (is (= "<a href='http://github.com'>github</a>"
+         (convert "[github](http://github.com)"))))
+
 (run-tests)
+
+
