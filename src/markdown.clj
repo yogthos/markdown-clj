@@ -1,5 +1,10 @@
 (ns markdown
-  (:import [java.io BufferedReader FileReader BufferedWriter]))
+  (:import [java.io 
+            BufferedReader 
+            FileReader 
+            BufferedWriter 
+            StringReader 
+            StringWriter]))
 
 (defn- write [writer text]
   (doseq [c text] (.write writer (int c))))
@@ -49,7 +54,7 @@
   (separator-transformer text, "<i>", "</i>", [\*], state))
 
 (defn- inline-code-transformer [text, state]
-  (separator-transformer text, "<pre>", "</pre>", [\`], state))
+  (separator-transformer text, "<pre><code>", "</code></pre>", [\`], state))
 
 (defn- strikethrough-transformer [text, state]
   (separator-transformer text, "<del>", "</del>", [\~ \~], state))
@@ -84,7 +89,7 @@
         
     (:code state)
     (if (or (:eof state) (empty? (.trim text)))
-      ["</pre>", (assoc state :code false)]      
+      ["</code></pre>", (assoc state :code false)]      
       [(str "\n" text), state])
     
     (empty? (.trim text)) 
@@ -93,7 +98,7 @@
     :default
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
-        [(str "<pre>" text), (assoc state :code true)]
+        [(str "<pre><code>" text), (assoc state :code true)]
         [text, state]))))
 
 (defn- hr-transformer [text, state]
@@ -103,34 +108,56 @@
         [(str "<hr/>"), state]
         [text, state])))
 
-
 (defn- list-transformer [text, state]
   (if (:code state)
     [text, state]
     (cond
       (= [\* \space] (take 2 text))
-      (if (:list state)
-        [(str "<li>" (apply str (drop 2 text)) "</li>"), state]
-        [(str "<ul><li>" (apply str (drop 2 text)) "</li>"), (assoc state :list true)])
+      (let [[spaces, remaining-text] (split-with (partial = \space) (rest text))
+            actual-text remaining-text
+            num-indents (count spaces)]
+        (if (:list state)             
+          (cond            
+            (nil? (:list-indents state))
+            [(str "<li>" (apply str actual-text))
+             (assoc state :list-indents 1)]
+            
+            (< num-indents (:list-indents state))
+            [(str "</li></ul></li><li>" (apply str actual-text))
+             (assoc state :list-indents (dec (:list-indents state)))]
+            
+            (> num-indents (:list-indents state))
+            [(str "<ul><li>" (apply str actual-text))
+             (assoc state :list-indents (inc (:list-indents state)))]
+            
+            (= num-indents (:list-indents state))
+            [(str "</li><li>" (apply str actual-text)), state]
+            
+            :default
+            [(str "<li>" (apply str actual-text)), state])
+          
+          [(str "<ul><li>" (apply str (drop 2 text))),
+           (assoc state :list true :list-indents num-indents)]))
       
       (and (:list state) (or (:eof state) (empty? (.trim text))))
-      ["</ul>", (assoc state :list false)]
+      [(apply str (for [i (range (:list-indents state))] "</li></ul>"))
+       (assoc state :list false)]
       
       :default
       [text, state])))
-
+    
 (defn- paragraph-transformer [text, state]  
   (if (or (:code state) (:list state) (:blockquote state))
     [text, state]
     (cond
-      (:paragraph state)      
+      (:paragraph state)     
       (if (or (:eof state) (empty? (.trim text)))
-        ["</p>", (assoc state :paragraph false)]
+        [(str text "</p>"), (assoc state :paragraph false)]
         [text, state])
-      
+     
       (and (not (:eof state)) (empty? (.trim text)))
       [(str "<p>" text), (assoc state :paragraph true)]
-      
+     
       :default
       [text, state])))
 
@@ -170,7 +197,7 @@
               (concat out head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>"))
               (rest tail))))))))
 
-(defn markdown-to-html 
+(defn md-to-html 
   "reads markdown content from the input stream and writes HTML to the provided output stream"
   [in out]    
   (with-open [reader (new BufferedReader in)
@@ -196,3 +223,10 @@
         (transformer "" (assoc state :eof true)))))
     (.flush writer)))
 
+(defn md-to-html-string
+  "converts a markdown formatted string to an HTML formatted string"
+  [text]
+  (let [input (new StringReader text)
+        output (new StringWriter)] 
+    (md-to-html input output)
+    (.toString output)))
