@@ -60,6 +60,10 @@
   (is (= "<a href='http://github.com'>github</a>"
          (convert "[github](http://github.com)"))))
 
+(deftest bad-link
+  (is (= "[github](http://github.comfooo" 
+         (convert "[github](http://github.comfooo"))))
+
 (run-tests)
 
 

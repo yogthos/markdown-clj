@@ -190,7 +190,8 @@
           
           [(count title) (count link)]
           (if (or (< (count title) 2) 
-                  (< (count link) 2))
+                  (< (count link) 2)
+                  (< (count tail) 1))
             (recur (concat out head title dud link), tail)
             (recur 
               (concat out head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>"))
@@ -204,12 +205,12 @@
     (let [transformer (init-transformer 
                         writer
                         inline-code-transformer
-                        code-transformer                        
+                        code-transformer
+                        list-transformer                        
                         hr-transformer
                         heading-transformer
                         italics-transformer
-                        bold-transformer
-                        list-transformer
+                        bold-transformer                        
                         link-transformer
                         blockquote-transformer
                         paragraph-transformer)] 
@@ -220,3 +221,5 @@
         (transformer "" (assoc state :eof true)))))
     (.flush writer)))
 
+
+;(markdown-to-html (new FileReader "text.txt") *out*)
