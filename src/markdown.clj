@@ -111,24 +111,27 @@
 (defn- list-transformer [text, state]
   (if (:code state)
     [text, state]
-    (cond
-      (= [\* \space] (take 2 text))
-      (let [[spaces, remaining-text] (split-with (partial = \space) (rest text))
-            actual-text remaining-text
-            num-indents (count spaces)]
+    (let [[spaces, remaining-text] (split-with (partial = \space) text)
+          actual-text (drop 2 remaining-text)
+          num-indents (count spaces)]          
+      (cond
+        (= [\* \space] (take 2 remaining-text))
         (if (:list state)             
           (cond            
             (nil? (:list-indents state))
             [(str "<li>" (apply str actual-text))
-             (assoc state :list-indents 1)]
+             (assoc state :list-indents num-indents)]
             
             (< num-indents (:list-indents state))
-            [(str "</li></ul></li><li>" (apply str actual-text))
-             (assoc state :list-indents (dec (:list-indents state)))]
+            [(str (apply str
+                         (for [i (range (- (:list-indents state) num-indents))]
+                           "</li></ul></li><li>"))                   
+                  (apply str actual-text))
+             (assoc state :list-indents num-indents)]
             
             (> num-indents (:list-indents state))
             [(str "<ul><li>" (apply str actual-text))
-             (assoc state :list-indents (inc (:list-indents state)))]
+             (assoc state :list-indents num-indents)]
             
             (= num-indents (:list-indents state))
             [(str "</li><li>" (apply str actual-text)), state]
@@ -137,15 +140,17 @@
             [(str "<li>" (apply str actual-text)), state])
           
           [(str "<ul><li>" (apply str (drop 2 text))),
-           (assoc state :list true :list-indents num-indents)]))
-      
-      (and (:list state) (or (:eof state) (empty? (.trim text))))
-      [(apply str (for [i (range (:list-indents state))] "</li></ul>"))
-       (assoc state :list false)]
-      
-      :default
-      [text, state])))
-    
+           (assoc state :list true :list-indents num-indents)])
+        
+        (and (:list state) (or (:eof state) (empty? (.trim text))))
+        [(if (< (:list-indents state) 1)
+           (str text "</li></ul>")
+           (str text (apply str (for [i (range (:list-indents state))] "</li></ul>"))))
+         (assoc state :list false)]
+        
+        :default
+        [text, state]))))
+
 (defn- paragraph-transformer [text, state]  
   (if (or (:code state) (:list state) (:blockquote state))
     [text, state]
@@ -230,3 +235,5 @@
         output (new StringWriter)] 
     (md-to-html input output)
     (.toString output)))
+
+

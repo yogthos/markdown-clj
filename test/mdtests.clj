@@ -40,8 +40,8 @@
          (markdown/md-to-html-string "* foo\n* bar\n* baz"))))
 
 (deftest ul-nested
-  (is (= "<ul><li>foo<ul><li>bar</li><li>baz</li><li>baz</li></ul></li><li>BAZ</li></ul>" 
-         (markdown/md-to-html-string "* foo\n*  bar\n*  baz\n*  baz\n* BAZ"))))
+  (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>" 
+         (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item"))))
 
 (deftest code
   (is (= "foo bar baz <pre><code>x = y + z;</code></pre> foo"
