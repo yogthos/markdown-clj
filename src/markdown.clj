@@ -14,20 +14,20 @@
       (write writer text)
       new-state)))
  
-(defn- bold-transformer [text, state]
+(defn- separator-transformer [text, open, close, separator, state]
   (if (:code state) 
     [text, state]
     (loop [out []
            buf []
-           tokens (partition-by (partial = \*) (seq text))
+           tokens (partition-by (partial = (first separator)) (seq text))
            cur-state (assoc state :found-token false)]
       (cond
         (empty? tokens)
-        [(apply str (into (if (:found-token cur-state) (into out [\* \*]) out) buf)), cur-state]
+        [(apply str (into (if (:found-token cur-state) (into out separator) out) buf)), cur-state]
         
         (:found-token cur-state)
-        (if (= (first tokens) [\* \*])
-          (recur (into out (flatten [\< \b \> buf \< \/ \b \>]))
+        (if (= (first tokens) separator)       
+          (recur (into out (concat (seq open) buf (seq close)))
                  []
                  (rest tokens)
                  (assoc cur-state :found-token false))
@@ -35,41 +35,42 @@
                  (into buf (first tokens))
                  (rest tokens)
                  cur-state))
-        
-        (= (first tokens) [\* \*])
-        (recur out, buf, (rest tokens), (assoc cur-state :found-token true))
      
+        (= (first tokens) separator)
+        (recur out, buf, (rest tokens), (assoc cur-state :found-token true))
+      
         :default
         (recur (into out (first tokens)), buf, (rest tokens), cur-state)))))
- 
+
+(defn- bold-transformer [text, state]
+  (separator-transformer text, "<b>", "</b>", [\* \*], state))
+
 (defn- italics-transformer [text, state]
+  (separator-transformer text, "<i>", "</i>", [\*], state))
+
+(defn- inline-code-transformer [text, state]
+  (separator-transformer text, "<pre>", "</pre>", [\`], state))
+
+(defn- strikethrough-transformer [text, state]
+  (separator-transformer text, "<del>", "</del>", [\~ \~], state))
+
+(defn- superscript-transformer [text, state]
   (if (:code state)
     [text, state]
-    (loop [out []
-           buf []
-           tokens (partition-by (partial = \*) (seq text))
-           cur-state (assoc state :found-token false)]
-      (cond
-        (empty? tokens)
-        [(apply str (into (if (:found-token cur-state) (conj out \*) out) buf)), cur-state]
-        
-        (:found-token cur-state)
-        (if (= (first tokens) [\*])
-          (recur (into out (flatten [\< \i \> buf \< \/ \i \>]))
-                 []
-                 (rest tokens)
-                 (assoc cur-state :found-token false))
-          (recur out
-                 (into buf (first tokens))
-                 (rest tokens)
-                 cur-state))
-     
-      (= (first tokens) [\*])
-      (recur out, buf, (rest tokens), (assoc cur-state :found-token true))
-     
-      :default
-      (recur (into out (first tokens)), buf, (rest tokens), cur-state)))))
- 
+    (let [tokens (partition-by (partial contains? #{\^ \space}) text)]
+      (loop [buf []             
+             remaining tokens]
+        (cond 
+          (empty? remaining)
+          [(apply str buf), state]
+          
+          (= (first remaining) [\^])
+          (recur (into buf (concat (seq "<sup>") (second remaining) (seq "</sup>")))                 
+                 (drop 2 remaining))
+          
+          :default
+          (recur (into buf (first remaining)) (rest remaining)))))))
+
 (defn- heading-transformer [text, state]
   (if (:code state)
     [text, state]
@@ -77,34 +78,6 @@
     (if (pos? num-hashes)   
       [(str "<h" num-hashes ">" (apply str (drop num-hashes text)) "</h" num-hashes ">"), state]
       [text, state]))))
-
-(defn- inline-code-transformer [text, state]
-  (if (:code state)
-    [text, state]
-    (loop [out []
-           buf []
-           tokens (partition-by (partial = \`) (seq text))
-           cur-state (assoc state :found-token false)]
-      (cond
-        (empty? tokens)
-        [(apply str (into (if (:found-token cur-state) (conj out \`) out) buf)), cur-state]
-        
-        (:found-token cur-state)
-        (if (= (first tokens) [\`])
-          (recur (into out (flatten [\< \p \r \e \> buf \< \/ \p \r \e \>]))
-                 []
-                 (rest tokens)
-                 (assoc cur-state :found-token false))
-          (recur out
-                 (into buf (first tokens))
-                 (rest tokens)
-                 cur-state))
-     
-      (= (first tokens) [\`])
-      (recur out, buf, (rest tokens), (assoc cur-state :found-token true))
-     
-      :default
-      (recur (into out (first tokens)), buf, (rest tokens), cur-state)))))
 
 (defn- code-transformer [text, state]  
   (cond 
@@ -210,7 +183,9 @@
                         hr-transformer
                         heading-transformer
                         italics-transformer
-                        bold-transformer                        
+                        bold-transformer     
+                        strikethrough-transformer
+                        superscript-transformer
                         link-transformer
                         blockquote-transformer
                         paragraph-transformer)] 
@@ -221,5 +196,3 @@
         (transformer "" (assoc state :eof true)))))
     (.flush writer)))
 
-
-;(markdown-to-html (new FileReader "text.txt") *out*)

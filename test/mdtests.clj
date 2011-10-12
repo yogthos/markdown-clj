@@ -39,7 +39,6 @@
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"
          (convert "\nLorem ipsum dolor sit amet, consectetur adipisicing elit, \nsed do eiusmod tempor incididunt ut labore"))))
 
-
 (deftest mulitple-paragraphs
   (is (= "<p>foo bar baz</p><p>foo bar baz</p>" 
       (convert "\nfoo bar baz\n\n\nfoo bar baz"))))
@@ -56,6 +55,14 @@
   (is (= "<pre>    x = 5\n    y = 6\n    z = x + y</pre>"
          (convert "    x = 5\n    y = 6\n    z = x + y")))) 
 
+(deftest stirkethrough
+  (is (= "<del>foo</del>"
+         (convert "~~foo~~"))))
+
+(deftest stirkethrough
+  (is (= "foo<sup>bar</sup> baz"
+         (convert "foo^bar baz"))))
+
 (deftest link
   (is (= "<a href='http://github.com'>github</a>"
          (convert "[github](http://github.com)"))))
@@ -63,6 +70,10 @@
 (deftest bad-link
   (is (= "[github](http://github.comfooo" 
          (convert "[github](http://github.comfooo"))))
+
+(deftest bad-link-title
+  (is (= "[github(http://github.comfooo)" 
+         (convert "[github(http://github.comfooo)"))))
 
 (run-tests)
 
