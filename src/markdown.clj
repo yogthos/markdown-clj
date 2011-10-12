@@ -27,7 +27,7 @@
         
         (:found-token cur-state)
         (if (= (first tokens) [\* \*])
-          (recur (concat out [\< \b \>] buf [\< \/ \b \>])
+          (recur (into out (flatten [\< \b \> buf \< \/ \b \>]))
                  []
                  (rest tokens)
                  (assoc cur-state :found-token false))
@@ -55,7 +55,7 @@
         
         (:found-token cur-state)
         (if (= (first tokens) [\*])
-          (recur (concat out [\< \i \>] buf  [\< \/ \i \>])
+          (recur (into out (flatten [\< \i \> buf \< \/ \i \>]))
                  []
                  (rest tokens)
                  (assoc cur-state :found-token false))
@@ -220,5 +220,3 @@
         (transformer "" (assoc state :eof true)))))
     (.flush writer)))
 
-
-(markdown-to-html (new FileReader "text.txt") *out*)
