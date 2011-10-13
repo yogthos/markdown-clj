@@ -1,6 +1,6 @@
 ##Markdown parser written in Clojure
 
-Currently, nested lists  aren't supported, for list of supported syntax see the tests
+Currently, numbered lists  aren't supported, for list of supported syntax see the tests
 
 
 
