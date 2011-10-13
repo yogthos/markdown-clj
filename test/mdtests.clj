@@ -11,10 +11,10 @@
 (deftest hr
   (is (= "<hr/>" (markdown/md-to-html-string "***"))))
 
-(deftest italics
-  (is (= "<i>foo</i>" (markdown/md-to-html-string "*foo*"))))
+(deftest em
+  (is (= "<em>foo</em>" (markdown/md-to-html-string "*foo*"))))
 
-(deftest alt-italics
+(deftest italics
   (is (= "<i>foo</i>" (markdown/md-to-html-string "_foo_"))))
 
 (deftest bold
@@ -23,11 +23,11 @@
 (deftest alt-bold
   (is (= "<b>foo</b>" (markdown/md-to-html-string "__foo__"))))
 
-(deftest bold-inside-italics
-  (is (= "<i>foo<b>bar</b>baz</i>" (markdown/md-to-html-string "*foo**bar**baz*"))))
+(deftest bold-inside-em
+  (is (= "<em>foo<b>bar</b>baz</em>" (markdown/md-to-html-string "*foo**bar**baz*"))))
 
-(deftest italics-inside-bold
-  (is (= "<b>foo<i>bar</i>baz</b>" (markdown/md-to-html-string "**foo*bar*baz**"))))
+(deftest em-inside-bold
+  (is (= "<b>foo<em>bar</em>baz</b>" (markdown/md-to-html-string "**foo*bar*baz**"))))
 
 (deftest paragraph
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"
