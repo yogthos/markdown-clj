@@ -78,11 +78,11 @@ using three backquotes indicates a start of a code block, the next three backquo
 ### Indented Code
 
 indenting by at least 4 spaces creates a code block
-```
-   some
-   code 
-   here
-```
+
+    some
+    code 
+    here
+
 
 ### Strikethrough
 
