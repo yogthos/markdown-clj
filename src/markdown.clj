@@ -91,8 +91,9 @@
       [text, state]))))
 
 (defn- code-transformer [text, state]  
-  (cond 
-        
+  (if (:codeblock state)
+    [text, state]
+    (cond         
     (:code state)
     (if (or (:eof state) (empty? (.trim text)))
       ["</code></pre>", (assoc state :code false)]      
@@ -105,7 +106,22 @@
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
         [(str "<pre><code>" text), (assoc state :code true)]
-        [text, state]))))
+        [text, state])))))
+
+(defn- codeblock-transformer [text, state]  
+  (cond
+    (and (or (= [\`\`\`] (take 3 text)) 
+             (= [\`\`\`] (take-last 3 text))) 
+         (:codeblock state))
+    [(str "</code></pre>" (apply str (drop 3 text))), (assoc state :code false :codeblock false)]
+        
+    (= [\`\`\`] (take 3 text))
+    [(str "<pre><code>\n" (apply str (drop 3 text))), (assoc state :code true :codeblock true)]
+            
+    (:codeblock state)
+    [(str "\n" text), state]
+    :default
+    [text, state]))
 
 (defn- hr-transformer [text, state]
   (if (:code state) 
@@ -166,7 +182,7 @@
         [(str text "</p>"), (assoc state :paragraph false)]
         [text, state])
      
-      (and (not (:eof state)) (empty? (.trim text)))
+      (and (not (:eof state)) (:last-line-empty? state))
       [(str "<p>" text), (assoc state :paragraph true)]
      
       :default
@@ -217,6 +233,7 @@
                         writer
                         inline-code-transformer
                         code-transformer
+                        codeblock-transformer
                         list-transformer                        
                         hr-transformer
                         heading-transformer
@@ -230,9 +247,11 @@
                         blockquote-transformer
                         paragraph-transformer)] 
       (loop [line (.readLine reader)
-             state {}]              
+             state {:last-line-empty? false}]              
       (if line        
-        (recur (.readLine reader) (transformer line state))
+        (recur (.readLine reader) 
+               (assoc (transformer line state) 
+                      :last-line-empty? (empty? (.trim line))))
         (transformer "" (assoc state :eof true)))))
     (.flush writer)))
 
@@ -243,3 +262,5 @@
         output (new StringWriter)] 
     (md-to-html input output)
     (.toString output)))
+
+(md-to-html (new FileReader "text.txt") *out*)
