@@ -14,8 +14,14 @@
 (deftest italics
   (is (= "<i>foo</i>" (markdown/md-to-html-string "*foo*"))))
 
+(deftest alt-italics
+  (is (= "<i>foo</i>" (markdown/md-to-html-string "_foo_"))))
+
 (deftest bold
   (is (= "<b>foo</b>" (markdown/md-to-html-string "**foo**"))))
+
+(deftest alt-bold
+  (is (= "<b>foo</b>" (markdown/md-to-html-string "__foo__"))))
 
 (deftest bold-inside-italics
   (is (= "<i>foo<b>bar</b>baz</i>" (markdown/md-to-html-string "*foo**bar**baz*"))))
@@ -44,7 +50,7 @@
          (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item"))))
 
 (deftest code
-  (is (= "foo bar baz <pre><code>x = y + z;</code></pre> foo"
+  (is (= "foo bar baz <code>x = y + z;</code> foo"
          (markdown/md-to-html-string "foo bar baz `x = y + z;` foo"))))
 
 (deftest multiline-code

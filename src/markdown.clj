@@ -50,11 +50,17 @@
 (defn- bold-transformer [text, state]
   (separator-transformer text, "<b>", "</b>", [\* \*], state))
 
+(defn- alt-bold-transformer [text, state]
+  (separator-transformer text, "<b>", "</b>", [\_ \_], state))
+
 (defn- italics-transformer [text, state]
   (separator-transformer text, "<i>", "</i>", [\*], state))
 
+(defn- alt-italics-transformer [text, state]
+  (separator-transformer text, "<i>", "</i>", [\_], state))
+
 (defn- inline-code-transformer [text, state]
-  (separator-transformer text, "<pre><code>", "</code></pre>", [\`], state))
+  (separator-transformer text, "<code>", "</code>", [\`], state))
 
 (defn- strikethrough-transformer [text, state]
   (separator-transformer text, "<del>", "</del>", [\~ \~], state))
@@ -215,7 +221,9 @@
                         hr-transformer
                         heading-transformer
                         italics-transformer
-                        bold-transformer     
+                        alt-italics-transformer
+                        bold-transformer    
+                        alt-bold-transformer
                         strikethrough-transformer
                         superscript-transformer
                         link-transformer
@@ -236,4 +244,4 @@
     (md-to-html input output)
     (.toString output)))
 
-
+;(md-to-html (new FileReader "small_text.txt") *out*)
