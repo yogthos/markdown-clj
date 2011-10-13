@@ -266,5 +266,3 @@
         output (new StringWriter)] 
     (md-to-html input output)
     (.toString output)))
-
-;(md-to-html (new FileReader "text.txt") *out*)
