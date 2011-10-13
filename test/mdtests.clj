@@ -9,7 +9,10 @@
   (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo"))))
 
 (deftest hr
-  (is (= "<hr/>" (markdown/md-to-html-string "***"))))
+  (is (= "<hr/>" (markdown/md-to-html-string "***")))
+  (is (= "<hr/>" (markdown/md-to-html-string " * * * ")))
+  (is (= "<hr/>" (markdown/md-to-html-string " *****")))
+  (is (= "<hr/>" (markdown/md-to-html-string "- - - "))))
 
 (deftest em
   (is (= "<em>foo</em>" (markdown/md-to-html-string "*foo*"))))

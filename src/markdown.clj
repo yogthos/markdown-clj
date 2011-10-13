@@ -126,9 +126,13 @@
 (defn- hr-transformer [text, state]
   (if (:code state) 
     [text, state]
-    (if (= "***" text)
+    (let [trimmed (.trim text)] 
+      (if (or (= "***" trimmed)
+              (= "* * *" trimmed)
+              (= "*****" trimmed)
+              (= "- - -" trimmed))
         [(str "<hr/>"), state]
-        [text, state])))
+        [text, state]))))
 
 (defn- list-transformer [text, state]
   (if (:code state)
@@ -231,11 +235,11 @@
               writer (new BufferedWriter out)]    
     (let [transformer (init-transformer 
                         writer
+                        hr-transformer
                         inline-code-transformer
                         code-transformer
                         codeblock-transformer
-                        list-transformer                        
-                        hr-transformer
+                        list-transformer                                                
                         heading-transformer
                         italics-transformer
                         em-transformer
@@ -263,3 +267,4 @@
     (md-to-html input output)
     (.toString output)))
 
+;(md-to-html (new FileReader "text.txt") *out*)
