@@ -52,6 +52,19 @@
   (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>" 
          (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item"))))
 
+(deftest ol
+  (is (= "<ol><li> Foo</li><li> Bar</li><li> Baz</li></ol>"
+         (markdown/md-to-html-string "1. Foo\n2. Bar\n3. Baz"))))
+
+(deftest ul-in-ol
+  (is (= "<ol><li> Bar<ol><li> Subbar<ul><li>foo</li><li>bar</li><li>baz</li></ul><li> Baz</li></ol></li></ol>"
+      (markdown/md-to-html-string "1. Bar\n 2. Subbar\n  * foo\n  * bar\n  * baz\n3. Baz"))))
+
+(deftest ol-in-ul
+  (is (= "<ul><li>Foo<ol><li> Bar<ol><li> Subbar</li></ol></li></ol><li>Baz</li></ul>" 
+         (markdown/md-to-html-string "* Foo\n 1. Bar\n  1. Subbar\n* Baz"))))
+
+
 (deftest code
   (is (= "foo bar baz <code>x = y + z;</code> foo"
          (markdown/md-to-html-string "foo bar baz `x = y + z;` foo"))))

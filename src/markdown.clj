@@ -20,7 +20,7 @@
       new-state)))
  
 (defn- separator-transformer [text, open, close, separator, state]
-  (if (:code state) 
+  (if (:code state)
     [text, state]
     (loop [out []
            buf []
@@ -28,10 +28,11 @@
            cur-state (assoc state :found-token false)]
       (cond
         (empty? tokens)
-        [(apply str (into (if (:found-token cur-state) (into out separator) out) buf)), cur-state]
-        
+        [(apply str (into (if (:found-token cur-state) (into out separator) out) buf))
+         (dissoc cur-state :found-token)]
+       
         (:found-token cur-state)
-        (if (= (first tokens) separator)       
+        (if (= (first tokens) separator)      
           (recur (into out (concat (seq open) buf (seq close)))
                  []
                  (rest tokens)
@@ -40,10 +41,10 @@
                  (into buf (first tokens))
                  (rest tokens)
                  cur-state))
-     
+    
         (= (first tokens) separator)
         (recur out, buf, (rest tokens), (assoc cur-state :found-token true))
-      
+     
         :default
         (recur (into out (first tokens)), buf, (rest tokens), cur-state)))))
 
@@ -134,48 +135,73 @@
         [(str "<hr/>"), state]
         [text, state]))))
 
-(defn- list-transformer [text, state]
+(defn- close-list [list-name indents]
+  (if (pos? indents) 
+    (apply str (for [i (range indents)] (str "</li></" list-name ">")))
+    (str "</li></" list-name ">")))
+
+(defn- list-row-helper [text state list-type indents]    
+  (let [list-name (if list-type (name list-type) nil)
+        total-indents (:list-indents state)
+        lists (or (:lists state) '())
+        last-list-type (first lists)        
+        text-string (apply str text)] 
+    
+    (cond
+      (or (empty? lists) (> indents total-indents))
+      [(str "<" list-name "><li>" text-string)
+         (assoc state :lists (conj lists list-type))]
+      
+      (not= list-type last-list-type)
+      (let [levels (count (take-while (partial = last-list-type) lists))]        
+        [(str 
+           (apply str (for [l (take-while (partial = last-list-type) lists)] (close-list (name l) 1)))             
+           "<li>" text-string)
+         (assoc state :lists (drop levels lists))])
+      
+      :default
+      (cond         
+        (< indents total-indents) 
+        (let [num-closed (- total-indents indents)] 
+          [(str
+             (apply str (for [l (take num-closed lists)] (close-list (name l) 1)))             
+             "</li><li>" text-string)
+           (assoc state :lists (drop num-closed lists))])
+        
+        :default 
+        [(str "</li><li>" text-string), state]))))
+
+(defn- list-transformer [text, state]  
   (if (:code state)
     [text, state]
     (let [[spaces, remaining-text] (split-with (partial = \space) text)
-          actual-text (drop 2 remaining-text)
-          num-indents (count spaces)]          
-      (cond
-        (= [\* \space] (take 2 remaining-text))
-        (if (:list state)             
-          (cond            
-            (nil? (:list-indents state))
-            [(str "<li>" (apply str actual-text))
-             (assoc state :list-indents num-indents)]
+          num-indents (count spaces)
+          {cur-lists :lists, list-indents :list-indents, eof? :eof} state
+          lists (or cur-lists '())]
+      
+          (cond
+            ;ol
+            (re-matches #"[0-9]+" (apply str (take-while (partial not= \.) remaining-text)))
+            (let [actual-text (rest (drop-while (partial not= \.) remaining-text))
+                  [new-text, new-state] (list-row-helper actual-text state :ol num-indents)]
+              [new-text, (assoc new-state :list-indents num-indents)])
             
-            (< num-indents (:list-indents state))
-            [(str (apply str
-                         (for [i (range (- (:list-indents state) num-indents))]
-                           "</li></ul></li><li>"))                   
-                  (apply str actual-text))
-             (assoc state :list-indents num-indents)]
-            
-            (> num-indents (:list-indents state))
-            [(str "<ul><li>" (apply str actual-text))
-             (assoc state :list-indents num-indents)]
-            
-            (= num-indents (:list-indents state))
-            [(str "</li><li>" (apply str actual-text)), state]
+            ;ul
+            (= [\* \space] (take 2 remaining-text))
+            (let [actual-text (drop 2 remaining-text)
+                  [new-text, new-state] (list-row-helper  actual-text state :ul num-indents)]
+              [new-text, (assoc new-state :list-indents num-indents)])
             
             :default
-            [(str "<li>" (apply str actual-text)), state])
-          
-          [(str "<ul><li>" (apply str (drop 2 text))),
-           (assoc state :list true :list-indents num-indents)])
-        
-        (and (:list state) (or (:eof state) (empty? (.trim text))))
-        [(if (< (:list-indents state) 1)
-           (str text "</li></ul>")
-           (str text (apply str (for [i (range (:list-indents state))] "</li></ul>"))))
-         (assoc state :list false)]
-        
-        :default
-        [text, state]))))
+            (cond
+              
+              (:lists state)
+              [(str (apply str (for [l (:lists state)]
+                (close-list (name l) 1))) text)
+               (dissoc state :lists :list-indents)]
+                            
+              :default
+              [text state])))))
 
 (defn- paragraph-transformer [text, state]  
   (if (or (:code state) (:list state) (:blockquote state))

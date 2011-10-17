@@ -57,12 +57,20 @@ This is another paragraph.
 
 ### Unordered List
 
-indenting an item makes it into a sublist of the item above it
+indenting an item makes it into a sublist of the item above it, ordered and unordered lists can be nested within one another
 
 ```
 * Foo
 * Bar
  * Baz
+```
+
+### Ordered List
+
+```
+1. Foo
+2. Bar
+3. Baz
 ```
 
 ### Inline code 
