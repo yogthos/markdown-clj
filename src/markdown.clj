@@ -153,11 +153,9 @@
          (assoc state :lists (conj lists list-type))]
       
       (not= list-type last-list-type)
-      (let [levels (count (take-while (partial = last-list-type) lists))]        
-        [(str 
-           (apply str (for [l (take-while (partial = last-list-type) lists)] (close-list (name l) 1)))             
-           "<li>" text-string)
-         (assoc state :lists (drop levels lists))])
+      (let [lists-to-close (take-while (partial = last-list-type) lists)]        
+        [(str (apply str (for [l lists-to-close] (close-list (name l) 1))) "<li>" text-string)
+         (assoc state :lists (drop (count lists-to-close) lists))])
       
       :default
       (cond         
