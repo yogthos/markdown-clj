@@ -19,8 +19,8 @@
       (write writer text)
       new-state)))
  
-(defn- separator-transformer [text, open, close, separator, state]
-  (if (:code state)
+(defn- separator-transformer [text, open, close, separator, state]  
+  (if (or (:code state) (:codeblock state))
     [text, state]
     (loop [out []
            buf []
@@ -110,7 +110,7 @@
         [text, state])))))
 
 (defn- codeblock-transformer [text, state]  
-  (cond
+  (cond    
     (and (or (= [\`\`\`] (take 3 text)) 
              (= [\`\`\`] (take-last 3 text))) 
          (:codeblock state))
@@ -259,10 +259,10 @@
               writer (new BufferedWriter out)]    
     (let [transformer (init-transformer 
                         writer
-                        hr-transformer
-                        inline-code-transformer
                         code-transformer
                         codeblock-transformer
+                        hr-transformer
+                        inline-code-transformer                        
                         list-transformer                                                
                         heading-transformer
                         italics-transformer
