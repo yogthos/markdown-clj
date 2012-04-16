@@ -91,7 +91,7 @@
       [(str "<h" num-hashes ">" (apply str (drop num-hashes text)) "</h" num-hashes ">"), state]
       [text, state]))))
 
-(defn- code-transformer [text, state]  
+(defn- code-transformer [text, state]    
   (if (:codeblock state)
     [text, state]
     (cond         
@@ -109,12 +109,13 @@
         [(str "<pre><code>" text), (assoc state :code true)]
         [text, state])))))
 
-(defn- codeblock-transformer [text, state]  
+(defn- codeblock-transformer [text, state]    
   (cond    
     (and (or (= [\`\`\`] (take 3 text)) 
              (= [\`\`\`] (take-last 3 text))) 
          (:codeblock state))
-    [(str "</code></pre>" (apply str (drop 3 text))), (assoc state :code false :codeblock false)]
+    [(str "</code></pre>" 
+          (apply str (drop 3 (drop-while (partial = \space) text)))), (assoc state :code false :codeblock false)]
         
     (= [\`\`\`] (take 3 text))
     [(str "<pre><code>\n" (apply str (drop 3 text))), (assoc state :code true :codeblock true)]
@@ -259,8 +260,8 @@
               writer (new BufferedWriter out)]    
     (let [transformer (init-transformer 
                         writer
-                        code-transformer
                         codeblock-transformer
+                        code-transformer                        
                         hr-transformer
                         inline-code-transformer                        
                         list-transformer                                                

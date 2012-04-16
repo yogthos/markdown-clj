@@ -97,4 +97,4 @@
   (is (= "[github(http://github.comfooo)" 
          (markdown/md-to-html-string "[github(http://github.comfooo)"))))
 
-(run-tests)
+;(run-tests)
