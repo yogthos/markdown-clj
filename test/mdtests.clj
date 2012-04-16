@@ -98,5 +98,3 @@
          (markdown/md-to-html-string "[github(http://github.comfooo)"))))
 
 (run-tests)
-
-

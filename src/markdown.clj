@@ -230,8 +230,8 @@
         [(str "<blockquote><p>" (apply str (rest text))), (assoc state :blockquote true)]
         [text, state]))))
 
-(defn- link-transformer [text, state]
-  (if (:code state)
+(defn- link-transformer [text, state]  
+  (if (or (:codeblock state) (:code state))
     [text, state]
     (loop [out []
            tokens (seq text)]
