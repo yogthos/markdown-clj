@@ -1,3 +1,5 @@
+#Markdown parser written in Clojure
+
 ## Installation
 
 Leiningen
@@ -16,9 +18,8 @@ Maven
 </dependency>
 ```
 
-##Markdown parser written in Clojure
 
-Supported syntax is as follows:
+## Supported syntax
 
 ### Heading
 
