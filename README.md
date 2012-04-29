@@ -1,3 +1,21 @@
+## Installation
+
+Leiningen
+
+```
+[markdown-clj "0.6"]
+```
+
+Maven
+
+```
+<dependency>
+  <groupId>markdown-clj</groupId>
+  <artifactId>markdown-clj</artifactId>
+  <version>0.6</version>
+</dependency>
+```
+
 ##Markdown parser written in Clojure
 
 Supported syntax is as follows:
