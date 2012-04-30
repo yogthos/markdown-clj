@@ -4,7 +4,7 @@
 
 Leiningen
 
-```
+```clojure
 [markdown-clj "0.6"]
 ```
 
