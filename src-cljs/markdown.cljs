@@ -12,7 +12,7 @@
       [(str html text) new-state])))
 
 (defn ^:export mdToHtml 
-  "reads markdown content from the input stream and writes HTML to the provided output stream"
+  "processes input text line by line and outputs an HTML string"
   [text]
   (let [transformer (init-transformer (transformer-list))] 
       (loop [html ""
