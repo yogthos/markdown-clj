@@ -10,7 +10,7 @@ Leiningen
 
 Maven
 
-```
+```xml
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
