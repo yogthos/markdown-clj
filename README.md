@@ -5,7 +5,7 @@
 Leiningen
 
 ```clojure
-[markdown-clj "0.6"]
+[markdown-clj "0.7"]
 ```
 
 Maven
