@@ -109,20 +109,23 @@
         [(str "<pre><code>" text), (assoc state :code true)]
         [text, state])))))      
 
+
 (defn codeblock-transformer [text, state]  
-  (cond
-    (and (or (= [\`\`\`] (take 3 text)) 
-             (= [\`\`\`] (take-last 3 text))) 
-         (:codeblock state))
-    [(str "</code></pre>" (apply str (drop 3 text))), (assoc state :code false :codeblock false)]
-        
-    (= [\`\`\`] (take 3 text))
-    [(str "<pre><code>\n" (apply str (drop 3 text))), (assoc state :code true :codeblock true)]
+  (let [trimmed (trim text)] 
+    (cond
+      (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
+      [(str "</code></pre>" (apply str (drop 3 trimmed))), (assoc state :code false :codeblock false)]
+      
+      (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
+      [(str "</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
+      
+      (= [\`\`\`] (take 3 trimmed))
+      [(str "<pre><code>\n" (apply str (drop 3 trimmed))), (assoc state :code true :codeblock true)]
             
     (:codeblock state)
     [(str "\n" text), state]
     :default
-    [text, state]))
+    [text, state])))
 
 (defn hr-transformer [text, state]
   (if (:code state) 
