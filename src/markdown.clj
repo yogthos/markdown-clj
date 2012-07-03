@@ -40,7 +40,8 @@
 (defn md-to-html-string
   "converts a markdown formatted string to an HTML formatted string"
   [text]
-  (let [input (new StringReader text)
-        output (new StringWriter)] 
-    (md-to-html input output)
-    (.toString output)))
+  (when text
+    (let [input (new StringReader text)
+          output (new StringWriter)] 
+      (md-to-html input output)
+      (.toString output))))
