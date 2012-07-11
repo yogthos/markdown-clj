@@ -89,6 +89,10 @@
   (is (= "<a href='http://github.com'>github</a>"
          (markdown/md-to-html-string "[github](http://github.com)"))))
 
+(deftest img
+  (is (= "<a href='/path/to/img.jpg'>Alt text</a> <img src=\"/path/to/img.jpg\" alt=\"Alt text\" />"
+         (markdown/md-to-html-string "[Alt text](/path/to/img.jpg) ![Alt text](/path/to/img.jpg)"))))
+
 (deftest bad-link
   (is (= "[github](http://github.comfooo" 
          (markdown/md-to-html-string "[github](http://github.comfooo"))))

@@ -128,6 +128,10 @@ a^2 + b^2 = c^2
 [github](http://github.com)
 ```
 
+### Image
+```
+![alt](http://server/path/to/img.jpg)
+```
 
 
 

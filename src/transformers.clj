@@ -173,11 +173,11 @@
                   (< (count tail) 1))
             (recur (concat out head title dud link), tail)
             (recur 
-              (concat out head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>"))
+              (if (= (last head) \!)
+                (concat out (butlast head)  (seq "<img src=\"") (rest link) (seq "\" alt=\"") (rest title) (seq "\" />"))
+                (concat out head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>")))
               (rest tail))))))))
-              
-              
-
+                           
 (defn- close-list [list-name indents]
   (if (pos? indents) 
     (apply str (for [i (range indents)] (str "</li></" list-name ">")))
