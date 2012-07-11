@@ -133,6 +133,12 @@ a^2 + b^2 = c^2
 ![alt](http://server/path/to/img.jpg)
 ```
 
+## License
+
+Copyright (C) 2012 Yogthos
+
+Distributed under the Eclipse Public License, the same as Clojure.
+
 
 
 
