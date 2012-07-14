@@ -3,6 +3,9 @@
 (defn- trim [text]
   (apply str (take-while (partial not= \space) (drop-while (partial = \space) text))))
 
+(defn- empty-line-transformer [text state]
+  [text (if (empty? (.trim text)) (dissoc state :hr :heading) state)])
+
 (defn- separator-transformer [text, open, close, separator, state]
   (if (:code state)
     [text, state]
@@ -73,11 +76,11 @@
     [text, state]
     (let [num-hashes (count (take-while (partial = \#) (seq text)))]    
     (if (pos? num-hashes)   
-      [(str "<h" num-hashes ">" (apply str (drop num-hashes text)) "</h" num-hashes ">"), state]
-      [text, state]))))
+      [(str "<h" num-hashes ">" (apply str (drop num-hashes text)) "</h" num-hashes ">") (assoc state :heading true)]
+      [text state]))))
 
-(defn paragraph-transformer [text, state]  
-  (if (or (:code state) (:list state) (:blockquote state))
+(defn paragraph-transformer [text, state]    
+  (if (or (:heading state) (:hr state) (:code state) (:list state) (:blockquote state))
     [text, state]
     (cond
       (:paragraph state)     
@@ -135,8 +138,8 @@
               (= "* * *" trimmed)
               (= "*****" trimmed)
               (= "- - -" trimmed))
-        [(str "<hr/>"), state]
-        [text, state]))))        
+        [(str "<hr/>") (assoc state :hr true)]
+        [text state]))))        
 
 
 (defn blockquote-transformer [text, state]
@@ -246,10 +249,11 @@
 
 
 (defn transformer-list []
-  [codeblock-transformer
+  [empty-line-transformer
+   codeblock-transformer
    code-transformer
    hr-transformer
-   inline-code-transformer                      										                        
+   inline-code-transformer                        									                        
    list-transformer    
    heading-transformer                      
    italics-transformer                      
