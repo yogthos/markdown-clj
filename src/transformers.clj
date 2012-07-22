@@ -4,7 +4,7 @@
   (apply str (take-while (partial not= \space) (drop-while (partial = \space) text))))
 
 (defn- empty-line-transformer [text state]
-  [text (if (empty? (.trim text)) (dissoc state :hr :heading) state)])
+  [text (if (empty? (trim text)) (dissoc state :hr :heading) state)])
 
 (defn- separator-transformer [text, open, close, separator, state]
   (if (:code state)
