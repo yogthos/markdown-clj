@@ -29,7 +29,7 @@
               writer (new BufferedWriter out)]    
     (let [transformer (init-transformer writer (transformer-list))] 
       (loop [line (.readLine reader)
-             state {:last-line-empty? false}]              
+             state {:last-line-empty? true}]              
         (if line        
           (recur (.readLine reader) 
                  (assoc (transformer line state) 
