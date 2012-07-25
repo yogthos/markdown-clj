@@ -5,7 +5,7 @@
 Leiningen
 
 ```clojure
-[markdown-clj "0.9"]
+[markdown-clj "0.9.1"]
 ```
 
 Maven
@@ -14,7 +14,7 @@ Maven
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
-  <version>0.9</version>
+  <version>0.9.1</version>
 </dependency>
 ```
 
@@ -148,6 +148,7 @@ a^2 + b^2 = c^2
 ### Image
 ```
 ![alt](http://server/path/to/img.jpg)
+![Alt text](/path/to/img.jpg "Optional Title")
 ```
 
 ## License

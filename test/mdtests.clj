@@ -91,7 +91,9 @@
 
 (deftest img
   (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" /></p>" 
-         (markdown/md-to-html-string "![Alt text](/path/to/img.jpg)"))))
+         (markdown/md-to-html-string "![Alt text](/path/to/img.jpg)")))
+  (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>" 
+         (markdown/md-to-html-string "![Alt text](/path/to/img.jpg \"Optional Title\")"))))
 
 (deftest bad-link
   (is (= "<p>[github](http://github.comfooo</p>" 

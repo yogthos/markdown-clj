@@ -177,10 +177,16 @@
             (recur (concat out head title dud link), tail)
             (recur 
               (if (= (last head) \!)
-                (concat out (butlast head)  (seq "<img src=\"") (rest link) (seq "\" alt=\"") (rest title) (seq "\" />"))
+                (let [alt (rest title)
+                      [url title] (split-with (partial not= \space) (rest link))
+                      title (apply str (rest title))]                                   
+                  (concat out (butlast head)  (seq "<img src=\"") url  (seq "\" alt=\"") alt 
+                          (if (not-empty title)
+                            (seq (apply str "\" title=" title " />"))
+                            (seq "\" />"))))
                 (concat out head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>")))
               (rest tail))))))))
-                           
+
 (defn- close-list [list-name indents]
   (if (pos? indents) 
     (apply str (for [i (range indents)] (str "</li></" list-name ">")))
