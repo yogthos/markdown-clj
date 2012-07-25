@@ -18,7 +18,7 @@ Maven
 </dependency>
 ```
 
-## Compiling
+## Building
 
 To build the Clojure jar 
 
