@@ -18,6 +18,23 @@ Maven
 </dependency>
 ```
 
+## Compiling
+
+To build the Clojure jar 
+
+```bash
+lein install
+```
+
+To compile the ClojureScript portion
+
+```bash
+lein cljsbuild once
+```
+
+
+
+
 
 ## Supported syntax
 
