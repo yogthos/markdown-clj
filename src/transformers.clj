@@ -1,4 +1,5 @@
-(ns transformers)
+(ns transformers
+  (:require [clojure.string :as string]))
 
 (defn- trim [text]
   (apply str (take-while (partial not= \space) (drop-while (partial = \space) text))))
@@ -155,15 +156,21 @@
       (if (= \> (first text))
         [(str "<blockquote><p>" (apply str (rest text))), (assoc state :blockquote true)]
         [text, state]))))
-        
-        
+
+(defn- fix-special-chars [str]
+  (-> str
+    (string/replace #"\*" "&#42;")
+    (string/replace #"\^" "&#94;")
+    (string/replace #"\_" "&#95;")
+    (string/replace #"\~" "&#126;")))
+
 (defn link-transformer [text, state]
   (if (:code state)
     [text, state]
     (loop [out []
            tokens (seq text)]
       (if (empty? tokens)
-        [(apply str out), state]
+        [(apply str out) state]
                 
         (let [[head, xs] (split-with (partial not= \[) tokens)
               [title, ys] (split-with (partial not= \]) xs)
@@ -176,15 +183,19 @@
                   (< (count tail) 1))
             (recur (concat out head title dud link), tail)
             (recur 
-              (if (= (last head) \!)
-                (let [alt (rest title)
-                      [url title] (split-with (partial not= \space) (rest link))
-                      title (apply str (rest title))]                                   
-                  (concat out (butlast head)  (seq "<img src=\"") url  (seq "\" alt=\"") alt 
-                          (if (not-empty title)
-                            (seq (apply str "\" title=" title " />"))
-                            (seq "\" />"))))
-                (concat out head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>")))
+              (into out
+                    (fix-special-chars
+                      (apply str
+                             (if (= (last head) \!)
+                               (let [alt (rest title)
+                                     [url title] (split-with (partial not= \space) (rest link))
+                                     title (apply str (rest title))]                                   
+                                 (concat   
+                                   (butlast head)  (seq "<img src=\"") url  (seq "\" alt=\"") alt 
+                                   (if (not-empty title)
+                                     (seq (apply str "\" title=" title " />"))
+                                     (seq "\" />"))))
+                               (apply str (concat head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>")))))))
               (rest tail))))))))
 
 (defn- close-list [list-name indents]
@@ -258,6 +269,7 @@
   [empty-line-transformer
    codeblock-transformer
    code-transformer
+   link-transformer
    hr-transformer
    inline-code-transformer                        									                        
    list-transformer    
@@ -267,7 +279,6 @@
    bold-transformer
    alt-bold-transformer                      
    strikethrough-transformer
-   superscript-transformer                      
-   link-transformer
+   superscript-transformer                         
    blockquote-transformer
    paragraph-transformer])

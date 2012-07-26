@@ -87,13 +87,19 @@
 
 (deftest link
   (is (= "<p><a href='http://github.com'>github</a></p>"
-         (markdown/md-to-html-string "[github](http://github.com)"))))
+         (markdown/md-to-html-string "[github](http://github.com)")))
+  (is (= "<p><a href='http://github.com/&#126;'>github</a></p>"
+         (markdown/md-to-html-string "[github](http://github.com/~)")))
+  (is (= "<p><a href='http://github.com/&#94;'>github</a></p>"
+         (markdown/md-to-html-string "[github](http://github.com/^)")))
+  (is (= "<p><a href='http://github.com/&#42;'>github</a></p>"
+         (markdown/md-to-html-string "[github](http://github.com/*)"))))
 
 (deftest img
   (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" /></p>" 
          (markdown/md-to-html-string "![Alt text](/path/to/img.jpg)")))
-  (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>" 
-         (markdown/md-to-html-string "![Alt text](/path/to/img.jpg \"Optional Title\")"))))
+  (is (= "<p><img src=\"/path/to/&#95;img&#95;.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>" 
+         (markdown/md-to-html-string "![Alt text](/path/to/_img_.jpg \"Optional Title\")"))))
 
 (deftest bad-link
   (is (= "<p>[github](http://github.comfooo</p>" 
@@ -104,4 +110,5 @@
          (markdown/md-to-html-string "[github(http://github.comfooo)"))))
 
 ;(run-tests)
+
 
