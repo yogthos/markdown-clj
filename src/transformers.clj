@@ -195,7 +195,7 @@
                                    (if (not-empty title)
                                      (seq (apply str "\" title=" title " />"))
                                      (seq "\" />"))))
-                               (apply str (concat head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>")))))))
+                               (concat head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>"))))))
               (rest tail))))))))
 
 (defn- close-list [list-name indents]
