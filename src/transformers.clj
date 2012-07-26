@@ -7,6 +7,13 @@
 (defn- empty-line-transformer [text state]
   [text (if (empty? (trim text)) (dissoc state :hr :heading) state)])
 
+(defn- fix-special-chars [str]
+  (-> str
+    (string/replace #"\*" "&#42;")
+    (string/replace #"\^" "&#94;")
+    (string/replace #"\_" "&#95;")
+    (string/replace #"\~" "&#126;")))
+
 (defn- separator-transformer [text, open, close, separator, state]
   (if (:code state)
     [text, state]
@@ -156,13 +163,6 @@
       (if (= \> (first text))
         [(str "<blockquote><p>" (apply str (rest text))), (assoc state :blockquote true)]
         [text, state]))))
-
-(defn- fix-special-chars [str]
-  (-> str
-    (string/replace #"\*" "&#42;")
-    (string/replace #"\^" "&#94;")
-    (string/replace #"\_" "&#95;")
-    (string/replace #"\~" "&#126;")))
 
 (defn link-transformer [text, state]
   (if (:code state)
