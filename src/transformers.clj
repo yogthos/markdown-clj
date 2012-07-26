@@ -183,10 +183,8 @@
                   (< (count tail) 1))
             (recur (concat out head title dud link), tail)
             (recur 
-              (into out
-                    (fix-special-chars
-                      (apply str
-                             (if (= (last head) \!)
+              (->>
+                (if (= (last head) \!)
                                (let [alt (rest title)
                                      [url title] (split-with (partial not= \space) (rest link))
                                      title (apply str (rest title))]                                   
@@ -195,7 +193,10 @@
                                    (if (not-empty title)
                                      (seq (apply str "\" title=" title " />"))
                                      (seq "\" />"))))
-                               (concat head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>"))))))
+                               (concat head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>")))
+                (apply str)
+                fix-special-chars
+                (into out))              
               (rest tail))))))))
 
 (defn- close-list [list-name indents]
