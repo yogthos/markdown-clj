@@ -93,7 +93,9 @@
   (is (= "<p><a href='http://github.com/&#94;'>github</a></p>"
          (markdown/md-to-html-string "[github](http://github.com/^)")))
   (is (= "<p><a href='http://github.com/&#42;'>github</a></p>"
-         (markdown/md-to-html-string "[github](http://github.com/*)"))))
+         (markdown/md-to-html-string "[github](http://github.com/*)")))
+  (is (= "<p><ul><li><a href='http://github.com/&#42;'>github</a></li></ul></p>"
+         (markdown/md-to-html-string "* [github](http://github.com/*)"))))
 
 (deftest img
   (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" /></p>" 
@@ -110,5 +112,4 @@
          (markdown/md-to-html-string "[github(http://github.comfooo)"))))
 
 ;(run-tests)
-
 

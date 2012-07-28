@@ -7,12 +7,14 @@
 (defn- empty-line-transformer [text state]
   [text (if (empty? (trim text)) (dissoc state :hr :heading) state)])
 
-(defn- fix-special-chars [str]
-  (-> str
+(defn- fix-special-chars [& xs]
+  (-> 
+    (apply str (apply concat xs))    
     (string/replace #"\*" "&#42;")
     (string/replace #"\^" "&#94;")
     (string/replace #"\_" "&#95;")
-    (string/replace #"\~" "&#126;")))
+    (string/replace #"\~" "&#126;")
+    seq))
 
 (defn- separator-transformer [text, open, close, separator, state]
   (if (:code state)
@@ -164,6 +166,16 @@
         [(str "<blockquote><p>" (apply str (rest text))), (assoc state :blockquote true)]
         [text, state]))))
 
+(defn- href [title link]
+  (fix-special-chars (seq "<a href='") link (seq "'>") title (seq "</a>")))
+
+(defn- img [alt url & [title]]
+  (fix-special-chars  
+    (seq "<img src=\"") url  (seq "\" alt=\"") alt 
+    (if (not-empty title)
+      (seq (apply str "\" title=" (apply str title) " />"))
+      (seq "\" />"))))
+
 (defn link-transformer [text, state]
   (if (:code state)
     [text, state]
@@ -185,17 +197,11 @@
             (recur 
               (->>
                 (if (= (last head) \!)
-                               (let [alt (rest title)
-                                     [url title] (split-with (partial not= \space) (rest link))
-                                     title (apply str (rest title))]                                   
-                                 (concat   
-                                   (butlast head)  (seq "<img src=\"") url  (seq "\" alt=\"") alt 
-                                   (if (not-empty title)
-                                     (seq (apply str "\" title=" title " />"))
-                                     (seq "\" />"))))
-                               (concat head (seq "<a href='") (rest link) (seq "'>") (rest title) (seq "</a>")))
-                (apply str)
-                fix-special-chars
+                  (let [alt (rest title)
+                        [url title] (split-with (partial not= \space) (rest link))
+                        title (apply str (rest title))]                                   
+                    (concat (butlast head) (img alt url title)))
+                  (concat head (href (rest title) (rest link))))                                
                 (into out))              
               (rest tail))))))))
 

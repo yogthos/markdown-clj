@@ -1,4 +1,4 @@
-(defproject markdown-clj "0.9.2"
+(defproject markdown-clj "0.9.3"
   :description "Markdown parser"
    :dependencies [[org.clojure/clojure "1.4.0"]]
    :plugins [[lein-cljsbuild "0.1.8"]]

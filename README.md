@@ -5,7 +5,7 @@
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.2"]
+[markdown-clj "0.9.3"]
 ```
 
 Maven
@@ -14,7 +14,7 @@ Maven
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
-  <version>0.9.2</version>
+  <version>0.9.3</version>
 </dependency>
 ```
 
