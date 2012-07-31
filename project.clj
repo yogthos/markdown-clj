@@ -1,7 +1,7 @@
 (defproject markdown-clj "0.9.3"
   :description "Markdown parser"
    :dependencies [[org.clojure/clojure "1.4.0"]]
-   :plugins [[lein-cljsbuild "0.1.8"]]
+   :plugins [[lein-cljsbuild "0.2.4"]]
    
    :cljsbuild
    {:crossovers [transformers],
