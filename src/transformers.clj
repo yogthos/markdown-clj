@@ -133,7 +133,7 @@
       [(str "</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
       
       (= [\`\`\`] (take 3 trimmed))
-      [(str "<pre><code>\n" (apply str (drop 3 trimmed))), (assoc state :code true :codeblock true)]
+      [(str "<pre><code>" (apply str (drop 3 trimmed))), (assoc state :code true :codeblock true)]
             
     (:codeblock state)
     [(str "\n" text), state]
