@@ -74,7 +74,7 @@
          (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y")))) 
 
 (deftest codeblock
-  (is (= "<pre><code>\n(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))</code></pre>"
+  (is (= "<pre><code>(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))</code></pre>"
          (markdown/md-to-html-string "```(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```"))))
 
 (deftest stirkethrough
