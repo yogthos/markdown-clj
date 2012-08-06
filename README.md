@@ -127,6 +127,7 @@ indenting by at least 4 spaces creates a code block
     code 
     here
 
+note: XML is escaped in code sections
 
 ### Strikethrough
 
