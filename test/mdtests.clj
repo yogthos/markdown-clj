@@ -68,6 +68,8 @@
 (deftest code
   (is (= "<p>foo bar baz <code>x = y + z;</code> foo</p>"
          (markdown/md-to-html-string "foo bar baz `x = y + z;` foo")))
+  (is (= "<p><code>&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;channel&gt;&lt;&frasl;channel&gt;</code></p>"
+         (markdown/md-to-html-string "`<?xml version='1.0' encoding='UTF-8'?><channel></channel>`")))
   (is (= "<p>foo bar baz <code>&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x:&quot; x&#41;&#41;</code> foo</p>"
          (markdown/md-to-html-string "foo bar baz `(fn [x & xs] (str \"x:\" x))` foo"))))
 
