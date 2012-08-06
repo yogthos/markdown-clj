@@ -7,16 +7,29 @@
 (defn- empty-line-transformer [text state]
   [text (if (empty? (trim text)) (dissoc state :hr :heading) state)])
 
-(defn- fix-special-chars [& xs]
-  (-> 
-    (apply str (apply concat xs))    
+(defn- escape-code [s]
+  (-> s
+    (string/replace #"&" "&amp;")
     (string/replace #"\*" "&#42;")
     (string/replace #"\^" "&#94;")
     (string/replace #"\_" "&#95;")
     (string/replace #"\~" "&#126;")
+    (string/replace #"\[" "&#91;")
+    (string/replace #"\]" "&#93;")
+    (string/replace #"\(" "&#40;")
+    (string/replace #"\)" "&#41;")
+    (string/replace #"\"" "&quot;")))
+
+(defn- escape-link [& xs]
+  (->
+    (apply str (apply concat xs))
+    (string/replace #"\*" "&#42;")
+    (string/replace #"\^" "&#94;")
+    (string/replace #"\_" "&#95;")
+    (string/replace #"\~" "&#126;")    
     seq))
 
-(defn- separator-transformer [text, open, close, separator, state]
+(defn- separator-transformer [escape? text, open, close, separator, state]
   (if (:code state)
     [text, state]
     (loop [out []
@@ -30,7 +43,12 @@
        
         (:found-token cur-state)
         (if (= (first tokens) separator)      
-          (recur (into out (concat (seq open) buf (seq close)))
+          (recur (vec 
+                   (concat 
+                     out
+                     (seq open) 
+                     (if escape? (seq (escape-code (apply str buf))) buf) 
+                     (seq close)))
                  []
                  (rest tokens)
                  (assoc cur-state :found-token false))
@@ -47,22 +65,22 @@
         
 
 (defn bold-transformer [text, state]
-  (separator-transformer text, "<b>", "</b>", [\* \*], state))
+  (separator-transformer false text, "<b>", "</b>", [\* \*], state))
 
 (defn alt-bold-transformer [text, state]
-  (separator-transformer text, "<b>", "</b>", [\_ \_], state))
+  (separator-transformer false text, "<b>", "</b>", [\_ \_], state))
 
 (defn em-transformer [text, state]
-  (separator-transformer text, "<em>", "</em>", [\*], state))
+  (separator-transformer false text, "<em>", "</em>", [\*], state))
 
 (defn italics-transformer [text, state]
-  (separator-transformer text, "<i>", "</i>", [\_], state))
+  (separator-transformer false text, "<i>", "</i>", [\_], state))
 
 (defn inline-code-transformer [text, state]
-  (separator-transformer text, "<code>", "</code>", [\`], state))
+  (separator-transformer true text, "<code>", "</code>", [\`], state))
 
 (defn strikethrough-transformer [text, state]
-  (separator-transformer text, "<del>", "</del>", [\~ \~], state))
+  (separator-transformer false text, "<del>", "</del>", [\~ \~], state))
 
 (defn superscript-transformer [text, state]
   (if (:code state)
@@ -111,7 +129,7 @@
     (:code state)
     (if (or (:eof state) (empty? (trim text)))
       ["</code></pre>", (assoc state :code false)]      
-      [(str "\n" text), state])
+      [(str "\n" (escape-code text)), state])
     
     (empty? (trim text)) 
     [text, state]
@@ -119,11 +137,11 @@
     :default
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
-        [(str "<pre><code>" text), (assoc state :code true)]
+        [(str "<pre><code>" (escape-code text)), (assoc state :code true)]
         [text, state])))))      
 
 
-(defn codeblock-transformer [text, state]  
+(defn codeblock-transformer [text, state]    
   (let [trimmed (trim text)] 
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
@@ -133,10 +151,10 @@
       [(str "</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
       
       (= [\`\`\`] (take 3 trimmed))
-      [(str "<pre><code>" (apply str (drop 3 trimmed))), (assoc state :code true :codeblock true)]
+      [(str "<pre><code>" (escape-code (apply str (drop 3 trimmed)))), (assoc state :code true :codeblock true)]
             
     (:codeblock state)
-    [(str "\n" text), state]
+    [(str "\n" (escape-code text)), state]
     :default
     [text, state])))
 
@@ -167,17 +185,17 @@
         [text, state]))))
 
 (defn- href [title link]
-  (fix-special-chars (seq "<a href='") link (seq "'>") title (seq "</a>")))
+  (escape-link (seq "<a href='") link (seq "'>") title (seq "</a>")))
 
 (defn- img [alt url & [title]]
-  (fix-special-chars  
+  (escape-link  
     (seq "<img src=\"") url  (seq "\" alt=\"") alt 
     (if (not-empty title)
       (seq (apply str "\" title=" (apply str title) " />"))
       (seq "\" />"))))
 
 (defn link-transformer [text, state]
-  (if (:code state)
+  (if (or (:codeblock state) (:code state))
     [text, state]
     (loop [out []
            tokens (seq text)]
@@ -276,9 +294,9 @@
   [empty-line-transformer
    codeblock-transformer
    code-transformer
+   inline-code-transformer
    link-transformer
-   hr-transformer
-   inline-code-transformer                        									                        
+   hr-transformer                           									                        
    list-transformer    
    heading-transformer                      
    italics-transformer                      

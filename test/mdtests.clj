@@ -67,15 +67,21 @@
 
 (deftest code
   (is (= "<p>foo bar baz <code>x = y + z;</code> foo</p>"
-         (markdown/md-to-html-string "foo bar baz `x = y + z;` foo"))))
+         (markdown/md-to-html-string "foo bar baz `x = y + z;` foo")))
+  (is (= "<p>foo bar baz <code>&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x:&quot; x&#41;&#41;</code> foo</p>"
+         (markdown/md-to-html-string "foo bar baz `(fn [x & xs] (str \"x:\" x))` foo"))))
 
 (deftest multiline-code
   (is (= "<pre><code>    x = 5\n    y = 6\n    z = x + y</code></pre>"
-         (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y")))) 
+         (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y")))
+  (is (= "<pre><code>    x = 5\n    y = 6\n    z = x + y\n    &#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x&quot;&#41;&#41;</code></pre>"
+         (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y\n    (fn [x & xs] (str \"x\"))")))) 
 
 (deftest codeblock
-  (is (= "<pre><code>(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))</code></pre>"
-         (markdown/md-to-html-string "```(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```"))))
+  (is (= "<pre><code>&#40;defn- write &#91;writer text&#93;\n  &#40;doseq &#91;c text&#93;\n    &#40;.write writer &#40;int c&#41;&#41;&#41;&#41;</code></pre>"
+         (markdown/md-to-html-string "```(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```")))
+  (is (= "<pre><code>&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;</code></pre>" 
+         (markdown/md-to-html-string "```(fn [x & xs]\n  (str \"x\"))\n```"))))
 
 (deftest stirkethrough
   (is (= "<p><del>foo</del></p>"
