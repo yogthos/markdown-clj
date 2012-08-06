@@ -16,7 +16,7 @@
     (string/replace #"\~" "&#126;")    
     (string/replace #"\<" "&lt;")
     (string/replace #"\>" "&gt;")    
-    (string/replace #"\/" "&frasl;")
+    ;(string/replace #"\/" "&frasl;") ;screws up ClojureScript compiling
     (string/replace #"\[" "&#91;")
     (string/replace #"\]" "&#93;")
     (string/replace #"\(" "&#40;")
