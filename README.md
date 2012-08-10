@@ -60,6 +60,7 @@ lein cljsbuild once
 [Indented Code](#indented-code),
 [Inline Code](#inline-code)
 
+***
 
 ### Heading
 
