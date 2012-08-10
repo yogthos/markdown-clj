@@ -47,8 +47,8 @@ lein cljsbuild once
 [Strikethrough](#strikethrough)
 
 #### Links
-[Image](#image)
-[Link](#link),
+[Image](#image),
+[Link](#link)
 
 
 #### Lists
