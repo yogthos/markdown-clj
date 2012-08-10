@@ -37,26 +37,26 @@ lein cljsbuild once
 ## Supported syntax
 
 #### Basic Elements
-[Blockquote](#blockquote)
-[Bold](#bold)
-[Emphasis](#emphasis)
-[Heading](#heading)
-[Italics](#italics)
-[Line](#line)
-[Paragraph](#paragraph)
+[Blockquote](#blockquote),
+[Bold](#bold),
+[Emphasis](#emphasis),
+[Heading](#heading),
+[Italics](#italics),
+[Line](#line),
+[Paragraph](#paragraph),
 [Strikethrough](#strikethrough)
 
 #### Links
-[Link](#link)
+[Link](#link),
 [Image](#image)
 
 #### Lists
-[Ordered List](#ordered-list)
+[Ordered List](#ordered-list),
 [Unordered List](#unordered-list)
 
 #### Code
-[Code Block](#code-block)
-[Indented Code](#indented-code)
+[Code Block](#code-block),
+[Indented Code](#indented-code),
 [Inline Code](#inline-code)
 
 
