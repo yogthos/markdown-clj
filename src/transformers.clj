@@ -126,7 +126,7 @@
       [text, state])))
       
 (defn code-transformer [text, state]  
-  (if (:codeblock state)
+  (if (or (:lists state) (:codeblock state))
     [text, state]
     (cond         
     (:code state)
