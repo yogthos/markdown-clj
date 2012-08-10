@@ -1,11 +1,13 @@
 #Markdown parser written in Clojure
 
+A markdown parser which compiles to both Clojure and ClojureScript.
+
 ## Installation
 
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.3"]
+[markdown-clj "0.9.4"]
 ```
 
 Maven
@@ -14,7 +16,7 @@ Maven
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
-  <version>0.9.3</version>
+  <version>0.9.4</version>
 </dependency>
 ```
 
@@ -32,11 +34,31 @@ To compile the ClojureScript portion
 lein cljsbuild once
 ```
 
-
-
-
-
 ## Supported syntax
+
+#### Basic Elements
+[Blockquote](#blockquote)
+[Bold](#bold)
+[Emphasis](#emphasis)
+[Heading](#heading)
+[Italics](#italics)
+[Line](#line)
+[Paragraph](#paragraph)
+[Strikethrough](#strikethrough)
+
+#### Links
+[Link](#link)
+[Image](#image)
+
+#### Lists
+[Ordered List](#ordered-list)
+[Unordered List](#unordered-list)
+
+#### Code
+[Code Block](#code-block)
+[Indented Code](#indented-code)
+[Inline Code](#inline-code)
+
 
 ### Heading
 
@@ -81,6 +103,14 @@ _foo_
 __foo__
 ```
 
+### Blockquote
+```
+>This is a blockquote
+with some content
+
+>this is another blockquote
+```
+
 ### Paragraph
 
 ```
@@ -109,7 +139,7 @@ indenting an item makes it into a sublist of the item above it, ordered and unor
 3. Baz
 ```
 
-### Inline code 
+### Inline Code 
 
 ```
 Here's some code `x + y = z` that's inlined.

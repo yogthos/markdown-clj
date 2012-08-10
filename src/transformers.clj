@@ -174,17 +174,17 @@
 
 
 (defn blockquote-transformer [text, state]
-  (if (or (:code state) (:list state))
+  (if (or (:code state) (:codeblock state) (:list state))
     [text, state]
     (cond
       (:blockquote state)
       (if (or (:eof state) (empty? (trim text)))
         ["</p></blockquote>", (assoc state :blockquote false)]
-        [text, state])
+        [(str text " "), state])
       
       :default
       (if (= \> (first text))
-        [(str "<blockquote><p>" (apply str (rest text))), (assoc state :blockquote true)]
+        [(str "<blockquote><p>" (apply str (rest text)) " "), (assoc state :blockquote true)]
         [text, state]))))
 
 (defn- href [title link]
