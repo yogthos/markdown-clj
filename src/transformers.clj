@@ -148,14 +148,14 @@
   (let [trimmed (trim text)] 
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
-      [(str "</pre>" (apply str (drop 3 trimmed))), (assoc state :code false :codeblock false)]
+      [(str "</code></pre>" (apply str (drop 3 trimmed))), (assoc state :code false :codeblock false)]
       
       (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "</pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
+      [(str "</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
       
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))] 
-        [(str "<pre" (if (not-empty lang) (str " class=\"brush: " (apply str lang) ";\"")) ">" (escape-code (apply str (rest code)))), (assoc state :code true :codeblock true)])
+        [(str "<pre><code" (if (not-empty lang) (str " class=\"brush: " (apply str lang) ";\"")) ">" (escape-code (apply str (rest code)))), (assoc state :code true :codeblock true)])
             
     (:codeblock state)
     [(str "\n" (escape-code text)), state]
