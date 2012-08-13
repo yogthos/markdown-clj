@@ -7,7 +7,7 @@ A markdown parser which compiles to both Clojure and ClojureScript.
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.6"]
+[markdown-clj "0.9.7"]
 ```
 
 Maven
@@ -149,7 +149,8 @@ Here's some code `x + y = z` that's inlined.
 
 ### Code block
 
-using three backquotes indicates a start of a code block, the next three backquotes ends the code block section.
+Using three backquotes indicates a start of a code block, the next three backquotes ends the code block section.
+Optionally, the language name can be put after the backquotes to produce a tag compatible with the [Syntax Highlighter](http://alexgorbatchev.com/SyntaxHighlighter/).
 
 ### Indented Code
 
