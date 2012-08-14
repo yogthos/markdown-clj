@@ -45,23 +45,23 @@
       (markdown/md-to-html-string "\nfoo bar baz\n\n\nfoo bar baz"))))
 
 (deftest ul
-  (is (= "<p><ul><li>foo</li><li>bar</li><li>baz</li></ul></p>" 
+  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>" 
          (markdown/md-to-html-string "* foo\n* bar\n* baz"))))
 
 (deftest ul-nested
-  (is (= "<p><ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul></p>" 
+  (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>" 
          (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item"))))
 
 (deftest ol
-  (is (= "<p><ol><li> Foo</li><li> Bar</li><li> Baz</li></ol></p>"
+  (is (= "<ol><li> Foo</li><li> Bar</li><li> Baz</li></ol>"
          (markdown/md-to-html-string "1. Foo\n2. Bar\n3. Baz"))))
 
 (deftest ul-in-ol
-  (is (= "<p><ol><li> Bar<ol><li> Subbar<ul><li>foo</li><li>bar</li><li>baz</li></ul><li> Baz</li></ol></li></ol></p>"         
+  (is (= "<ol><li> Bar<ol><li> Subbar<ul><li>foo</li><li>bar</li><li>baz</li></ul><li> Baz</li></ol></li></ol>"         
          (markdown/md-to-html-string "1. Bar\n 2. Subbar\n  * foo\n  * bar\n  * baz\n3. Baz"))))
 
 (deftest ol-in-ul
-  (is (= "<p><ul><li>Foo<ol><li> Bar<ol><li> Subbar</li></ol></li></ol><li>Baz</li></ul></p>" 
+  (is (= "<ul><li>Foo<ol><li> Bar<ol><li> Subbar</li></ol></li></ol><li>Baz</li></ul>" 
          (markdown/md-to-html-string "* Foo\n 1. Bar\n  1. Subbar\n* Baz"))))
 
 
@@ -106,7 +106,7 @@
          (markdown/md-to-html-string "[github](http://github.com/^)")))
   (is (= "<p><a href='http://github.com/&#42;'>github</a></p>"
          (markdown/md-to-html-string "[github](http://github.com/*)")))
-  (is (= "<p><ul><li><a href='http://github.com/&#42;'>github</a></li></ul></p>"
+  (is (= "<ul><li><a href='http://github.com/&#42;'>github</a></li></ul>"
          (markdown/md-to-html-string "* [github](http://github.com/*)"))))
 
 (deftest img
@@ -126,4 +126,6 @@
 (deftest blockquote 
   (is (= "<blockquote><p>Foo bar baz </p></blockquote>"
          (markdown/md-to-html-string ">Foo bar baz"))))
+
 ;(run-tests)
+

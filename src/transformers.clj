@@ -111,7 +111,7 @@
       [text state]))))
 
 (defn paragraph-transformer [text, state]    
-  (if (or (:heading state) (:hr state) (:code state) (:list state) (:blockquote state))
+  (if (or (:heading state) (:hr state) (:code state) (:lists state) (:blockquote state))
     [text, state]
     (cond
       (:paragraph state)     
@@ -175,7 +175,7 @@
 
 
 (defn blockquote-transformer [text, state]
-  (if (or (:code state) (:codeblock state) (:list state))
+  (if (or (:code state) (:codeblock state) (:lists state))
     [text, state]
     (cond
       (:blockquote state)
