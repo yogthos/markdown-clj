@@ -1,11 +1,8 @@
 (ns transformers
   (:require [clojure.string :as string]))
 
-(defn- trim [text]
-  (apply str (take-while (partial not= \space) (drop-while (partial = \space) text))))
-
 (defn- empty-line-transformer [text state]
-  [text (if (empty? (trim text)) (dissoc state :hr :heading) state)])
+  [text (if (string/blank? text) (dissoc state :hr :heading) state)])
 
 (defn- escape-code [s]
   (-> s
@@ -115,7 +112,7 @@
     [text, state]
     (cond
       (:paragraph state)     
-      (if (or (:eof state) (empty? (trim text)))
+      (if (or (:eof state) (empty? (string/trim text)))
         [(str text "</p>"), (assoc state :paragraph false)]
         [text, state])
      
@@ -130,11 +127,11 @@
     [text, state]
     (cond         
     (:code state)
-    (if (or (:eof state) (empty? (trim text)))
+    (if (or (:eof state) (empty? (string/trim text)))
       ["</code></pre>", (assoc state :code false)]      
       [(str "\n" (escape-code text)), state])
     
-    (empty? (trim text)) 
+    (empty? (string/trim text)) 
     [text, state]
     
     :default
@@ -145,7 +142,7 @@
 
 (split-with (partial not= \space) (drop 3 "```foo bar"))
 (defn codeblock-transformer [text, state]    
-  (let [trimmed (trim text)] 
+  (let [trimmed (string/trim text)] 
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
       [(str "</code></pre>" (apply str (drop 3 trimmed))), (assoc state :code false :codeblock false)]
@@ -165,7 +162,7 @@
 (defn hr-transformer [text, state]
   (if (:code state) 
     [text, state]
-    (let [trimmed (trim text)] 
+    (let [trimmed (string/trim text)] 
       (if (or (= "***" trimmed)
               (= "* * *" trimmed)
               (= "*****" trimmed)
@@ -179,7 +176,7 @@
     [text, state]
     (cond
       (:blockquote state)
-      (if (or (:eof state) (empty? (trim text)))
+      (if (or (:eof state) (empty? (string/trim text)))
         ["</p></blockquote>", (assoc state :blockquote false)]
         [(str text " "), state])
       
