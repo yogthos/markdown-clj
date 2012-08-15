@@ -150,7 +150,13 @@ Here's some code `x + y = z` that's inlined.
 ### Code block
 
 Using three backquotes indicates a start of a code block, the next three backquotes ends the code block section.
-Optionally, the language name can be put after the backquotes to produce a tag compatible with the [Syntax Highlighter](http://alexgorbatchev.com/SyntaxHighlighter/).
+Optionally, the language name can be put after the backquotes to produce a tag compatible with the [Syntax Highlighter](http://alexgorbatchev.com/SyntaxHighlighter/), eg:
+
+&#96;&#96;&#96;clojure
+
+(defn foo [bar] "baz")
+
+&#96;&#96;&#96;
 
 ### Indented Code
 
@@ -181,7 +187,7 @@ a^2 + b^2 = c^2
 
 ### Image
 ```
-![alt](http://server/path/to/img.jpg)
+![Alt text](http://server/path/to/img.jpg)
 ![Alt text](/path/to/img.jpg "Optional Title")
 ```
 
