@@ -133,6 +133,7 @@ indenting an item makes it into a sublist of the item above it, ordered and unor
  * Baz
 ```
 
+(note available in 9.8 which contains a list parser rewrite)
 ```
 * foo
 * bar
