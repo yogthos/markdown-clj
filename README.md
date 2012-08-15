@@ -187,7 +187,7 @@ a^2 + b^2 = c^2
 
 ### Image
 ```
-![alt](http://server/path/to/img.jpg)
+![Alt text](http://server/path/to/img.jpg)
 ![Alt text](/path/to/img.jpg "Optional Title")
 ```
 
