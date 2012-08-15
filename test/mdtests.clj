@@ -53,17 +53,33 @@
          (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item"))))
 
 (deftest ol
-  (is (= "<ol><li> Foo</li><li> Bar</li><li> Baz</li></ol>"
+  (is (= "<ol><li>Foo</li><li>Bar</li><li>Baz</li></ol>"
          (markdown/md-to-html-string "1. Foo\n2. Bar\n3. Baz"))))
 
 (deftest ul-in-ol
-  (is (= "<ol><li> Bar<ol><li> Subbar<ul><li>foo</li><li>bar</li><li>baz</li></ul><li> Baz</li></ol></li></ol>"         
+  (is (= "<ol><li>Bar<ol><li>Subbar<ul><li>foo</li><li>bar</li><li>baz</li></ul></li></ol></li><li>Baz</li></ol>"         
          (markdown/md-to-html-string "1. Bar\n 2. Subbar\n  * foo\n  * bar\n  * baz\n3. Baz"))))
 
 (deftest ol-in-ul
-  (is (= "<ul><li>Foo<ol><li> Bar<ol><li> Subbar</li></ol></li></ol><li>Baz</li></ul>" 
+  (is (= "<ul><li>Foo<ol><li>Bar<ol><li>Subbar</li></ol></li></ol></li><li>Baz</li></ul>" 
          (markdown/md-to-html-string "* Foo\n 1. Bar\n  1. Subbar\n* Baz"))))
 
+(deftest multilist
+  (is (=
+        "<ul><li>foo</li><li>bar<ul><li>baz<ol><li>foo</li><li>bar</li></ol></li><li>fuzz<ul><li>blah</li><li>blue</li></ul></li></ul></li><li>brass</li></ul>"
+        (markdown/md-to-html-string 
+"* foo
+* bar
+
+   * baz
+     1. foo
+     2. bar
+
+   * fuzz
+
+      * blah
+      * blue
+* brass"))))
 
 (deftest code
   (is (= "<p>foo bar baz <code>x = y + z;</code> foo</p>"
@@ -125,7 +141,7 @@
 
 (deftest blockquote 
   (is (= "<blockquote><p>Foo bar baz </p></blockquote>"
-         (markdown/md-to-html-string ">Foo bar baz"))))
+         )))
 
 ;(run-tests)
 

@@ -15,7 +15,8 @@
     (let [[text new-state]
           (reduce
             (fn [[text, state] transformer]                 
-              (transformer text state))
+              (with-redefs [transformers/substring (fn [s n] (.substring s n))]
+                (transformer text state)))
             [line state]           
             transformers)]      
       (write writer text)
