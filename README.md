@@ -7,7 +7,7 @@ A markdown parser which compiles to both Clojure and ClojureScript.
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.7"]
+[markdown-clj "0.9.8"]
 ```
 
 Maven
@@ -16,7 +16,7 @@ Maven
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
-  <version>0.9.7</version>
+  <version>0.9.8</version>
 </dependency>
 ```
 
@@ -133,7 +133,6 @@ indenting an item makes it into a sublist of the item above it, ordered and unor
  * Baz
 ```
 
-(note available in 9.8 which contains a list parser rewrite)
 ```
 * foo
 * bar
