@@ -133,6 +133,21 @@ indenting an item makes it into a sublist of the item above it, ordered and unor
  * Baz
 ```
 
+```
+* foo
+* bar
+
+   * baz
+     1. foo
+     2. bar
+
+   * fuzz
+
+      * blah
+      * blue
+* brass
+```
+
 ### Ordered List
 
 ```
