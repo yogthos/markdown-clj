@@ -282,7 +282,7 @@
     :else
     (let [trimmed (string/trim text)]      
       (cond
-        (re-find #"\* " trimmed)
+        (re-find #"^\* " trimmed)
         (ul text state)
         
         (re-find #"^[0-9]+\." trimmed)
