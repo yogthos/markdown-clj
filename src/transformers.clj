@@ -270,7 +270,7 @@
     (add-row :ol list-type num-indents indents content state)))
 
 
-(defn list-transformer [text state]  
+(defn list-transformer [text state]    
   (cond
     (or (:code state) (:codeblock state))
     [text, state]
@@ -291,7 +291,7 @@
         (and (or (:eof state) 
                  (:last-line-empty? state)) 
              (not-empty (:lists state)))
-        [(close-lists (:lists state))
+        [(str (close-lists (:lists state)) text)
          (dissoc state :lists)]
         
         :else

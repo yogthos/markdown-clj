@@ -141,6 +141,6 @@
 
 (deftest blockquote 
   (is (= "<blockquote><p>Foo bar baz </p></blockquote>"
-         )))
+         (markdown/md-to-html-string ">Foo bar baz"))))
 
 ;(run-tests)
