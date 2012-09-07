@@ -32,7 +32,7 @@
     (string/replace #"\~" "&#126;")    
     seq))
 
-(defn escaped-chars-transformer [text state]  
+(defn- escaped-chars-transformer [text state]  
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
@@ -316,7 +316,7 @@
    codeblock-transformer
    code-transformer
    escaped-chars-transformer   
-   inline-code-transformer   
+   inline-code-transformer     
    link-transformer
    hr-transformer                           									                        
    list-transformer    
