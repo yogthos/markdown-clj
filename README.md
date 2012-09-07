@@ -36,6 +36,13 @@ lein cljsbuild once
 
 ## Supported syntax
 
+Control characters can be escaped using \
+```
+\*
+\`
+\_
+```
+
 #### Basic Elements
 [Blockquote](#blockquote),
 [Bold](#bold),
