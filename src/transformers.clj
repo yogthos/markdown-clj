@@ -32,6 +32,19 @@
     (string/replace #"\~" "&#126;")    
     seq))
 
+(defn escaped-chars-transformer [text state]  
+  [(if (or (:code state) (:codeblock state))
+     text
+     (-> text
+       (string/replace #"\\`" "&#8216;")       
+       (string/replace #"\\\*" "&#42;")       
+       (string/replace #"\\_" "&#95;")
+       (string/replace #"\\\{" "&#123;")
+       (string/replace #"\\\}" "&#125;")
+       (string/replace #"\\\[" "&#91;")
+       (string/replace #"\\\]" "&#93;")))
+   state])
+
 (defn- separator-transformer [escape? text, open, close, separator, state]
   (if (:code state)
     [text, state]
@@ -299,10 +312,11 @@
 
 
 (defn transformer-list []
-  [empty-line-transformer
+  [empty-line-transformer   
    codeblock-transformer
    code-transformer
-   inline-code-transformer
+   escaped-chars-transformer   
+   inline-code-transformer   
    link-transformer
    hr-transformer                           									                        
    list-transformer    

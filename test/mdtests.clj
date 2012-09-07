@@ -143,4 +143,9 @@
   (is (= "<blockquote><p>Foo bar baz </p></blockquote>"
          (markdown/md-to-html-string ">Foo bar baz"))))
 
+(deftest escaped-characters
+  (is
+    (= "<p>&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
+       (markdown/md-to-html-string "\\*\\`\\_\\{\\}\\[\\]*foo*`test`_bar_{x}[y]"))))
+
 ;(run-tests)
