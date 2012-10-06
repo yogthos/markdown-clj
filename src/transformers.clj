@@ -137,15 +137,15 @@
      
       :default
       [text, state])))
-      
+
 (defn code-transformer [text, state]  
   (if (or (:lists state) (:codeblock state))
     [text, state]
     (cond         
     (:code state)
-    (if (or (:eof state) (empty? (string/trim text)))
-      ["</code></pre>", (assoc state :code false)]      
-      [(str "\n" (escape-code text)), state])
+    (if (or (:eof state) (not (= "    " (apply str (take 4 text)))))
+      [(str "\n</code></pre>" text), (assoc state :code false)]      
+      [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
     
     (empty? (string/trim text)) 
     [text, state]
@@ -153,7 +153,8 @@
     :default
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
-        [(str "<pre><code>" (escape-code text)), (assoc state :code true)]
+        [(str "<pre><code>\n" (escape-code (string/replace-first text #"    " ""))) 
+         (assoc state :code true)]
         [text, state])))))      
 
 
@@ -161,10 +162,10 @@
   (let [trimmed (string/trim text)] 
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
-      [(str "</code></pre>" (apply str (drop 3 trimmed))), (assoc state :code false :codeblock false)]
+      [(str "\n</code></pre>" (apply str (drop 3 trimmed))), (assoc state :code false :codeblock false)]
       
       (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
+      [(str "\n</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
       
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
