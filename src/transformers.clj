@@ -167,8 +167,9 @@
       [(str "</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
       
       (= [\`\`\`] (take 3 trimmed))
-      (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))] 
-        [(str "<pre><code" (if (not-empty lang) (str " class=\"brush: " (apply str lang) ";\"")) ">" (escape-code (apply str (rest code)))), (assoc state :code true :codeblock true)])
+      (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
+            s           (apply str (rest code))]         
+        [(str "<pre><code" (if (not-empty lang) (str " class=\"brush: " (apply str lang) ";\"")) ">" (escape-code (if (empty? s) s (str "\n" s)))), (assoc state :code true :codeblock true)])
             
     (:codeblock state)
     [(str "\n" (escape-code text)), state]

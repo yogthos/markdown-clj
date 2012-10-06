@@ -96,13 +96,13 @@
          (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y\n    (fn [x & xs] (str \"x\"))")))) 
 
 (deftest codeblock
-  (is (= "<pre><code>&#40;defn- write &#91;writer text&#93;\n  &#40;doseq &#91;c text&#93;\n    &#40;.write writer &#40;int c&#41;&#41;&#41;&#41;</code></pre>"
+  (is (= "<pre><code>\n&#40;defn- write &#91;writer text&#93;\n  &#40;doseq &#91;c text&#93;\n    &#40;.write writer &#40;int c&#41;&#41;&#41;&#41;</code></pre>"
          (markdown/md-to-html-string "``` (defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```")))
-  (is (= "<pre><code>&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;</code></pre>" 
+  (is (= "<pre><code>\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;</code></pre>" 
          (markdown/md-to-html-string "``` (fn [x & xs]\n  (str \"x\"))\n```")))
   (is (= "<pre><code>\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;</code></pre>" 
          (markdown/md-to-html-string "```\n(fn [x & xs]\n  (str \"x\"))\n```")))
-  (is (= "<pre><code class=\"brush: clojure;\">&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;</code></pre>" 
+  (is (= "<pre><code class=\"brush: clojure;\">\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;</code></pre>" 
          (markdown/md-to-html-string "```clojure (fn [x & xs]\n  (str \"x\"))\n```"))))
 
 (deftest stirkethrough
