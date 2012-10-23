@@ -74,11 +74,11 @@ Control characters can be escaped using \
 the number of hashes indicates the level of the heading
 
 ```
-#Heading
+# Heading
 
 ##Sub-heading 
 
-###Sub-sub-heading 
+### Sub-sub-heading 
 ```
 
 ### Line
