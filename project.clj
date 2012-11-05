@@ -3,7 +3,7 @@
    :url "https://github.com/yogthos/markdown-clj"
    :license {:name "Eclipse Public License"
              :url "http://www.eclipse.org/legal/epl-v10.html"}
-   :dependencies [[org.clojure/clojure "1.4.0"]]
+   :dependencies [[org.clojure/clojure "1.3.0"]]
    :plugins [[lein-cljsbuild "0.2.9"]]
    
    :cljsbuild
