@@ -1,11 +1,7 @@
 (ns markdown
   (:use [transformers :only [transformer-list]])
-  (:import [java.io 
-            BufferedReader 
-            FileReader 
-            BufferedWriter 
-            StringReader 
-            StringWriter]))
+  (:require [clojure.java.io :as io])
+  (:import [java.io StringReader StringWriter]))
 
 (defn- write [writer text]
   (doseq [c text] (.write writer (int c))))
@@ -25,8 +21,8 @@
 (defn md-to-html 
   "reads markdown content from the input stream and writes HTML to the provided output stream"
   [in out]    
-  (with-open [reader (new BufferedReader in)
-              writer (new BufferedWriter out)]    
+  (with-open [reader (io/reader in)
+              writer (io/writer out)]    
     (let [transformer (init-transformer writer (transformer-list))] 
       (loop [line (.readLine reader)
              state {:last-line-empty? true}]              
