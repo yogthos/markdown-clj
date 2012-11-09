@@ -45,20 +45,20 @@ Markdown-clj can be invoked either by calling `md-to-html` which takes two param
 ```
 or by calling `md-to-html-string` which accepts a string with markdown content and returns a string with the resulting HTML:
 ```clojure
-(md-to-html-string "\n```clojure\n(defn foo [])```")
+(md-to-html-string "\n```clojure\n(defn foo [])\n```")
 ```
 ```xml
-<p><pre><code class=\"brush: clojure;\">\n</code></pre>(defn foo [])</p>
+<p><pre><code class=\"brush: clojure;\">\n&#40;defn foo &#91;&#93;&#41;\n</code></pre></p>
 ```
 
 Finally, `md-to-html` and `md-to-html-string` can accept optional parameters, currently `:code-style` is supported.
 Specifying `:code-style` will override the default code class formatting for code blocks, eg: 
 
 ```clojure
-(md-to-html-string "\n```clojure\n(defn foo [])```" :code-style #(str "class=\"" % "\""))
+(md-to-html-string "\n```clojure\n(defn foo [])\n```" :code-style #(str "class=\"" % "\""))
 ```
 ```xml
-<p><pre><code class=\"clojure\">\n</code></pre>(defn foo [])</p>
+<p><pre><code class=\"clojure\">\n&#40;defn foo &#91;&#93;&#41;\n</code></pre></p>
 ```
 
 ## Supported syntax
