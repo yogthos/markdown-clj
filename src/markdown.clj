@@ -20,12 +20,12 @@
  
 (defn md-to-html 
   "reads markdown content from the input stream and writes HTML to the provided output stream"
-  [in out]    
+  [in out & params]  
   (with-open [reader (io/reader in)
               writer (io/writer out)]    
     (let [transformer (init-transformer writer (transformer-list))] 
-      (loop [line (.readLine reader)
-             state {:last-line-empty? true}]              
+      (loop [line  (.readLine reader)
+             state (apply (partial assoc {} :last-line-empty? true) params)]              
         (if line        
           (recur (.readLine reader) 
                  (assoc (transformer line state) 
@@ -35,9 +35,9 @@
 
 (defn md-to-html-string
   "converts a markdown formatted string to an HTML formatted string"
-  [text]
+  [text & params]  
   (when text
     (let [input (new StringReader text)
           output (new StringWriter)] 
-      (md-to-html input output)
+      (apply (partial md-to-html input output) params)
       (.toString output))))

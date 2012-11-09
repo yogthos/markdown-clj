@@ -169,8 +169,15 @@
       
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
-            s           (apply str (rest code))]         
-        [(str "<pre><code" (if (not-empty lang) (str " class=\"brush: " (apply str lang) ";\"")) ">" (escape-code (if (empty? s) s (str "\n" s)))), (assoc state :code true :codeblock true)])
+            s           (apply str (rest code))
+            formatter   (:code-style state)]         
+        [(str "<pre><code" (if (not-empty lang) 
+                             (str " " 
+                                  (if formatter 
+                                    (formatter (apply str lang)) 
+                                    (str "class=\"brush: " (apply str lang) ";\"")))) ">" 
+              (escape-code (if (empty? s) s (str "\n" s)))) 
+         (assoc state :code true :codeblock true)])
             
     (:codeblock state)
     [(str "\n" (escape-code text)), state]

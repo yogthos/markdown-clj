@@ -7,7 +7,7 @@ A markdown parser which compiles to both Clojure and ClojureScript.
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.9"]
+[markdown-clj "0.9.10"]
 ```
 
 Maven
@@ -16,7 +16,7 @@ Maven
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
-  <version>0.9.9</version>
+  <version>0.9.10</version>
 </dependency>
 ```
 
@@ -32,6 +32,33 @@ To compile the ClojureScript portion
 
 ```bash
 lein cljsbuild once
+```
+
+## Usage
+
+Markdown-clj can be invoked either by calling `md-to-html` which takes two parameters, which will be passed to a reader and writer respectively, eg:
+
+```clojure
+(md-to-html "input.md" "output.html")
+
+(md-to-html (input-stream "input.md") (output-stream "test.txt"))
+```
+or by calling `md-to-html-string` which accepts a string with markdown content and returns a string with the resulting HTML:
+```clojure
+(md-to-html-string "\n```clojure\n(defn foo [])```")
+```
+```xml
+<p><pre><code class=\"brush: clojure;\">\n</code></pre>(defn foo [])</p>
+```
+
+Finally, `md-to-html` and `md-to-html-string` can accept optional parameters, currently `:code-style` is supported.
+Specifying `:code-style` will override the default code class formatting for code blocks, eg: 
+
+```clojure
+(md-to-html-string "\n```clojure\n(defn foo [])```" :code-style #(str "class=\"" % "\""))
+```
+```xml
+<p><pre><code class=\"clojure\">\n</code></pre>(defn foo [])</p>
 ```
 
 ## Supported syntax
@@ -179,6 +206,7 @@ Optionally, the language name can be put after the backquotes to produce a tag c
 (defn foo [bar] "baz")
 
 &#96;&#96;&#96;
+
 
 ### Indented Code
 
