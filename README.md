@@ -159,7 +159,8 @@ This is another paragraph.
 
 ### Unordered List
 
-indenting an item makes it into a sublist of the item above it, ordered and unordered lists can be nested within one another
+indenting an item makes it into a sublist of the item above it, ordered and unordered lists can be nested within one another. 
+List items can be split over multiple lines.
 
 ```
 * Foo
@@ -174,6 +175,10 @@ indenting an item makes it into a sublist of the item above it, ordered and unor
    * baz
      1. foo
      2. bar
+        more content 
+        ## subheading 
+        ***
+        **bold** item in the list
 
    * fuzz
 
