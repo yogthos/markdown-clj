@@ -118,10 +118,12 @@
 (defn heading-transformer [text, state]
   (if (:code state)
     [text, state]
-    (let [num-hashes (count (take-while (partial = \#) (seq text)))]    
-    (if (pos? num-hashes)   
-      [(str "<h" num-hashes ">" (apply str (drop num-hashes text)) "</h" num-hashes ">") (assoc state :heading true)]
-      [text state]))))
+    (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]    
+      (if (pos? num-hashes)   
+        [(str "<h" num-hashes ">" 
+              (apply str (reverse (drop-while #(or (= \# %) (= \space %)) (reverse (drop num-hashes text))))) 
+              "</h" num-hashes ">") (assoc state :heading true)]
+        [text state]))))
 
 (defn paragraph-transformer [text, state]    
   (if (or (:heading state) (:hr state) (:code state) (:lists state) (:blockquote state))
