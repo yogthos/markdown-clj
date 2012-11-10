@@ -311,13 +311,18 @@
     [text (assoc state :last-line-empty? true)]
     
     :else
-    (let [trimmed (string/trim text)]         
+    (let [indents             (count (take-while (partial = \space) text))
+          trimmed             (string/trim text)]
+      
       (cond
         (re-find #"^\* " trimmed)
         (ul text state)
         
         (re-find #"^[0-9]+\." trimmed)
         (ol text state)
+        
+        (> indents 0)
+        [text state]
         
         (and (or (:eof state) 
                  (:last-line-empty? state)) 
