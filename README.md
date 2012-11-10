@@ -178,7 +178,7 @@ List items can be split over multiple lines.
         more content 
         ## subheading 
         ***
-        **bold** item in the list
+        **bold text** in the list
 
    * fuzz
 
