@@ -334,7 +334,7 @@
         [text state]))))
 
 
-(defn transformer-list []
+(def transformer-list
   [empty-line-transformer   
    codeblock-transformer
    code-transformer

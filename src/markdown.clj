@@ -23,7 +23,7 @@
   [in out & params]  
   (with-open [reader (io/reader in)
               writer (io/writer out)]    
-    (let [transformer (init-transformer writer (transformer-list))] 
+    (let [transformer (init-transformer writer transformer-list)] 
       (loop [line  (.readLine reader)
              state (apply (partial assoc {} :last-line-empty? true) params)]              
         (if line        

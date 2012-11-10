@@ -14,7 +14,7 @@
 (defn ^:export mdToHtml 
   "processes input text line by line and outputs an HTML string"
   [text]
-  (let [transformer (init-transformer (transformer-list))] 
+  (let [transformer (init-transformer transformer-list)] 
       (loop [html ""
              remaining (.split text "\n")
              state {:last-line-empty? false}]              
