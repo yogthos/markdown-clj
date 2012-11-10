@@ -115,15 +115,22 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
+(defn- heading-level [text]
+  (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
+    (if (pos? num-hashes) num-hashes)))
+
+(defn- make-heading [text]
+  (if-let [heading (heading-level text)] 
+    (str "<h" heading ">" 
+         (apply str (reverse (drop-while #(or (= \# %) (= \space %)) (reverse (drop heading text))))) 
+         "</h" heading ">")))
+
 (defn heading-transformer [text, state]
   (if (:code state)
     [text, state]
-    (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]    
-      (if (pos? num-hashes)   
-        [(str "<h" num-hashes ">" 
-              (apply str (reverse (drop-while #(or (= \# %) (= \space %)) (reverse (drop num-hashes text))))) 
-              "</h" num-hashes ">") (assoc state :heading true)]
-        [text state]))))
+    (if-let [heading (make-heading text)]
+      [heading (assoc state :heading true)]
+      [text state])))
 
 (defn paragraph-transformer [text, state]    
   (if (or (:heading state) (:hr state) (:code state) (:lists state) (:blockquote state))
@@ -285,13 +292,13 @@
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
         content (string/trim (substring text (inc num-indents)))]
-    (add-row :ul list-type num-indents indents content state)))
+    (add-row :ul list-type num-indents indents (or (make-heading content) content) state)))
 
 (defn ol [text state]
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
         content (string/trim (apply str (drop-while (partial not= \space) (string/trim text))))]
-    (add-row :ol list-type num-indents indents content state)))
+    (add-row :ol list-type num-indents indents (or (make-heading content) content) state)))
 
 
 (defn list-transformer [text state]    
@@ -304,7 +311,7 @@
     [text (assoc state :last-line-empty? true)]
     
     :else
-    (let [trimmed (string/trim text)]      
+    (let [trimmed (string/trim text)]         
       (cond
         (re-find #"^\* " trimmed)
         (ul text state)
