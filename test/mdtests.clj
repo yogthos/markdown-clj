@@ -38,7 +38,7 @@
 
 (deftest paragraph-multiline
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"
-         (markdown/md-to-html-string "\nLorem ipsum dolor sit amet, consectetur adipisicing elit, \nsed do eiusmod tempor incididunt ut labore"))))
+         (markdown/md-to-html-string "\nLorem ipsum dolor sit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
 
 (deftest mulitple-paragraphs
   (is (= "<p>foo bar baz</p><p>foo bar baz</p>" 

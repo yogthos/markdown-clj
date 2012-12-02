@@ -45,9 +45,9 @@
        (string/replace #"\\\]" "&#93;")))
    state])
 
-(defn- separator-transformer [escape? text, open, close, separator, state]
+(defn- separator-transformer [escape? text open close separator state]
   (if (:code state)
-    [text, state]
+    [text state]
     (loop [out []
            buf []
            tokens (partition-by (partial = (first separator)) (seq text))
@@ -74,39 +74,39 @@
                  cur-state))
     
         (= (first tokens) separator)
-        (recur out, buf, (rest tokens), (assoc cur-state :found-token true))
+        (recur out buf (rest tokens) (assoc cur-state :found-token true))
      
         :default
-        (recur (into out (first tokens)), buf, (rest tokens), cur-state)))))
+        (recur (into out (first tokens)) buf (rest tokens) cur-state)))))
         
 
-(defn bold-transformer [text, state]
-  (separator-transformer false text, "<b>", "</b>", [\* \*], state))
+(defn bold-transformer [text state]
+  (separator-transformer false text "<b>" "</b>" [\* \*] state))
 
-(defn alt-bold-transformer [text, state]
-  (separator-transformer false text, "<b>", "</b>", [\_ \_], state))
+(defn alt-bold-transformer [text state]
+  (separator-transformer false text "<b>" "</b>" [\_ \_] state))
 
-(defn em-transformer [text, state]
-  (separator-transformer false text, "<em>", "</em>", [\*], state))
+(defn em-transformer [text state]
+  (separator-transformer false text "<em>" "</em>" [\*] state))
 
-(defn italics-transformer [text, state]
-  (separator-transformer false text, "<i>", "</i>", [\_], state))
+(defn italics-transformer [text state]
+  (separator-transformer false text "<i>" "</i>" [\_] state))
 
-(defn inline-code-transformer [text, state]
-  (separator-transformer true text, "<code>", "</code>", [\`], state))
+(defn inline-code-transformer [text state]
+  (separator-transformer true text "<code>" "</code>" [\`] state))
 
-(defn strikethrough-transformer [text, state]
-  (separator-transformer false text, "<del>", "</del>", [\~ \~], state))
+(defn strikethrough-transformer [text state]
+  (separator-transformer false text "<del>" "</del>" [\~ \~] state))
 
-(defn superscript-transformer [text, state]
+(defn superscript-transformer [text state]
   (if (:code state)
-    [text, state]
+    [text state]
     (let [tokens (partition-by (partial contains? #{\^ \space}) text)]
       (loop [buf []             
              remaining tokens]
         (cond 
           (empty? remaining)
-          [(apply str buf), state]
+          [(apply str buf) state]
           
           (= (first remaining) [\^])
           (recur (into buf (concat (seq "<sup>") (second remaining) (seq "</sup>")))                 
@@ -125,56 +125,57 @@
          (apply str (reverse (drop-while #(or (= \# %) (= \space %)) (reverse (drop heading text))))) 
          "</h" heading ">")))
 
-(defn heading-transformer [text, state]
+(defn heading-transformer [text state]
   (if (:code state)
-    [text, state]
+    [text state]
     (if-let [heading (make-heading text)]
       [heading (assoc state :heading true)]
       [text state])))
 
-(defn paragraph-transformer [text, state]    
-  (if (or (:heading state) (:hr state) (:code state) (:lists state) (:blockquote state))
-    [text, state]
+(defn paragraph-transformer 
+  [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]  
+  (if (or heading hr code lists blockquote)
+    [text state]
     (cond
-      (:paragraph state)     
-      (if (or (:eof state) (empty? (string/trim text)))
-        [(str text "</p>"), (assoc state :paragraph false)]
-        [text, state])
+      paragraph?     
+      (if (or eof (empty? (string/trim text)))
+        [(str text "</p>") (assoc state :paragraph? false)]
+        [(if last-line-empty? text (str " " text)) state])
      
-      (and (not (:eof state)) (:last-line-empty? state))
-      [(str "<p>" text), (assoc state :paragraph true)]
-     
+      (and (not eof) last-line-empty?)
+      [(str "<p>" text) (assoc state :paragraph? true)]
+           
       :default
-      [text, state])))
+      [text state])))
 
-(defn code-transformer [text, state]  
-  (if (or (:lists state) (:codeblock state))
-    [text, state]
+(defn code-transformer [text {:keys [eof lists code codeblock] :as state}]  
+  (if (or lists codeblock)
+    [text state]
     (cond         
-    (:code state)
-    (if (or (:eof state) (not (= "    " (apply str (take 4 text)))))
-      [(str "\n</code></pre>" text), (assoc state :code false)]      
+    code
+    (if (or eof (not (= "    " (apply str (take 4 text)))))
+      [(str "\n</code></pre>" text) (assoc state :code false)]      
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
     
     (empty? (string/trim text)) 
-    [text, state]
+    [text state]
     
     :default
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
         [(str "<pre><code>\n" (escape-code (string/replace-first text #"    " ""))) 
          (assoc state :code true)]
-        [text, state])))))      
+        [text state])))))      
 
 
-(defn codeblock-transformer [text, state]    
+(defn codeblock-transformer [text state]    
   (let [trimmed (string/trim text)] 
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
-      [(str "\n</code></pre>" (apply str (drop 3 trimmed))), (assoc state :code false :codeblock false)]
+      [(str "\n</code></pre>" (apply str (drop 3 trimmed))) (assoc state :code false :codeblock false)]
       
       (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "\n</code></pre>" (apply str (drop-last 3 trimmed))), (assoc state :code false :codeblock false)]
+      [(str "\n</code></pre>" (apply str (drop-last 3 trimmed))) (assoc state :code false :codeblock false)]
       
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
@@ -189,13 +190,13 @@
          (assoc state :code true :codeblock true)])
             
     (:codeblock state)
-    [(str "\n" (escape-code text)), state]
+    [(str "\n" (escape-code text)) state]
     :default
-    [text, state])))
+    [text state])))
 
-(defn hr-transformer [text, state]
+(defn hr-transformer [text state]
   (if (:code state) 
-    [text, state]
+    [text state]
     (let [trimmed (string/trim text)] 
       (if (or (= "***" trimmed)
               (= "* * *" trimmed)
@@ -205,19 +206,19 @@
         [text state]))))        
 
 
-(defn blockquote-transformer [text, state]
+(defn blockquote-transformer [text state]
   (if (or (:code state) (:codeblock state) (:lists state))
-    [text, state]
+    [text state]
     (cond
       (:blockquote state)
       (if (or (:eof state) (empty? (string/trim text)))
-        ["</p></blockquote>", (assoc state :blockquote false)]
-        [(str text " "), state])
+        ["</p></blockquote>" (assoc state :blockquote false)]
+        [(str text " ") state])
       
       :default
       (if (= \> (first text))
-        [(str "<blockquote><p>" (apply str (rest text)) " "), (assoc state :blockquote true)]
-        [text, state]))))
+        [(str "<blockquote><p>" (apply str (rest text)) " ") (assoc state :blockquote true)]
+        [text state]))))
 
 (defn- href [title link]
   (escape-link (seq "<a href='") link (seq "'>") title (seq "</a>")))
@@ -229,24 +230,24 @@
       (seq (apply str "\" title=" (apply str title) " />"))
       (seq "\" />"))))
 
-(defn link-transformer [text, state]
+(defn link-transformer [text state]
   (if (or (:codeblock state) (:code state))
-    [text, state]
+    [text state]
     (loop [out []
            tokens (seq text)]
       (if (empty? tokens)
         [(apply str out) state]
                 
-        (let [[head, xs] (split-with (partial not= \[) tokens)
-              [title, ys] (split-with (partial not= \]) xs)
-              [dud, zs] (split-with (partial not= \() ys)
-              [link, tail] (split-with (partial not= \)) zs)]
+        (let [[head xs] (split-with (partial not= \[) tokens)
+              [title ys] (split-with (partial not= \]) xs)
+              [dud zs] (split-with (partial not= \() ys)
+              [link tail] (split-with (partial not= \)) zs)]
           
           [(count title) (count link)]
           (if (or (< (count title) 2) 
                   (< (count link) 2)
                   (< (count tail) 1))
-            (recur (concat out head title dud link), tail)
+            (recur (concat out head title dud link) tail)
             (recur 
               (->>
                 (if (= (last head) \!)
@@ -283,7 +284,7 @@
          (update-in state [:lists] conj [row-type num-indents])])
       
       (= num-indents indents)
-      [(str "</li><li>" content), state])
+      [(str "</li><li>" content) state])
     
     [(str "<" (name row-type) "><li>" content)
      (assoc state :lists [[row-type num-indents]])]))
@@ -304,7 +305,7 @@
 (defn list-transformer [text state]    
   (cond
     (or (:code state) (:codeblock state))
-    [text, state]
+    [text state]
     (and (not (:eof state)) 
          (:lists state)
          (string/blank? text))
