@@ -1,4 +1,4 @@
-(ns markdown
+(ns markdown.core
   (:use [markdown.transformers :only [transformer-list]]))
 
 (defn- init-transformer [transformers]
