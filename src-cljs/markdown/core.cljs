@@ -1,5 +1,5 @@
 (ns markdown
-  (:use [transformers :only [transformer-list]]))
+  (:use [markdown.transformers :only [transformer-list]]))
 
 (defn- init-transformer [transformers]
   (fn [html line state]

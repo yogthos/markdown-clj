@@ -1,4 +1,4 @@
-(ns transformers
+(ns markdown.transformers
   (:require [clojure.string :as string]))
 
 (defn- substring [s n]

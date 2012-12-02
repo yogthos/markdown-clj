@@ -1,5 +1,5 @@
 (ns mdtests  
-  (:require markdown)
+  (:require [markdown.core :as markdown])
   (:use clojure.test))
 
 (deftest heading1 

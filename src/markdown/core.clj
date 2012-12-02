@@ -1,5 +1,5 @@
-(ns markdown
-  (:use [transformers :only [transformer-list]])
+(ns markdown.core
+  (:use [markdown.transformers :only [transformer-list]])
   (:require [clojure.java.io :as io])
   (:import [java.io StringReader StringWriter]))
 
@@ -11,7 +11,7 @@
     (let [[text new-state]
           (reduce
             (fn [[text, state] transformer]                 
-              (with-redefs [transformers/substring (fn [s n] (.substring s n))]
+              (with-redefs [markdown.transformers/substring (fn [s n] (.substring s n))]
                 (transformer text state)))
             [line state]           
             transformers)]      

@@ -7,7 +7,7 @@
    :plugins [[lein-cljsbuild "0.2.9"]]
    
    :cljsbuild
-   {:crossovers [transformers],
+   {:crossovers [markdown.transformers],
     :builds
     [{:source-path "src-cljs",      
       :compiler {:output-to "js/markdown.js"

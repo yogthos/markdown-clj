@@ -39,6 +39,9 @@ lein cljsbuild once
 Markdown-clj can be invoked either by calling `md-to-html` which takes two parameters, which will be passed to a reader and writer respectively, eg:
 
 ```clojure
+(ns foo
+  (:use markdown.core))
+  
 (md-to-html "input.md" "output.html")
 
 (md-to-html (input-stream "input.md") (output-stream "test.txt"))
