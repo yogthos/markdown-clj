@@ -4,7 +4,7 @@
 (defn- substring [s n]
   (apply str (drop n s)))
 
-(defn- empty-line-transformer [text state]
+(defn- empty-line [text state]
   [text (if (string/blank? text) (dissoc state :hr :heading) state)])
 
 (defn- escape-code [s]
@@ -32,7 +32,7 @@
     (string/replace #"\~" "&#126;")    
     seq))
 
-(defn- escaped-chars-transformer [text state]  
+(defn- escaped-chars [text state]  
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
@@ -45,7 +45,7 @@
        (string/replace #"\\\]" "&#93;")))
    state])
 
-(defn- separator-transformer [escape? text open close separator state]
+(defn- separator [escape? text open close separator state]
   (if (:code state)
     [text state]
     (loop [out []
@@ -80,25 +80,25 @@
         (recur (into out (first tokens)) buf (rest tokens) cur-state)))))
         
 
-(defn bold-transformer [text state]
-  (separator-transformer false text "<b>" "</b>" [\* \*] state))
+(defn bold [text state]
+  (separator false text "<b>" "</b>" [\* \*] state))
 
-(defn alt-bold-transformer [text state]
-  (separator-transformer false text "<b>" "</b>" [\_ \_] state))
+(defn alt-bold [text state]
+  (separator false text "<b>" "</b>" [\_ \_] state))
 
-(defn em-transformer [text state]
-  (separator-transformer false text "<em>" "</em>" [\*] state))
+(defn em [text state]
+  (separator false text "<em>" "</em>" [\*] state))
 
-(defn italics-transformer [text state]
-  (separator-transformer false text "<i>" "</i>" [\_] state))
+(defn italics [text state]
+  (separator false text "<i>" "</i>" [\_] state))
 
-(defn inline-code-transformer [text state]
-  (separator-transformer true text "<code>" "</code>" [\`] state))
+(defn inline-code [text state]
+  (separator true text "<code>" "</code>" [\`] state))
 
-(defn strikethrough-transformer [text state]
-  (separator-transformer false text "<del>" "</del>" [\~ \~] state))
+(defn strikethrough [text state]
+  (separator false text "<del>" "</del>" [\~ \~] state))
 
-(defn superscript-transformer [text state]
+(defn superscript [text state]
   (if (:code state)
     [text state]
     (let [tokens (partition-by (partial contains? #{\^ \space}) text)]
@@ -125,14 +125,14 @@
          (apply str (reverse (drop-while #(or (= \# %) (= \space %)) (reverse (drop heading text))))) 
          "</h" heading ">")))
 
-(defn heading-transformer [text state]
+(defn heading [text state]
   (if (:code state)
     [text state]
     (if-let [heading (make-heading text)]
       [heading (assoc state :heading true)]
       [text state])))
 
-(defn paragraph-transformer 
+(defn paragraph 
   [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]  
   (if (or heading hr code lists blockquote)
     [text state]
@@ -148,7 +148,7 @@
       :default
       [text state])))
 
-(defn code-transformer [text {:keys [eof lists code codeblock] :as state}]  
+(defn code [text {:keys [eof lists code codeblock] :as state}]  
   (if (or lists codeblock)
     [text state]
     (cond         
@@ -168,7 +168,7 @@
         [text state])))))      
 
 
-(defn codeblock-transformer [text state]    
+(defn codeblock [text state]    
   (let [trimmed (string/trim text)] 
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
@@ -194,7 +194,7 @@
     :default
     [text state])))
 
-(defn hr-transformer [text state]
+(defn hr [text state]
   (if (:code state) 
     [text state]
     (let [trimmed (string/trim text)] 
@@ -206,7 +206,7 @@
         [text state]))))        
 
 
-(defn blockquote-transformer [text state]
+(defn blockquote [text state]
   (if (or (:code state) (:codeblock state) (:lists state))
     [text state]
     (cond
@@ -230,7 +230,7 @@
       (seq (apply str "\" title=" (apply str title) " />"))
       (seq "\" />"))))
 
-(defn link-transformer [text state]
+(defn link [text state]
   (if (or (:codeblock state) (:code state))
     [text state]
     (loop [out []
@@ -302,7 +302,7 @@
     (add-row :ol list-type num-indents indents (or (make-heading content) content) state)))
 
 
-(defn list-transformer [text state]    
+(defn li [text state]    
   (cond
     (or (:code state) (:codeblock state))
     [text state]
@@ -336,20 +336,20 @@
 
 
 (def transformer-list
-  [empty-line-transformer   
-   codeblock-transformer
-   code-transformer
-   escaped-chars-transformer   
-   inline-code-transformer     
-   link-transformer
-   hr-transformer                           									                        
-   list-transformer    
-   heading-transformer                      
-   italics-transformer                      
-   em-transformer
-   bold-transformer
-   alt-bold-transformer                      
-   strikethrough-transformer
-   superscript-transformer                         
-   blockquote-transformer
-   paragraph-transformer])
+  [empty-line   
+   codeblock
+   code
+   escaped-chars   
+   inline-code     
+   link
+   hr                           									                        
+   li    
+   heading                      
+   italics                      
+   em
+   bold
+   alt-bold                      
+   strikethrough
+   superscript                         
+   blockquote
+   paragraph])
