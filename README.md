@@ -203,7 +203,9 @@ List items can be split over multiple lines.
 3. Baz
 ```
 
-### Inline Code 
+### Inline Code
+
+Any special characters in code will be escaped with their corresponding HTML codes. 
 
 ```
 Here's some code `x + y = z` that's inlined.

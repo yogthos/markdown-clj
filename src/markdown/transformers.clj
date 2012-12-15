@@ -312,8 +312,8 @@
     [text (assoc state :last-line-empty? true)]
     
     :else
-    (let [indents             (count (take-while (partial = \space) text))
-          trimmed             (string/trim text)]
+    (let [indents (count (take-while (partial = \space) text))
+          trimmed (string/trim text)]
       
       (cond
         (re-find #"^\* " trimmed)
