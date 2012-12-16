@@ -2,9 +2,7 @@
 
 A markdown parser which compiles to both Clojure and ClojureScript.
 
-## Continuous Integration Status
-
-[![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
+#### Continuous integration status: [![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
 
 
 ## Installation
