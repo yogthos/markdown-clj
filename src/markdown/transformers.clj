@@ -42,7 +42,9 @@
        (string/replace #"\\\{" "&#123;")
        (string/replace #"\\\}" "&#125;")
        (string/replace #"\\\[" "&#91;")
-       (string/replace #"\\\]" "&#93;")))
+       (string/replace #"\\\]" "&#93;")
+       (string/replace #"\\\(" "&#40;")
+       (string/replace #"\\\)" "&#41;")))
    state])
 
 (defn- separator [escape? text open close separator state]

@@ -10,7 +10,7 @@ A markdown parser which compiles to both Clojure and ClojureScript.
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.11"]
+[markdown-clj "0.9.12"]
 ```
 
 Maven
@@ -19,7 +19,7 @@ Maven
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
-  <version>0.9.11</version>
+  <version>0.9.12</version>
 </dependency>
 ```
 
@@ -79,6 +79,12 @@ Control characters can be escaped using \
 \*
 \`
 \_
+\(
+\)
+\[
+\]
+\{
+\}
 ```
 
 #### Basic Elements
