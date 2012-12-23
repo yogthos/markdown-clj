@@ -304,12 +304,15 @@
     (add-row :ol list-type num-indents indents (or (make-heading content) content) state)))
 
 
-(defn li [text state]    
+(defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]    
   (cond
-    (or (:code state) (:codeblock state))
-    [text state]
-    (and (not (:eof state)) 
-         (:lists state)
+    (or code codeblock)
+    (if (or last-line-empty? eof)
+      [(str (close-lists lists) text)
+       (dissoc state :lists)]
+      [text state])
+    (and (not eof) 
+         lists
          (string/blank? text))
     [text (assoc state :last-line-empty? true)]
     
@@ -327,10 +330,9 @@
         (> indents 0)
         [text state]
         
-        (and (or (:eof state) 
-                 (:last-line-empty? state)) 
-             (not-empty (:lists state)))
-        [(str (close-lists (:lists state)) text)
+        (and (or eof last-line-empty?) 
+             (not-empty lists))
+        [(str (close-lists lists) text)
          (dissoc state :lists)]
         
         :else
