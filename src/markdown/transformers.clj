@@ -132,7 +132,7 @@
              (str 
                "<a name=\"heading\" class=\"anchor\" href=\"#" 
                (-> text string/lower-case (string/replace " " "&#95;")) 
-               "></a>"))
+               "\"><span class=\"link\"></span></a>"))
            text "</h" heading ">"))))
 
 (defn heading [text {:keys [code heading-anchors] :as state}]

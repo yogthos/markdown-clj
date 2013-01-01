@@ -7,8 +7,8 @@
 
 (deftest heading-with-anchor
   (is (= 
-        "<h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz></a>foo bar BAz</h3>"
-        (markdown/md-to-html-string "###foo bar BAz" :heading-anchors true))))
+        "<h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz\"><span class=\"link\"></span></a>foo bar BAz</h3>some text"
+        (markdown/md-to-html-string "###foo bar BAz\nsome text" :heading-anchors true))))
 
 (deftest heading2 
   (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo"))))
