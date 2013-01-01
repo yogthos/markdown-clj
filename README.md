@@ -10,7 +10,7 @@ A markdown parser which compiles to both Clojure and ClojureScript.
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.13"]
+[markdown-clj "0.9.14"]
 ```
 
 Maven
@@ -19,7 +19,7 @@ Maven
 <dependency>
   <groupId>markdown-clj</groupId>
   <artifactId>markdown-clj</artifactId>
-  <version>0.9.13</version>
+  <version>0.9.14</version>
 </dependency>
 ```
 
@@ -59,7 +59,19 @@ or by calling `md-to-html-string` which accepts a string with markdown content a
 </code></pre>
 ```
 
-Finally, `md-to-html` and `md-to-html-string` can accept optional parameters, currently `:code-style` is supported.
+Finally, `md-to-html` and `md-to-html-string` can accept optional parameters:
+
+Specifying `:heading-anchors` will create anchors for the heading tags, eg:
+
+```clojure
+(markdown/md-to-html-string "###foo bar BAz" :heading-anchors true)
+
+```
+```xml
+<h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz></a>foo bar BAz</h3>
+```
+
+
 Specifying `:code-style` will override the default code class formatting for code blocks, eg: 
 
 ```clojure

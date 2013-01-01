@@ -5,6 +5,11 @@
 (deftest heading1 
   (is (= "<h1>foo</h1>" (markdown/md-to-html-string "#foo"))))
 
+(deftest heading-with-anchor
+  (is (= 
+        "<h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz></a>foo bar BAz</h3>"
+        (markdown/md-to-html-string "###foo bar BAz" :heading-anchors true))))
+
 (deftest heading2 
   (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo"))))
 
@@ -148,4 +153,6 @@
     (= "<p>&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
        (markdown/md-to-html-string "\\*\\`\\_\\{\\}\\[\\]*foo*`test`_bar_{x}[y]"))))
 
-;(run-tests)
+#_(run-tests)
+
+

@@ -17,21 +17,21 @@
             transformers)]      
       (write writer text)
       new-state)))
- 
+
 (defn md-to-html 
   "reads markdown content from the input stream and writes HTML to the provided output stream"
-  [in out & params]  
-  (with-open [reader (io/reader in)
-              writer (io/writer out)]    
-    (let [transformer (init-transformer writer transformer-list)] 
-      (loop [line  (.readLine reader)
+  [in out & params]    
+  (with-open [rdr (io/reader in)
+              wrt (io/writer out)]        
+    (let [transformer (init-transformer wrt transformer-list)] 
+      (loop [line  (.readLine rdr)
              state (apply (partial assoc {} :last-line-empty? true) params)]              
         (if line        
-          (recur (.readLine reader) 
+          (recur (.readLine rdr) 
                  (assoc (transformer line state) 
                         :last-line-empty? (empty? (.trim line))))
           (transformer "" (assoc state :eof true)))))
-    (.flush writer)))
+    (.flush wrt)))
 
 (defn md-to-html-string
   "converts a markdown formatted string to an HTML formatted string"

@@ -117,20 +117,28 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
+(defn- heading-text [heading text]
+  (apply str (reverse (drop-while #(or (= \# %) (= \space %)) (reverse (drop heading text))))))
+
 (defn- heading-level [text]
   (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
     (if (pos? num-hashes) num-hashes)))
 
-(defn- make-heading [text]
+(defn- make-heading [text heading-anchors]
   (if-let [heading (heading-level text)] 
-    (str "<h" heading ">" 
-         (apply str (reverse (drop-while #(or (= \# %) (= \space %)) (reverse (drop heading text))))) 
-         "</h" heading ">")))
+    (let [text (heading-text heading text)]
+      (str "<h" heading ">" 
+           (if heading-anchors 
+             (str 
+               "<a name=\"heading\" class=\"anchor\" href=\"#" 
+               (-> text string/lower-case (string/replace " " "&#95;")) 
+               "></a>"))
+           text "</h" heading ">"))))
 
-(defn heading [text state]
-  (if (:code state)
+(defn heading [text {:keys [code heading-anchors] :as state}]
+  (if code
     [text state]
-    (if-let [heading (make-heading text)]
+    (if-let [heading (make-heading (string/trim text) heading-anchors)]
       [heading (assoc state :heading true)]
       [text state])))
 
@@ -295,13 +303,13 @@
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
         content (string/trim (substring text (inc num-indents)))]
-    (add-row :ul list-type num-indents indents (or (make-heading content) content) state)))
+    (add-row :ul list-type num-indents indents (or (make-heading content false) content) state)))
 
 (defn ol [text state]
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
         content (string/trim (apply str (drop-while (partial not= \space) (string/trim text))))]
-    (add-row :ol list-type num-indents indents (or (make-heading content) content) state)))
+    (add-row :ol list-type num-indents indents (or (make-heading content  false) content) state)))
 
 
 (defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]    
