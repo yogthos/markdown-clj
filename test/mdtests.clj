@@ -3,15 +3,15 @@
   (:use clojure.test))
 
 (deftest heading1 
-  (is (= "<h1 name = \"foo\">foo</h1>" (markdown/md-to-html-string "#foo"))))
+  (is (= "<h1>foo</h1>" (markdown/md-to-html-string "#foo"))))
 
 (deftest heading-with-complex-anchor
   (is (= 
-        "<h3 name = \"foo&#95;bar&#95;baz\">foo bar BAz</h3>some text"
-        (markdown/md-to-html-string "###foo bar BAz\nsome text"))))
+        "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>some text"
+        (markdown/md-to-html-string "###foo bar BAz\nsome text" :heading-anchors true))))
 
 (deftest heading2 
-  (is (= "<h2 name = \"foo\">foo</h2>" (markdown/md-to-html-string "##foo"))))
+  (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo"))))
 
 (deftest hr
   (is (= "<hr/>" (markdown/md-to-html-string "***")))
