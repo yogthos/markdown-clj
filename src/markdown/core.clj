@@ -10,9 +10,8 @@
   (fn [line state]    
     (let [[text new-state]
           (reduce
-            (fn [[text, state] transformer]                 
-              (with-redefs [markdown.transformers/substring (fn [s n] (.substring s n))]
-                (transformer text state)))
+            (fn [[text, state] transformer]
+              (transformer text state))
             [line state]           
             transformers)]      
       (write writer text)
@@ -21,7 +20,8 @@
 (defn md-to-html 
   "reads markdown content from the input stream and writes HTML to the provided output stream"
   [in out & params]    
-  (with-open [rdr (io/reader in)
+  (binding [markdown.transformers/substring (fn [s n] (.substring s n))] 
+    (with-open [rdr (io/reader in)
               wrt (io/writer out)]        
     (let [transformer (init-transformer wrt transformer-list)] 
       (loop [line  (.readLine rdr)
@@ -31,7 +31,7 @@
                  (assoc (transformer line state) 
                         :last-line-empty? (empty? (.trim line))))
           (transformer "" (assoc state :eof true)))))
-    (.flush wrt)))
+    (.flush wrt))))
 
 (defn md-to-html-string
   "converts a markdown formatted string to an HTML formatted string"

@@ -1,5 +1,5 @@
 (ns markdown.core
-  (:use [markdown.transformers :only [transformer-list]]))
+  (:use [markdown.transformers :only [substring transformer-list]]))
 
 (defn- init-transformer [transformers]
   (fn [html line state]
@@ -14,17 +14,18 @@
 (defn ^:export mdToHtml 
   "processes input text line by line and outputs an HTML string"
   [text]
-  (let [transformer (init-transformer transformer-list)] 
+  (binding [markdown.transformers/substring (fn [s n] (apply str (drop n s)))] 
+    (let [transformer (init-transformer transformer-list)] 
       (loop [html ""
              remaining (.split text "\n")
              state {:last-line-empty? false}]              
-             
+        
         (if (empty? remaining)        
           (first (transformer html "" (assoc state :eof true)))
           (let [[new-html new-state] (transformer html (first remaining) state) ] 
-          (recur new-html
-                 (rest remaining) 
-                 (assoc new-state :last-line-empty? (empty? (first remaining)))))))))
+            (recur new-html
+                   (rest remaining) 
+                   (assoc new-state :last-line-empty? (empty? (first remaining))))))))))
 
 
 

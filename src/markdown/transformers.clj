@@ -1,8 +1,7 @@
 (ns markdown.transformers
   (:require [clojure.string :as string]))
 
-(defn- substring [s n]
-  (apply str (drop n s)))
+(declare ^{:dynamic true} substring)
 
 (defn- empty-line [text state]
   [text (if (string/blank? text) (dissoc state :hr :heading) state)])
