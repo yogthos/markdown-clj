@@ -1,5 +1,5 @@
 (ns markdown.core
-  (:use [markdown.transformers :only [substring transformer-list]]))
+  (:use [markdown.transformers :only [*substring* transformer-list]]))
 
 (defn- init-transformer [transformers]
   (fn [html line state]
@@ -14,7 +14,7 @@
 (defn ^:export mdToHtml 
   "processes input text line by line and outputs an HTML string"
   [text]
-  (binding [markdown.transformers/substring (fn [s n] (apply str (drop n s)))] 
+  (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))] 
     (let [transformer (init-transformer transformer-list)] 
       (loop [html ""
              remaining (.split text "\n")

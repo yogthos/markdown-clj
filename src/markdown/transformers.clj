@@ -1,7 +1,7 @@
 (ns markdown.transformers
   (:require [clojure.string :as string]))
 
-(declare ^{:dynamic true} substring)
+(declare ^{:dynamic true} *substring*)
 
 (defn- empty-line [text state]
   [text (if (string/blank? text) (dissoc state :hr :heading) state)])
@@ -303,7 +303,7 @@
 (defn ul [text state]
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
-        content (string/trim (substring text (inc num-indents)))]
+        content (string/trim (*substring* text (inc num-indents)))]
     (add-row :ul list-type num-indents indents (or (make-heading content false) content) state)))
 
 (defn ol [text state]

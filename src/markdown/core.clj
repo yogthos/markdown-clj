@@ -1,5 +1,5 @@
 (ns markdown.core
-  (:use [markdown.transformers :only [transformer-list]])
+  (:use [markdown.transformers :only [*substring* transformer-list]])
   (:require [clojure.java.io :as io])
   (:import [java.io StringReader StringWriter]))
 
@@ -20,7 +20,7 @@
 (defn md-to-html 
   "reads markdown content from the input stream and writes HTML to the provided output stream"
   [in out & params]    
-  (binding [markdown.transformers/substring (fn [s n] (.substring s n))] 
+  (binding [markdown.transformers/*substring* (fn [s n] (.substring s n))] 
     (with-open [rdr (io/reader in)
               wrt (io/writer out)]        
     (let [transformer (init-transformer wrt transformer-list)] 
