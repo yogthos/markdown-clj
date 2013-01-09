@@ -342,7 +342,7 @@
         (and (or eof last-line-empty?) 
              (not-empty lists))
         [(str (close-lists lists) text)
-         (dissoc state :lists)]
+         (assoc state :lists [])]
         
         :else
         [text state]))))

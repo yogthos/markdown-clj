@@ -154,5 +154,3 @@
        (markdown/md-to-html-string "\\*\\`\\_\\{\\}\\[\\]*foo*`test`_bar_{x}[y]"))))
 
 #_(run-tests)
-
-
