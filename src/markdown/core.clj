@@ -3,14 +3,14 @@
   (:require [clojure.java.io :as io])
   (:import [java.io StringReader StringWriter]))
 
-(defn- write [writer text]
+(defn- write [writer text]  
   (doseq [c text] (.write writer (int c))))
  
 (defn- init-transformer [writer transformers]  
   (fn [line state]    
     (let [[text new-state]
           (reduce
-            (fn [[text, state] transformer]
+            (fn [[text, state] transformer]              
               (transformer text state))
             [line state]           
             transformers)]      
@@ -22,16 +22,19 @@
   [in out & params]    
   (binding [markdown.transformers/*substring* (fn [s n] (.substring s n))] 
     (with-open [rdr (io/reader in)
-              wrt (io/writer out)]        
-    (let [transformer (init-transformer wrt transformer-list)] 
-      (loop [line  (.readLine rdr)
-             state (apply (partial assoc {} :last-line-empty? true) params)]              
-        (if line        
-          (recur (.readLine rdr) 
-                 (assoc (transformer line state) 
-                        :last-line-empty? (empty? (.trim line))))
-          (transformer "" (assoc state :eof true)))))
-    (.flush wrt))))
+                wrt (io/writer out)]        
+      (let [transformer (init-transformer wrt transformer-list)] 
+        (loop [line  (.readLine rdr)
+               state (apply (partial assoc {} :last-line-empty? true) params)]        
+          (let [state (if (:buf state) 
+                        (transformer (:buf state) (-> state (dissoc :buf :lists) (assoc :last-line-empty? true)))           
+                        state)] 
+            (if line        
+              (recur (.readLine rdr) 
+                     (assoc (transformer line state) 
+                            :last-line-empty? (empty? (.trim line))))
+              (transformer "" (assoc state :eof true))))))
+      (.flush wrt))))
 
 (defn md-to-html-string
   "converts a markdown formatted string to an HTML formatted string"

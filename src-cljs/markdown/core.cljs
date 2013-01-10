@@ -18,14 +18,17 @@
     (let [transformer (init-transformer transformer-list)] 
       (loop [html ""
              remaining (.split text "\n")
-             state {:last-line-empty? false}]              
-        
-        (if (empty? remaining)        
-          (first (transformer html "" (assoc state :eof true)))
-          (let [[new-html new-state] (transformer html (first remaining) state) ] 
-            (recur new-html
-                   (rest remaining) 
-                   (assoc new-state :last-line-empty? (empty? (first remaining))))))))))
+             state {:last-line-empty? false}]        
+        (let [[html state] 
+              (if (:buf state) 
+                (transformer html (:buf state) (-> state (dissoc :buf :lists) (assoc :last-line-empty? true)))           
+                [html state])]
+          (if (empty? remaining)        
+            (first (transformer html "" (assoc state :eof true)))
+            (let [[html state] (transformer html (first remaining) state) ] 
+              (recur html
+                     (rest remaining) 
+                     (assoc state :last-line-empty? (empty? (first remaining)))))))))))
 
 
 

@@ -144,7 +144,7 @@
       [text state])))
 
 (defn paragraph 
-  [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]  
+  [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]   
   (if (or heading hr code lists blockquote)
     [text state]
     (cond
@@ -314,7 +314,7 @@
 
 
 (defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]    
-  (cond
+  (cond    
     (or code codeblock)
     (if (or last-line-empty? eof)
       [(str (close-lists lists) text)
@@ -341,12 +341,11 @@
         
         (and (or eof last-line-empty?) 
              (not-empty lists))
-        [(str (close-lists lists) text)
-         (assoc state :lists [])]
+        [(close-lists lists)
+         (assoc state :lists [] :buf text)]
         
         :else
         [text state]))))
-
 
 (def transformer-list
   [empty-line   

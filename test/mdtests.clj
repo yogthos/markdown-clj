@@ -43,7 +43,7 @@
 
 (deftest paragraph-multiline
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"
-         (markdown/md-to-html-string "\nLorem ipsum dolor sit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
+         (markdown/md-to-html-string "\nLorem ipsum dolor\nsit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
 
 (deftest mulitple-paragraphs
   (is (= "<p>foo bar baz</p><p>foo bar baz</p>" 
@@ -52,6 +52,10 @@
 (deftest ul
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>" 
          (markdown/md-to-html-string "* foo\n* bar\n* baz"))))
+
+(deftest ul-followed-by-paragraph
+  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph</p>" 
+         (markdown/md-to-html-string "* foo\n* bar\n* baz\n\nparagraph"))))
 
 (deftest ul-nested
   (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>" 
