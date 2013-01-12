@@ -241,6 +241,15 @@
       (seq (apply str "\" title=" (apply str title) " />"))
       (seq "\" />"))))
 
+(defn handle-img-link [xs]
+  (if (= [\[ \! \[] (take 3 xs))
+    (let [xs (drop 3 xs)
+          [alt xy] (split-with (partial not= \]) xs)          
+          [url-title zy] (->> xy (drop 2) (split-with (partial not= \))))
+          [url title] (split-with (partial not= \space) url-title)]      
+      (concat "[" (img alt url (not-empty title)) (rest zy)))
+    xs))
+
 (defn link [text state]
   (if (or (:codeblock state) (:code state))
     [text state]
@@ -249,12 +258,12 @@
       (if (empty? tokens)
         [(apply str out) state]
                 
-        (let [[head xs] (split-with (partial not= \[) tokens)
-              [title ys] (split-with (partial not= \]) xs)
-              [dud zs] (split-with (partial not= \() ys)
+        (let [[head xs]   (split-with (partial not= \[) tokens)
+              xs          (handle-img-link xs)              
+              [title ys]  (split-with (partial not= \]) xs)
+              [dud zs]    (split-with (partial not= \() ys)
               [link tail] (split-with (partial not= \)) zs)]
-          
-          [(count title) (count link)]
+                                                  
           (if (or (< (count title) 2) 
                   (< (count link) 2)
                   (< (count tail) 1))
@@ -271,13 +280,13 @@
               (rest tail))))))))
 
 
-(defn close-lists [lists]
+(defn- close-lists [lists]
   (apply str
          (for [[list-type] lists]    
            (str "</li></" (name list-type) ">"))))
 
 
-(defn add-row [row-type list-type num-indents indents content state]  
+(defn- add-row [row-type list-type num-indents indents content state]  
   (if list-type
     (cond
       (< num-indents indents)

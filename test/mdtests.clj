@@ -140,6 +140,10 @@
   (is (= "<p><img src=\"/path/to/&#95;img&#95;.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>" 
          (markdown/md-to-html-string "![Alt text](/path/to/_img_.jpg \"Optional Title\")"))))
 
+(deftest img-link 
+  (is (= "<p><a href='http://travis-ci.org/yogthos/markdown-clj'><img src=\"https://secure.travis-ci.org/yogthos/markdown-clj.png\" alt=\"Continuous Integration status\" /></a></p>"
+         (markdown/md-to-html-string "[![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)"))))
+
 (deftest bad-link
   (is (= "<p>[github](http://github.comfooo</p>" 
          (markdown/md-to-html-string "[github](http://github.comfooo"))))
