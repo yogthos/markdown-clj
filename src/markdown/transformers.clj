@@ -323,12 +323,18 @@
 
 
 (defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]    
-  (cond    
+  (cond   
+    
+    (and last-line-empty? (string/blank? text))
+    [(str (close-lists lists) text)
+       (dissoc state :lists)]
+    
     (or code codeblock)
-    (if (or last-line-empty? eof)
+    (if (and lists (or last-line-empty? eof))
       [(str (close-lists lists) text)
        (dissoc state :lists)]
       [text state])
+    
     (and (not eof) 
          lists
          (string/blank? text))
