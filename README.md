@@ -4,6 +4,9 @@ A markdown parser which compiles to both Clojure and ClojureScript.
 
 [![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
 
+## Demo
+
+You can try out the parser in the browser with [example.html](https://raw.github.com/yogthos/markdown-clj/master/example.html).
 
 ## Installation
 
