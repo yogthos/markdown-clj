@@ -13,17 +13,7 @@ You can try out the parser in the browser with [example.html](https://raw.github
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.19"]
-```
-
-Maven
-
-```xml
-<dependency>
-  <groupId>markdown-clj</groupId>
-  <artifactId>markdown-clj</artifactId>
-  <version>0.9.19</version>
-</dependency>
+[markdown-clj "0.9.20"]
 ```
 
 ## Building
