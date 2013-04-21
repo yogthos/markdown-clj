@@ -6,7 +6,7 @@ A markdown parser which compiles to both Clojure and ClojureScript.
 
 ## Demo
 
-You can try out the parser in the browser with [example.html](https://raw.github.com/yogthos/markdown-clj/master/example.html).
+You can try out the parser [here](http://yogthos.net/markdown.html).
 
 ## Installation
 
