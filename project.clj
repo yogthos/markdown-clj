@@ -5,7 +5,7 @@
              :url "http://www.eclipse.org/legal/epl-v10.html"}
    :dependencies [[org.clojure/clojure "1.5.1"]
                   [criterium "0.3.1" :scope "test"]]
-   :plugins [[lein-cljsbuild "0.3.0"]]
+   :plugins [[lein-cljsbuild "0.2.9"]]
    
    :test-selectors {:default (complement :benchmark)
                     :benchmark :benchmark
