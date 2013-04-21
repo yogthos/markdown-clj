@@ -99,9 +99,9 @@
          (markdown/md-to-html-string "foo bar baz `(fn [x & xs] (str \"x:\" x))` foo"))))
 
 (deftest multiline-code
-  (is (= "<pre><code>\nx = 5\ny = 6\nz = x + y\n</code></pre>"
+  (is (= "<pre>\nx = 5\ny = 6\nz = x + y\n</pre>"
          (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y")))
-  (is (= "<pre><code>\nx = 5\ny = 6\nz = x + y\n&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
+  (is (= "<pre>\nx = 5\ny = 6\nz = x + y\n&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x&quot;&#41;&#41;\n</pre>"
          (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y\n    (fn [x & xs] (str \"x\"))")))) 
 
 (deftest codeblock

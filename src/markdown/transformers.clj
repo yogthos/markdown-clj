@@ -165,7 +165,7 @@
     (cond         
     code
     (if (or eof (not (= "    " (apply str (take 4 text)))))
-      [(str "\n</code></pre>" text) (assoc state :code false)]      
+      [(str "\n</pre>" text) (assoc state :code false)]      
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
     
     (empty? (string/trim text)) 
@@ -174,7 +174,7 @@
     :default
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
-        [(str "<pre><code>\n" (escape-code (string/replace-first text #"    " ""))) 
+        [(str "<pre>\n" (escape-code (string/replace-first text #"    " ""))) 
          (assoc state :code true)]
         [text state])))))      
 
