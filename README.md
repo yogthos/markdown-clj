@@ -57,9 +57,9 @@ or by calling `md-to-html-string` which accepts a string with markdown content a
 (md-to-html-string "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```")
 ```
 ```xml
-<h1> This is a test</h1>some code follows<pre><code class="brush: clojure;">
+<h1> This is a test</h1>some code follows<pre class="brush: clojure">
 &#40;defn foo &#91;&#93;&#41;
-</code></pre>
+</pre>
 ```
 
 Finally, `md-to-html` and `md-to-html-string` can accept optional parameters:
@@ -82,9 +82,9 @@ Specifying `:code-style` will override the default code class formatting for cod
                    :code-style #(str "class=\"" % "\""))
 ```
 ```xml
-<h1> This is a test</h1>some code follows<pre><code class="clojure">
+<h1> This is a test</h1>some code follows<pre class="clojure">
 &#40;defn foo &#91;&#93;&#41;
-</code></pre>
+</pre>
 ```
 
 ## Supported syntax
