@@ -51,7 +51,11 @@
 
 (deftest ul
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>" 
-         (markdown/md-to-html-string "* foo\n* bar\n* baz"))))
+         (markdown/md-to-html-string "* foo\n* bar\n* baz")))
+  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>"
+         (markdown/md-to-html-string "- foo\n- bar\n- baz")))
+  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>"
+         (markdown/md-to-html-string "+ foo\n+ bar\n+ baz"))))
 
 (deftest ul-followed-by-paragraph
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph</p>" 
@@ -59,7 +63,9 @@
 
 (deftest ul-nested
   (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>" 
-         (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item"))))
+         (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item")))
+  (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>"
+         (markdown/md-to-html-string "* first item\n - first sub-item\n  - second sub-item\n - third sub-item\n* second item\n + first sub-item\n + second sub-item\n* third item"))))
 
 (deftest ol
   (is (= "<ol><li>Foo</li><li>Bar</li><li>Baz</li></ol>"
