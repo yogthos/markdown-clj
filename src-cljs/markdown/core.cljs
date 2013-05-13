@@ -9,14 +9,14 @@
               (transformer text state))
             [line state]           
             transformers)]      
-      [(str html text) new-state])))
+      [(.append html text) new-state])))
 
 (defn ^:export mdToHtml 
   "processes input text line by line and outputs an HTML string"
   [text]
   (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))] 
     (let [transformer (init-transformer transformer-list)] 
-      (loop [html ""
+      (loop [html (goog.string.StringBuffer. "")
              remaining (.split text "\n")
              state {:last-line-empty? false}]        
         (let [[html state] 
@@ -24,7 +24,7 @@
                 (transformer html (:buf state) (-> state (dissoc :buf :lists) (assoc :last-line-empty? true)))           
                 [html state])]
           (if (empty? remaining)        
-            (first (transformer html "" (assoc state :eof true)))
+            (.toString (first (transformer html "" (assoc state :eof true))))
             (let [[html state] (transformer html (first remaining) state) ] 
               (recur html
                      (rest remaining) 
