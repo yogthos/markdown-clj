@@ -13,7 +13,7 @@ You can try out the parser [here](http://yogthos.net/markdown.html).
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.21"]
+[markdown-clj "0.9.22"]
 ```
 
 ## Building
@@ -128,6 +128,16 @@ the number of hashes indicates the level of the heading
 ##Sub-heading 
 
 ### Sub-sub-heading 
+```
+
+headings can also be defined using `=` and `-` for `h1` and `h2` respectively
+
+```
+Heading 1
+=========
+
+Heading 2
+---------
 ```
 
 ### Line
