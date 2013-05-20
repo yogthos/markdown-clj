@@ -3,8 +3,7 @@
          :only [*next-line* *substring* transformer-list]]))
 
 (defn- init-transformer [transformers]
-  (fn [html line next-line state]
-    ;(.log js/console (.toString html) line next-line)
+  (fn [html line next-line state]    
     (binding [*next-line* next-line]
       (let [[text new-state]
             (reduce
@@ -36,6 +35,3 @@
                           :last-line-empty? (empty? line)))
             (transformer html line "" (assoc state :eof true)))))
       (.toString html))))
-
-
-
