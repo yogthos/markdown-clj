@@ -3,8 +3,17 @@
 
 (declare ^{:dynamic true} *substring*)
 
-(defn- empty-line [text state]
-  [text (if (string/blank? text) (dissoc state :hr :heading) state)])
+(declare ^:dynamic *next-line*)
+
+(defn- h1? [text]
+  (and (not-empty text) (every? #{\=} (string/trim text))))
+
+(defn- h2? [text]
+  (and (not-empty text) (every? #{\-} (string/trim text))))
+
+(defn- empty-line [text state]  
+  [(if (or (h1? text) (h2? text)) "" text) 
+   (if (string/blank? text) (dissoc state :hr :heading) state)])
 
 (defn- escape-code [s]
   (-> s
@@ -136,12 +145,20 @@
            (if heading-anchors (str "<a name=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"></a>"))
            text "</h" heading ">"))))
 
-(defn heading [text state]
+(defn heading [text state]  
   (if (:code state)
     [text state]
-    (if-let [heading (make-heading text (:heading-anchors state))]
-      [heading (assoc state :heading true)]
-      [text state])))
+    (cond
+      (h1? *next-line*)
+      [(str "<h1>" text "</h1>") (assoc state :heading true)]
+      
+      (h2? *next-line*)      
+      [(str "<h2>" text "</h2>") (assoc state :heading true)]
+      
+      :else
+      (if-let [heading (make-heading text (:heading-anchors state))]
+        [heading (assoc state :heading true)]
+        [text state]))))
 
 (defn paragraph 
   [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]   
