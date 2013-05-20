@@ -14,7 +14,10 @@
    
    :cljsbuild
    {:crossovers [markdown.transformers]
+    :crossover-path "src-cljs"
+    :output-to "js/markdown.js"
     :builds
-    [{:source-paths ["src-cljs"]      
-      :compiler {:optimizations :advanced
-                 :pretty-print false}}]})
+    {:dev  {:source-paths ["src-cljs"]
+             :compiler {:output-to "target/main.js"
+                        :optimizations :whitespace
+                        :pretty-print true}}}})
