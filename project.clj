@@ -18,6 +18,5 @@
     :output-to "js/markdown.js"
     :builds
     {:dev  {:source-paths ["src-cljs"]
-             :compiler {:output-to "target/main.js"
-                        :optimizations :whitespace
+             :compiler {:optimizations :whitespace
                         :pretty-print true}}}})
