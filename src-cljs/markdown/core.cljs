@@ -16,12 +16,12 @@
 
 (defn ^:export mdToHtml 
   "processes input text line by line and outputs an HTML string"
-  [text]
+  [text & params]
   (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))] 
     (let [transformer (init-transformer transformer-list)
           html        (goog.string.StringBuffer. "")] 
       (loop [[line & more] (.split text "\n")
-             state {:last-line-empty? false}]        
+             state (apply (partial assoc {} :last-line-empty? false) params)]        
         (let [state 
               (if (:buf state) 
                 (transformer html 

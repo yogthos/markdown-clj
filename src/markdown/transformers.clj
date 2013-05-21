@@ -5,13 +5,15 @@
 
 (declare ^:dynamic *next-line*)
 
+(defn heading? [text type]
+  (let [trimmed (if text (string/trim text))]
+    (and (not-empty trimmed) (every? #{type} trimmed))))
+
 (defn- h1? [text]
-  (let [trimmed (string/trim text)]
-    (and (not-empty trimmed) (every? #{\=} trimmed))))
+  (heading? text \=))
 
 (defn- h2? [text]
-  (let [trimmed (string/trim text)]
-    (and (not-empty trimmed) (every? #{\-} (string/trim trimmed)))))
+  (heading? text \-))
 
 (defn- empty-line [text state]  
   [(if (or (h1? text) (h2? text)) "" text) 
