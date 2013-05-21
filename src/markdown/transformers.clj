@@ -6,10 +6,12 @@
 (declare ^:dynamic *next-line*)
 
 (defn- h1? [text]
-  (and (not-empty text) (every? #{\=} (string/trim text))))
+  (let [trimmed (string/trim text)]
+    (and (not-empty trimmed) (every? #{\=} trimmed))))
 
 (defn- h2? [text]
-  (and (not-empty text) (every? #{\-} (string/trim text))))
+  (let [trimmed (string/trim text)]
+    (and (not-empty trimmed) (every? #{\-} (string/trim trimmed)))))
 
 (defn- empty-line [text state]  
   [(if (or (h1? text) (h2? text)) "" text) 
