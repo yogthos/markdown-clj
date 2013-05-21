@@ -13,7 +13,7 @@ You can try out the parser [here](http://yogthos.net/markdown.html).
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.24"]
+[markdown-clj "0.9.25"]
 ```
 
 ## Usage Clojure
@@ -65,7 +65,8 @@ Specifying `:code-style` will override the default code class formatting for cod
 
 ## Usage ClojureScript
 
-Currently the ClojureScript exposes the `mdToHtml` function that takes a markdown string and returns the corresponding HTML.
+The ClojureScript portion works the same as above except that the entry function is called `mdToHtml` and it accepts
+a string followed by the options as its input:
 
 ```clojure
 (ns myscript
@@ -74,6 +75,9 @@ Currently the ClojureScript exposes the `mdToHtml` function that takes a markdow
 (.log js/console
   (md/mdToHtml "##This is a heading\nwith a paragraph following it"))
 
+(.log js/console 
+  (md/mdToHtml "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```" 
+               :code-style #(str "class=\"" % "\"")))
 ```
 
 ## Supported syntax
