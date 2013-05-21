@@ -65,8 +65,8 @@ Specifying `:code-style` will override the default code class formatting for cod
 
 ## Usage ClojureScript
 
-The ClojureScript portion works the same as above except that the entry function is called `mdToHtml` and it accepts
-a string followed by the options as its input:
+The ClojureScript portion works the same as above except that the entry function is called `mdToHtml`. It accepts
+a string followed by the options as its input, and returns the resulting HTML string:
 
 ```clojure
 (ns myscript
@@ -79,6 +79,7 @@ a string followed by the options as its input:
   (md/mdToHtml "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```" 
                :code-style #(str "class=\"" % "\"")))
 ```
+
 
 ## Supported syntax
 
