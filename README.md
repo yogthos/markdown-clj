@@ -13,7 +13,7 @@ You can try out the parser [here](http://yogthos.net/markdown.html).
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.25"]
+[markdown-clj "0.9.26"]
 ```
 
 ## Usage Clojure
@@ -103,6 +103,7 @@ Control characters can be escaped using \
 [Heading](#heading),
 [Italics](#italics),
 [Line](#line),
+[Linebreak](#linebreak),
 [Paragraph](#paragraph),
 [Strikethrough](#strikethrough)
 
@@ -155,6 +156,10 @@ Heading 2
 
 - - -
 ```
+
+### Linebreak
+
+If a line ends with two or more spaces a `<br />` tag will be inserted at the end.
 
 ### Emphasis
 
