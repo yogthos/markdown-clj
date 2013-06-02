@@ -1,0 +1,325 @@
+<html>
+<head>
+<title>Live Markdown example</title>
+<style type="text/css">
+body{
+    margin: 0 auto;
+    padding: 30px;
+    background: #474747;
+    font: 20px Tahoma, Helvetica, Arial, Sans-Serif;
+	  color: #222; text-shadow: 0px 2px 3px #555;
+}
+
+h1, h2, h3, h4 {
+	display: block; text-decoration: none;
+	font: Helvetica, Arial, Sans-Serif;
+	color: #999; text-shadow: 0px 3px 8px #2a2a2a;
+ }
+
+h1 {
+  font-size: 35px;
+ }
+
+h2 {
+  font-size: 30px;
+ }
+h3 {
+  font-size: 25px;
+ }
+h4 {
+  font-size: 20px;
+ }
+
+textarea {
+	width: 600px; margin: 0 auto; background: #222; padding: 20px;
+	font-size: 22px; color: #555; text-shadow: 0px 2px 3px #171717;
+
+	-webkit-box-shadow: 0px 2px 3px #555;
+	-moz-box-shadow: 0px 2px 3px #555;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+}
+
+pre {
+        margin: 0 auto; background: #222; padding: 20px;
+	font-size: 15px; color: #555; text-shadow: 0px 2px 3px #171717;
+	margin-bottom: 20px;
+	-webkit-box-shadow: 0px 2px 3px #555;
+	-moz-box-shadow: 0px 2px 3px #555;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+}
+
+a {
+	text-decoration: none;
+	font: 18px Helvetica, Arial, Sans-Serif;
+	color: #999; text-shadow: 0px 3px 8px #2a2a2a;
+ }
+
+a:hover {
+        color: #a0a0a0; text-shadow: 0px 5px 8px #2a2a2a;
+}
+
+hr {
+  height: 3px;
+  border: 0;
+  background-color: #333;
+}
+
+#output {
+        width: 600px; margin: 0 auto; background: #444; padding: 20px;
+        font-size: 15px; color: #aaa; text-shadow: 0px 1px 1px #171717;
+
+        -webkit-box-shadow: 0px 2px 3px #555;
+        -moz-box-shadow: 0px 2px 3px #555;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+}
+</style>
+
+<script src="http://rawgithub.com/yogthos/markdown-clj/master/js/markdown.js" type="text/javascript"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+	function render() {
+	  var md = document.getElementById("input").value;   
+	  document.getElementById("output").innerHTML = markdown.core.mdToHtml(md);
+	}
+</script>
+</head>
+<body>
+	<table>
+		<tbody>
+			<tr>
+				<td><textarea cols="80" id="input" onkeypress="render()"
+						rows="40"></textarea></td>
+				<td id="output" valign="top"></td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<br/>
+	
+	<h2>Supported Syntax</h2>
+
+<p>Control characters can be escaped using \</p>
+
+<pre><code>\*
+\`
+\_
+\(
+\)
+\[
+\]
+\{
+\}
+</code></pre>
+
+<h4>
+<a name="basic-elements" class="anchor" href="#basic-elements"><span class="mini-icon mini-icon-link"></span></a>Basic Elements</h4>
+
+<p><a href="#blockquote">Blockquote</a>
+<br/>
+<a href="#bold">Bold</a>
+<br/>
+<a href="#emphasis">Emphasis</a>
+<br/>
+<a href="#heading">Heading</a>
+<br/>
+<a href="#italics">Italics</a>
+<br/>
+<a href="#line">Line</a>
+<br/>
+<a href="#paragraph">Paragraph</a>
+<br/>
+<a href="#strikethrough">Strikethrough</a></p>
+
+<h4>
+<a name="links" class="anchor" href="#links"><span class="mini-icon mini-icon-link"></span></a>Links</h4>
+
+<p><a href="#image">Image</a>
+<br/>
+<a href="#link">Link</a></p>
+
+<h4>
+<a name="lists" class="anchor" href="#lists"><span class="mini-icon mini-icon-link"></span></a>Lists</h4>
+
+<p><a href="#ordered-list">Ordered List</a>
+<br/>
+<a href="#unordered-list">Unordered List</a></p>
+
+<h4>
+<a name="code" class="anchor" href="#code"><span class="mini-icon mini-icon-link"></span></a>Code</h4>
+
+<p><a href="#code-block">Code Block</a>
+<br/>
+<a href="#indented-code">Indented Code</a>
+<br/>
+<a href="#inline-code">Inline Code</a></p>
+
+<hr><h3>
+<a name="heading" class="anchor" href="#heading"><span class="mini-icon mini-icon-link"></span></a>Heading</h3>
+
+<p>the number of hashes indicates the level of the heading</p>
+
+<pre><code># Heading
+
+##Sub-heading 
+
+### Sub-sub-heading 
+</code></pre>
+
+<h3>
+<a name="line" class="anchor" href="#line"><span class="mini-icon mini-icon-link"></span></a>Line</h3>
+
+<pre><code>***
+
+* * *
+
+*****
+
+- - -
+</code></pre>
+
+<h3>
+<a name="emphasis" class="anchor" href="#emphasis"><span class="mini-icon mini-icon-link"></span></a>Emphasis</h3>
+
+<pre><code>*foo*
+</code></pre>
+
+<h3>
+<a name="italics" class="anchor" href="#italics"><span class="mini-icon mini-icon-link"></span></a>Italics</h3>
+
+<pre><code>_foo_
+</code></pre>
+
+<h3>
+<a name="bold" class="anchor" href="#bold"><span class="mini-icon mini-icon-link"></span></a>Bold</h3>
+
+<pre><code>**foo**
+__foo__
+</code></pre>
+
+<h3>
+<a name="blockquote" class="anchor" href="#blockquote"><span class="mini-icon mini-icon-link"></span></a>Blockquote</h3>
+
+<pre><code>&gt;This is a blockquote
+with some content
+
+&gt;this is another blockquote
+</code></pre>
+
+<h3>
+<a name="paragraph" class="anchor" href="#paragraph"><span class="mini-icon mini-icon-link"></span></a>Paragraph</h3>
+
+<pre><code>This is a paragraph, it's
+split into separate lines.
+
+This is another paragraph.
+
+</code></pre>
+
+<h3>
+<a name="unordered-list" class="anchor" href="#unordered-list"><span class="mini-icon mini-icon-link"></span></a>Unordered List</h3>
+
+<p>indenting an item makes it into a sublist of the item above it, ordered and unordered lists can be nested within one another. 
+List items can be split over multiple lines.</p>
+
+<pre><code>* Foo
+* Bar
+ * Baz
+</code></pre>
+
+<pre><code>* foo
+* bar
+
+   * baz
+     1. foo
+     2. bar
+        more content 
+        ## subheading 
+        ***
+        **bold text** in the list
+
+   * fuzz
+
+      * blah
+      * blue
+* brass
+</code></pre>
+
+<h3>
+<a name="ordered-list" class="anchor" href="#ordered-list"><span class="mini-icon mini-icon-link"></span></a>Ordered List</h3>
+
+<pre><code>1. Foo
+2. Bar
+3. Baz
+</code></pre>
+
+<h3>
+<a name="inline-code" class="anchor" href="#inline-code"><span class="mini-icon mini-icon-link"></span></a>Inline Code</h3>
+
+<p>Any special characters in code will be escaped with their corresponding HTML codes. </p>
+
+<pre><code>Here's some code `x + y = z` that's inlined.
+</code></pre>
+
+<h3>
+<a name="code-block" class="anchor" href="#code-block"><span class="mini-icon mini-icon-link"></span></a>Code block</h3>
+
+<p>Using three backquotes indicates a start of a code block, the next three backquotes ends the code block section.
+Optionally, the language name can be put after the backquotes to produce a tag compatible with the <a href="http://alexgorbatchev.com/SyntaxHighlighter/">Syntax Highlighter</a>, eg:</p>
+
+<p>```clojure</p>
+
+<p>(defn foo [bar] "baz")</p>
+
+<p>```</p>
+
+<h3>
+<a name="indented-code" class="anchor" href="#indented-code"><span class="mini-icon mini-icon-link"></span></a>Indented Code</h3>
+
+<p>indenting by at least 4 spaces creates a code block</p>
+
+<pre><code>some
+code 
+here
+</code></pre>
+
+<p>note: XML is escaped in code sections</p>
+
+<h3>
+<a name="strikethrough" class="anchor" href="#strikethrough"><span class="mini-icon mini-icon-link"></span></a>Strikethrough</h3>
+
+<pre><code>~~foo~~
+</code></pre>
+
+<h3>
+<a name="superscript" class="anchor" href="#superscript"><span class="mini-icon mini-icon-link"></span></a>Superscript</h3>
+
+<pre><code>a^2 + b^2 = c^2
+</code></pre>
+
+<h3>
+<a name="link" class="anchor" href="#link"><span class="mini-icon mini-icon-link"></span></a>Link</h3>
+
+<pre><code>[github](http://github.com)
+</code></pre>
+
+<h3>
+<a name="image" class="anchor" href="#image"><span class="mini-icon mini-icon-link"></span></a>Image</h3>
+
+<pre><code>![Alt text](http://server/path/to/img.jpg)
+![Alt text](/path/to/img.jpg "Optional Title")
+</code></pre>
+
+<h3>
+<a name="image-link" class="anchor" href="#image-link"><span class="mini-icon mini-icon-link"></span></a>Image Link</h3>
+
+<pre><code>[![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
+</code></pre>
+
+	
+
+</body>
+</html>
+
