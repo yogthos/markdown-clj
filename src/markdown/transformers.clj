@@ -164,6 +164,13 @@
         [heading (assoc state :heading true)]
         [text state]))))
 
+(defn br [text {:keys [code lists] :as state}]
+  [(if (and (= [\space \space] (take-last 2 text))
+            (not (or code lists))) 
+     (str text "<br />") 
+     text)
+   state])
+
 (defn paragraph 
   [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]   
   (if (or heading hr code lists blockquote)
@@ -400,4 +407,5 @@
    strikethrough
    superscript                         
    blockquote
-   paragraph])
+   paragraph
+   br])
