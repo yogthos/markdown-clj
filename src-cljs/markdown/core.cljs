@@ -1,8 +1,8 @@
 (ns markdown.core
   (:use [markdown.transformers
-         :only [*next-line* *substring* transformer-list]]))
+         :only [*next-line* *substring* transformer-vector]]))
 
-(defn- init-transformer [transformers]
+(defn- init-transformer [{:keys [replacement-transformers custom-transformers]}]
   (fn [html line next-line state]    
     (binding [*next-line* next-line]
       (let [[text new-state]
@@ -10,7 +10,8 @@
               (fn [[text state] transformer]               
                 (transformer text state))
               [line state]           
-              transformers)]
+              (or replacement-transformers
+                  (into transformer-vector custom-transformers)))]
         (.append html text)
         new-state))))
 
@@ -18,7 +19,7 @@
   "processes input text line by line and outputs an HTML string"
   [text & params]
   (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))] 
-    (let [transformer (init-transformer transformer-list)
+    (let [transformer (init-transformer params)
           html        (goog.string.StringBuffer. "")] 
       (loop [[line & more] (.split text "\n")
              state (apply (partial assoc {} :last-line-empty? false) params)]        

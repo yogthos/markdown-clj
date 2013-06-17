@@ -390,7 +390,7 @@
         :else
         [text state]))))
 
-(def transformer-list
+(def transformer-vector
   [empty-line   
    codeblock
    code

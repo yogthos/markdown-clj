@@ -1,13 +1,13 @@
 (ns markdown.core
   (:use [markdown.transformers
-         :only [*next-line* *substring* transformer-list]])
+         :only [*next-line* *substring* transformer-vector]])
   (:require [clojure.java.io :as io])
   (:import [java.io StringReader StringWriter]))
 
 (defn- write [writer text]  
   (doseq [c text] (.write writer (int c))))
  
-(defn- init-transformer [writer transformers]  
+(defn- init-transformer [writer {:keys [replacement-transformers custom-transformers]}]  
   (fn [line next-line state]     
     (binding [*next-line* next-line]
       (let [[text new-state]
@@ -15,7 +15,8 @@
               (fn [[text, state] transformer]              
                 (transformer text state))
               [line state]           
-              transformers)]      
+              (or replacement-transformers
+                  (into transformer-vector custom-transformers)))]      
         (write writer text)
         new-state))))
 
@@ -25,7 +26,7 @@
   (binding [markdown.transformers/*substring* (fn [s n] (.substring s n))] 
     (with-open [rdr (io/reader in)
                 wrt (io/writer out)]        
-      (let [transformer (init-transformer wrt transformer-list)] 
+      (let [transformer (init-transformer wrt params)] 
         (loop [line  (.readLine rdr)
                next-line (.readLine rdr)
                state (apply (partial assoc {} :last-line-empty? true) params)]        

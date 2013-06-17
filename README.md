@@ -63,6 +63,27 @@ Specifying `:code-style` will override the default code class formatting for cod
 </pre>
 ```
 
+Additional transformers can be specified using the `:custom-transformers` key. A transformer function must accept two arguments. First argument is the string representing the current line and the second is the map representing the current state.
+
+For example, if we wanted to add a transformer that would capitalize all text we could do the following:
+
+```clojure
+(defn capitalize [text state]
+  [(.toUpperCase text) state])
+
+(markdown/md-to-html-string "#foo" :custom-transformers [capitalize])
+```
+
+```xml
+<H1>FOO</H1>
+```
+
+Alternatively, you could provide a custom set of transformers to replace the default transformers using the `:replacement-transformers` key.
+
+```clojure
+(markdown/md-to-html-string "#foo" :replacement-transformers [capitalize])
+```
+
 ## Usage ClojureScript
 
 The ClojureScript portion works the same as above except that the entry function is called `mdToHtml`. It accepts
