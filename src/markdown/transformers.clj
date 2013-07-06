@@ -177,19 +177,20 @@
 
 (defn paragraph 
   [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]   
-  (if (or heading hr code lists blockquote)
+  (cond
+    (or heading hr code lists blockquote)
     [text state]
-    (cond
-      paragraph?     
-      (if (or eof (empty? (string/trim text)))
-        [(str (paragraph-text last-line-empty? text) "</p>") (assoc state :paragraph? false)]
-        [(paragraph-text last-line-empty? text) state])
-     
-      (and (not eof) last-line-empty?)
-      [(str "<p>" text) (assoc state :paragraph? true)]
-           
-      :default
-      [text state])))
+    
+    paragraph?     
+    (if (or eof (empty? (string/trim text)))
+      [(str (paragraph-text last-line-empty? text) "</p>") (assoc state :paragraph? false)]
+      [(paragraph-text last-line-empty? text) state])
+    
+    (and (not eof) last-line-empty?)
+    [(str "<p>" text) (assoc state :paragraph? true)]
+    
+    :default
+    [text state]))
 
 (defn code [text {:keys [eof lists code codeblock] :as state}]  
   (if (or lists codeblock)
