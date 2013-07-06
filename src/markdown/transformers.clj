@@ -150,19 +150,20 @@
            text "</h" heading ">"))))
 
 (defn heading [text state]  
-  (if (:code state)
+  (cond
+    (:code state)
     [text state]
-    (cond
-      (h1? *next-line*)
-      [(str "<h1>" text "</h1>") (assoc state :heading true)]
-      
-      (h2? *next-line*)      
-      [(str "<h2>" text "</h2>") (assoc state :heading true)]
-      
-      :else
-      (if-let [heading (make-heading text (:heading-anchors state))]
-        [heading (assoc state :heading true)]
-        [text state]))))
+    
+    (h1? *next-line*)
+    [(str "<h1>" text "</h1>") (assoc state :heading true)]
+    
+    (h2? *next-line*)      
+    [(str "<h2>" text "</h2>") (assoc state :heading true)]
+    
+    :else
+    (if-let [heading (make-heading text (:heading-anchors state))]
+      [heading (assoc state :heading true)]
+      [text state])))
 
 (defn br [text {:keys [code lists] :as state}]
   [(if (and (= [\space \space] (take-last 2 text))
@@ -193,9 +194,10 @@
     [text state]))
 
 (defn code [text {:keys [eof lists code codeblock] :as state}]  
-  (if (or lists codeblock)
+  (cond
+    (or lists codeblock)
     [text state]
-    (cond         
+    
     code
     (if (or eof (not (= "    " (apply str (take 4 text)))))
       [(str "\n</pre>" text) (assoc state :code false)]      
@@ -209,7 +211,7 @@
       (if (> num-spaces 3)
         [(str "<pre>\n" (escape-code (string/replace-first text #"    " ""))) 
          (assoc state :code true)]
-        [text state])))))      
+        [text state]))))      
 
 
 (defn codeblock [text state]    
@@ -235,6 +237,7 @@
             
     (:codeblock state)
     [(str "\n" (escape-code text)) state]
+    
     :default
     [text state])))
 
@@ -250,19 +253,20 @@
         [text state]))))        
 
 
-(defn blockquote [text state]
-  (if (or (:code state) (:codeblock state) (:lists state))
+(defn blockquote [text {:keys [eof code codeblock lists] :as state}]
+  (cond
+    (or code codeblock lists)
     [text state]
-    (cond
-      (:blockquote state)
-      (if (or (:eof state) (empty? (string/trim text)))
-        ["</p></blockquote>" (assoc state :blockquote false)]
-        [(str text " ") state])
-      
-      :default
-      (if (= \> (first text))
-        [(str "<blockquote><p>" (apply str (rest text)) " ") (assoc state :blockquote true)]
-        [text state]))))
+    
+    (:blockquote state)
+    (if (or eof (empty? (string/trim text)))
+      ["</p></blockquote>" (assoc state :blockquote false)]
+      [(str text " ") state])
+    
+    :default
+    (if (= \> (first text))
+      [(str "<blockquote><p>" (apply str (rest text)) " ") (assoc state :blockquote true)]
+      [text state])))
 
 (defn- href [title link]
   (escape-link (seq "<a href='") link (seq "'>") title (seq "</a>")))
@@ -283,8 +287,8 @@
       (concat "[" (img alt url (not-empty title)) (rest zy)))
     xs))
 
-(defn link [text state]
-  (if (or (:codeblock state) (:code state))
+(defn link [text {:keys [code codeblock] :as state}]
+  (if (or code codeblock)
     [text state]
     (loop [out []
            tokens (seq text)]
