@@ -31,17 +31,17 @@
 (deftest italics
   (is (= "<p><i>foo</i></p>" (markdown/md-to-html-string "_foo_"))))
 
-(deftest bold
-  (is (= "<p><b>foo</b></p>" (markdown/md-to-html-string "**foo**"))))
+(deftest strong
+  (is (= "<p><strong>foo</strong></p>" (markdown/md-to-html-string "**foo**"))))
 
-(deftest alt-bold
+(deftest bold
   (is (= "<p><b>foo</b></p>" (markdown/md-to-html-string "__foo__"))))
 
-(deftest bold-inside-em
-  (is (= "<p><em>foo<b>bar</b>baz</em></p>" (markdown/md-to-html-string "*foo**bar**baz*"))))
+(deftest strong-inside-em
+  (is (= "<p><em>foo<strong>bar</strong>baz</em></p>" (markdown/md-to-html-string "*foo**bar**baz*"))))
 
-(deftest em-inside-bold
-  (is (= "<p><b>foo<em>bar</em>baz</b></p>" (markdown/md-to-html-string "**foo*bar*baz**"))))
+(deftest em-inside-strong
+  (is (= "<p><strong>foo<em>bar</em>baz</strong></p>" (markdown/md-to-html-string "**foo*bar*baz**"))))
 
 (deftest paragraph
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"

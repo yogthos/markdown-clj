@@ -119,10 +119,11 @@ Control characters can be escaped using \
 
 #### Basic Elements
 [Blockquote](#blockquote),
+[Strong](#strong),
 [Bold](#bold),
 [Emphasis](#emphasis),
-[Heading](#heading),
 [Italics](#italics),
+[Heading](#heading),
 [Line](#line),
 [Linebreak](#linebreak),
 [Paragraph](#paragraph),
@@ -194,10 +195,15 @@ If a line ends with two or more spaces a `<br />` tag will be inserted at the en
 _foo_
 ```
 
-### Bold
+### Strong
 
 ```
 **foo**
+```
+
+### Bold
+
+```
 __foo__
 ```
 
@@ -240,7 +246,7 @@ List items can be split over multiple lines.
         more content 
         ## subheading 
         ***
-        **bold text** in the list
+        **strong text** in the list
 
    * fuzz
 
