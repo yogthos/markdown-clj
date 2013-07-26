@@ -95,7 +95,7 @@
         
 
 (defn bold [text state]
-  (separator false text "<b>" "</b>" [\* \*] state))
+  (separator false text "<strong>" "</strong>" [\* \*] state))
 
 (defn alt-bold [text state]
   (separator false text "<b>" "</b>" [\_ \_] state))
