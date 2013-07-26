@@ -59,7 +59,7 @@
        (string/replace #"\\\)" "&#41;")))
    state])
 
-(defn- separator [escape? text open close separator state]
+(defn separator [escape? text open close separator state]
   (if (:code state)
     [text state]
     (loop [out []
