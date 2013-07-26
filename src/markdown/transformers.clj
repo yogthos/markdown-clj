@@ -94,10 +94,10 @@
         (recur (into out (first tokens)) buf (rest tokens) cur-state)))))
         
 
-(defn bold [text state]
-  (separator false text "<b>" "</b>" [\* \*] state))
+(defn strong [text state]
+  (separator false text "<strong>" "</strong>" [\* \*] state))
 
-(defn alt-bold [text state]
+(defn bold [text state]
   (separator false text "<b>" "</b>" [\_ \_] state))
 
 (defn em [text state]
@@ -411,8 +411,8 @@
    heading                      
    italics                      
    em
+   strong
    bold
-   alt-bold                      
    strikethrough
    superscript                         
    blockquote
