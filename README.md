@@ -23,7 +23,7 @@ Markdown-clj can be invoked either by calling `md-to-html` which takes two param
 ```clojure
 (ns foo
   (:use markdown.core))
-  
+
 (md-to-html "input.md" "output.html")
 
 (md-to-html (input-stream "input.md") (output-stream "test.txt"))
@@ -47,14 +47,14 @@ Specifying `:heading-anchors` will create anchors for the heading tags, eg:
 
 ```
 ```xml
-<h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz></a>foo bar BAz</h3>
+<h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>
 ```
 
 
-Specifying `:code-style` will override the default code class formatting for code blocks, eg: 
+Specifying `:code-style` will override the default code class formatting for code blocks, eg:
 
 ```clojure
-(md-to-html-string "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```" 
+(md-to-html-string "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
                    :code-style #(str "class=\"" % "\""))
 ```
 ```xml
@@ -96,8 +96,8 @@ a string followed by the options as its input, and returns the resulting HTML st
 (.log js/console
   (md/mdToHtml "##This is a heading\nwith a paragraph following it"))
 
-(.log js/console 
-  (md/mdToHtml "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```" 
+(.log js/console
+  (md/mdToHtml "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
                :code-style #(str "class=\"" % "\"")))
 ```
 
@@ -152,9 +152,9 @@ the number of hashes indicates the level of the heading
 ```
 # Heading
 
-##Sub-heading 
+##Sub-heading
 
-### Sub-sub-heading 
+### Sub-sub-heading
 ```
 
 headings can also be defined using `=` and `-` for `h1` and `h2` respectively
@@ -227,7 +227,7 @@ This is another paragraph.
 
 ### Unordered List
 
-indenting an item makes it into a sublist of the item above it, ordered and unordered lists can be nested within one another. 
+indenting an item makes it into a sublist of the item above it, ordered and unordered lists can be nested within one another.
 List items can be split over multiple lines.
 
 ```
@@ -243,8 +243,8 @@ List items can be split over multiple lines.
    * baz
      1. foo
      2. bar
-        more content 
-        ## subheading 
+        more content
+        ## subheading
         ***
         **strong text** in the list
 
@@ -265,7 +265,7 @@ List items can be split over multiple lines.
 
 ### Inline Code
 
-Any special characters in code will be escaped with their corresponding HTML codes. 
+Any special characters in code will be escaped with their corresponding HTML codes.
 
 ```
 Here's some code `x + y = z` that's inlined.
@@ -288,7 +288,7 @@ Optionally, the language name can be put after the backquotes to produce a tag c
 indenting by at least 4 spaces creates a code block
 
     some
-    code 
+    code
     here
 
 note: XML is escaped in code sections
