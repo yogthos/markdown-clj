@@ -244,14 +244,13 @@
 (defn hr [text state]
   (if (:code state) 
     [text state]
-    (let [trimmed (string/trim text)] 
-      (if (or (= "***" trimmed)
-              (= "* * *" trimmed)
-              (= "*****" trimmed)
-              (= "- - -" trimmed))
-        [(str "<hr/>") (assoc state :hr true)]
-        [text state]))))        
-
+    (if (and
+          (or (empty? (drop-while #{\* \space} text))
+              (empty? (drop-while #{\- \space} text))
+              (empty? (drop-while #{\_ \space} text)))
+          (> (count (remove #{\space} text)) 2))
+      [(str "<hr/>") (assoc state :hr true)]
+      [text state])))
 
 (defn blockquote [text {:keys [eof code codeblock lists] :as state}]
   (cond
