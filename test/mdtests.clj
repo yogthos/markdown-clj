@@ -154,11 +154,15 @@
 
 (deftest img-link 
   (is (= "<p><a href='http://travis-ci.org/yogthos/markdown-clj'><img src=\"https://secure.travis-ci.org/yogthos/markdown-clj.png\" alt=\"Continuous Integration status\" /></a></p>"
-         (markdown/md-to-html-string "[![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)"))))
+         (markdown/md-to-html-string "[![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)")))
+  (is (= "<p><img src=\"https://secure.travis-ci.org/yogthos/markdown-clj.png\" alt=\"\" /></p>"
+         (markdown/md-to-html-string "![](https://secure.travis-ci.org/yogthos/markdown-clj.png)"))))
 
 (deftest bad-link
   (is (= "<p>[github](http://github.comfooo</p>" 
-         (markdown/md-to-html-string "[github](http://github.comfooo"))))
+         (markdown/md-to-html-string "[github](http://github.comfooo")))
+  (is (= "<p>[github] no way (http://github.com)</p>"
+         (markdown/md-to-html-string "[github] no way (http://github.com)"))))
 
 (deftest bad-link-title
   (is (= "<p>[github(http://github.comfooo)</p>" 
