@@ -13,7 +13,7 @@ You can try out the parser [here](http://yogthos.net/markdown.html).
 Leiningen
 
 ```clojure
-[markdown-clj "0.9.31"]
+[markdown-clj "0.9.32"]
 ```
 
 ## Usage Clojure
