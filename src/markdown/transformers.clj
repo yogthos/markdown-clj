@@ -299,10 +299,10 @@
               [title ys]  (split-with (partial not= \]) xs)
               [dud zs]    (split-with (partial not= \() ys)
               [link tail] (split-with (partial not= \)) zs)]
-                                                  
-          (if (or (< (count title) 2) 
-                  (< (count link) 2)
-                  (< (count tail) 1))
+
+          (if (or (< (count link) 2)
+                  (< (count tail) 1)
+                  (> (count dud) 1))
             (recur (concat out head title dud link) tail)
             (recur 
               (->>
