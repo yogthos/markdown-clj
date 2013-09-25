@@ -84,6 +84,23 @@ Alternatively, you could provide a custom set of transformers to replace the def
 (markdown/md-to-html-string "#foo" :replacement-transformers [capitalize])
 ```
 
+This can also be used to add preprocessor transformers. For example, if we wanted to sanitize any image links we could do the following:
+
+```clojure
+(use 'markdown.transformers 'markdown.core)
+
+(defn escape-images [text state]
+  [(clojure.string/replace text #"(!\[.*?\]\()(.+?)(\))" "") state])
+
+(markdown/md-to-html-string
+  "foo ![Alt text](/path/to/img.jpg \"Optional Title\") bar [text](http://test)"
+  :replacement-transformers (cons escape-images transformer-vector))
+```
+
+```xml
+"<p>foo  bar <a href='http://test'>text</a></p>"
+```
+
 ## Usage ClojureScript
 
 The ClojureScript portion works the same as above except that the entry function is called `mdToHtml`. It accepts

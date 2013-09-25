@@ -15,7 +15,7 @@
 (defn- h2? [text]
   (heading? text \-))
 
-(defn- empty-line [text state]
+(defn empty-line [text state]
   [(if (or (h1? text) (h2? text)) "" text) 
    (if (string/blank? text) (dissoc state :hr :heading) state)])
 
@@ -271,7 +271,7 @@
   (escape-link (seq "<a href='") link (seq "'>") title (seq "</a>")))
 
 (defn- img [alt url & [title]]
-  (escape-link  
+  (escape-link
     (seq "<img src=\"") url  (seq "\" alt=\"") alt
     (if (not-empty title)
       (seq (apply str "\" title=" (apply str title) " />"))
@@ -280,9 +280,9 @@
 (defn handle-img-link [xs]
   (if (= [\[ \! \[] (take 3 xs))
     (let [xs (drop 3 xs)
-          [alt xy] (split-with (partial not= \]) xs)          
+          [alt xy] (split-with (partial not= \]) xs)
           [url-title zy] (->> xy (drop 2) (split-with (partial not= \))))
-          [url title] (split-with (partial not= \space) url-title)]      
+          [url title] (split-with (partial not= \space) url-title)]
       (concat "[" (img alt url (not-empty title)) (rest zy)))
     xs))
 
@@ -314,7 +314,6 @@
                   (concat head (href (rest title) (rest link))))
                 (into out))
               (rest tail))))))))
-
 
 (defn- close-lists [lists]
   (apply str
@@ -417,3 +416,4 @@
    blockquote
    paragraph
    br])
+
