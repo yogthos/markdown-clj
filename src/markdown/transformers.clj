@@ -362,12 +362,12 @@
 
     (and last-line-empty? (string/blank? text))
     [(str (close-lists lists) text)
-       (dissoc state :lists)]
+     (-> state (dissoc :lists) (assoc :last-line-empty? false))]
 
     (or code codeblock)
     (if (and lists (or last-line-empty? eof))
       [(str (close-lists lists) text)
-       (dissoc state :lists)]
+       (-> state (dissoc :lists) (assoc :last-line-empty? false))]
       [text state])
 
     (and (not eof) 

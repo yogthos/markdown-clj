@@ -177,4 +177,7 @@
     (= "<p>&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
        (markdown/md-to-html-string "\\*\\`\\_\\{\\}\\[\\]*foo*`test`_bar_{x}[y]"))))
 
-#_(run-tests)
+
+(deftest paragraph-after-list
+  (is (= "<ol><li>a</li><li>b</li></ol><p>test <strong>bold</strong> and <em>italic</em></p>"
+         (markdown/md-to-html-string"1. a\n2. b\n\ntest **bold** and *italic*"))))
