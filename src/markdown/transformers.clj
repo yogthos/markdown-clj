@@ -200,7 +200,7 @@
 
     code
     (if (or eof (not (= "    " (apply str (take 4 text)))))
-      [(str "\n</pre>" text) (assoc state :code false)]
+      [(str "\n</pre>" text) (assoc state :code false :last-line-empty? false)]
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
 
     (empty? (string/trim text))
@@ -218,10 +218,10 @@
   (let [trimmed (string/trim text)]
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
-      [(str "\n</pre>" (apply str (drop 3 trimmed))) (assoc state :code false :codeblock false)]
+      [(str "\n</pre>" (apply str (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "\n</pre>" (apply str (drop-last 3 trimmed))) (assoc state :code false :codeblock false)]
+      [(str "\n</pre>" (apply str (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))

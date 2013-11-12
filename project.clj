@@ -1,4 +1,4 @@
-(defproject markdown-clj "0.9.34"
+(defproject markdown-clj "0.9.35"
   :clojurescript? true
   :description "Markdown parser"
    :url "https://github.com/yogthos/markdown-clj"
@@ -11,11 +11,10 @@
    :test-selectors {:default (complement :benchmark)
                     :benchmark :benchmark
                     :all (constantly true)}
-   
    :cljsbuild
    {:crossovers [markdown.transformers]
     :crossover-path "crossover"
-    :crossover-jar true        
+    :crossover-jar true
     :builds {:main
              {:source-paths ["src-cljs"]
               :jar true
