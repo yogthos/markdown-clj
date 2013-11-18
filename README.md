@@ -18,7 +18,11 @@ Leiningen
 
 ## Usage Clojure
 
-Markdown-clj can be invoked either by calling `md-to-html` which takes two parameters, which will be passed to a reader and writer respectively, eg:
+Markdown-clj can be invoked either by calling `md-to-html` or `md-to-html-string` functions.
+
+The `md-to-html` function accepts an input containing Markdown markup and an output where
+the resulting HTML will be written. The input and output parameters will be passed to a reader
+and a writer respectively:
 
 ```clojure
 (ns foo
@@ -28,7 +32,9 @@ Markdown-clj can be invoked either by calling `md-to-html` which takes two param
 
 (md-to-html (input-stream "input.md") (output-stream "test.txt"))
 ```
-or by calling `md-to-html-string` which accepts a string with markdown content and returns a string with the resulting HTML:
+
+The `md-to-html-string` function accepts a string with markdown content and returns a string with the resulting HTML:
+
 ```clojure
 (md-to-html-string "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```")
 ```
@@ -38,7 +44,7 @@ or by calling `md-to-html-string` which accepts a string with markdown content a
 </pre>
 ```
 
-Finally, `md-to-html` and `md-to-html-string` can accept optional parameters:
+Both `md-to-html` and `md-to-html-string` can accept optional parameters:
 
 Specifying `:heading-anchors` will create anchors for the heading tags, eg:
 
@@ -63,7 +69,21 @@ Specifying `:code-style` will override the default code class formatting for cod
 </pre>
 ```
 
-Additional transformers can be specified using the `:custom-transformers` key. A transformer function must accept two arguments. First argument is the string representing the current line and the second is the map representing the current state.
+Additional transformers can be specified using the `:custom-transformers` key.
+A transformer function must accept two arguments.
+First argument is the string representing the current line and the second is the map representing the current state.
+
+The default state keys are:
+
+* `:code` - inside a code section
+* `:codeblock` - inside a code block
+* `:eof` - end of file
+* `:heading` - in a heading
+* `:hr` - in a horizontal line 
+* `:lists` - inside a list
+* `:blockquote` - inside a blockquote
+* `:paragraph?` - in a paragraph?
+* `:last-line-empty?` - was last line an empty line?
 
 For example, if we wanted to add a transformer that would capitalize all text we could do the following:
 
