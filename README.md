@@ -1,6 +1,6 @@
 #Markdown parser written in Clojure
 
-A markdown parser which compiles to both Clojure and ClojureScript.
+A markdown parser that compiles to both Clojure and ClojureScript.
 
 [![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
 
