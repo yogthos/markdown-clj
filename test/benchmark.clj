@@ -12,4 +12,4 @@
 
 (deftest ^:benchmark bench-file []
   (criterium/bench
-    (markdown/md-to-html "test.md" (java.io.StringWriter.))))
+    (markdown/md-to-html (str "test" java.io.File/separator "bench.md") (java.io.StringWriter.))))
