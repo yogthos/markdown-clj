@@ -16,7 +16,7 @@
   (heading? text \-))
 
 (defn empty-line [text state]
-  [(if (or (h1? text) (h2? text)) "" text) 
+  [(if (or (h1? text) (h2? text)) "" text)
    (if (string/blank? text) (dissoc state :hr :heading) state)])
 
 (defn- escape-code [s]
@@ -37,14 +37,14 @@
 
 (defn- escape-link [& xs]
   (->
-    (apply str (apply concat xs))
+    (string/join (apply concat xs))
     (string/replace #"\*" "&#42;")
     (string/replace #"\^" "&#94;")
     (string/replace #"\_" "&#95;")
     (string/replace #"\~" "&#126;")
     seq))
 
-(defn escaped-chars [text state]  
+(defn escaped-chars [text state]
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
@@ -68,16 +68,16 @@
            cur-state (assoc state :found-token false)]
       (cond
         (empty? tokens)
-        [(apply str (into (if (:found-token cur-state) (into out separator) out) buf))
+        [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
          (dissoc cur-state :found-token)]
 
         (:found-token cur-state)
         (if (= (first tokens) separator)
-          (recur (vec 
-                   (concat 
+          (recur (vec
+                   (concat
                      out
-                     (seq open) 
-                     (if escape? (seq (escape-code (apply str buf))) buf) 
+                     (seq open)
+                     (if escape? (seq (escape-code (string/join buf))) buf)
                      (seq close)))
                  []
                  (rest tokens)
@@ -118,9 +118,9 @@
     (let [tokens (partition-by (partial contains? #{\^ \space}) text)]
       (loop [buf []
              remaining tokens]
-        (cond 
+        (cond
           (empty? remaining)
-          [(apply str buf) state]
+          [(string/join buf) state]
 
           (= (first remaining) [\^])
           (recur (into buf (concat (seq "<sup>") (second remaining) (seq "</sup>")))
@@ -135,7 +135,7 @@
     (reverse)
     (drop-while #(or (= \# %) (= \space %)))
     (reverse)
-    (apply str)
+    (string/join)
     (string/trim)))
 
 (defn- heading-level [text]
@@ -143,7 +143,7 @@
     (if (pos? num-hashes) num-hashes)))
 
 (defn- make-heading [text heading-anchors]
-  (if-let [heading (heading-level text)] 
+  (if-let [heading (heading-level text)]
     (let [text (heading-text heading text)]
       (str "<h" heading ">"
            (if heading-anchors (str "<a name=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"></a>"))
@@ -157,7 +157,7 @@
     (h1? *next-line*)
     [(str "<h1>" text "</h1>") (assoc state :heading true)]
 
-    (h2? *next-line*)      
+    (h2? *next-line*)
     [(str "<h2>" text "</h2>") (assoc state :heading true)]
 
     :else
@@ -176,7 +176,7 @@
   (if (and (not last-line-empty?) (not-empty text))
     (str " " text) text))
 
-(defn paragraph 
+(defn paragraph
   [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]
   (cond
     (or heading hr code lists blockquote)
@@ -199,7 +199,7 @@
     [text state]
 
     code
-    (if (or eof (not (= "    " (apply str (take 4 text)))))
+    (if (or eof (not= "    " (string/join (take 4 text)) ))
       [(str "\n</pre>" text) (assoc state :code false :last-line-empty? false)]
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
 
@@ -218,10 +218,10 @@
   (let [trimmed (string/trim text)]
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
-      [(str "\n</pre>" (apply str (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "\n</pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "\n</pre>" (apply str (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "\n</pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
@@ -230,8 +230,8 @@
         [(str "<pre" (if (not-empty lang)
                              (str " "
                                   (if formatter
-                                    (formatter (apply str lang))
-                                    (str "class=\"brush: " (apply str lang) "\"")))) ">"
+                                    (formatter (string/join lang))
+                                    (str "class=\"brush: " (string/join lang) "\"")))) ">"
               (escape-code (if (empty? s) s (str "\n" s))))
          (assoc state :code true :codeblock true)])
 
@@ -264,7 +264,7 @@
 
     :default
     (if (= \> (first text))
-      [(str "<blockquote><p>" (apply str (rest text)) " ") (assoc state :blockquote true)]
+      [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true)]
       [text state])))
 
 (defn- href [title link]
@@ -274,7 +274,7 @@
   (escape-link
     (seq "<img src=\"") url  (seq "\" alt=\"") alt
     (if (not-empty title)
-      (seq (apply str "\" title=" (apply str title) " />"))
+      (seq (apply str "\" title=" (string/join title) " />"))
       (seq "\" />"))))
 
 (defn handle-img-link [xs]
@@ -292,7 +292,7 @@
     (loop [out []
            tokens (seq text)]
       (if (empty? tokens)
-        [(apply str out) state]
+        [(string/join out) state]
 
         (let [[head xs]   (split-with (partial not= \[) tokens)
               xs          (handle-img-link xs)
@@ -305,18 +305,17 @@
                   (> (count dud) 1))
             (recur (concat out head title dud link) tail)
             (recur
-              (->>
+              (into out
                 (if (= (last head) \!)
                   (let [alt (rest title)
                         [url title] (split-with (partial not= \space) (rest link))
-                        title (apply str (rest title))]
+                        title (string/join (rest title))]
                     (concat (butlast head) (img alt url title)))
-                  (concat head (href (rest title) (rest link))))
-                (into out))
+                  (concat head (href (rest title) (rest link)))))
               (rest tail))))))))
 
 (defn- close-lists [lists]
-  (apply str
+  (string/join
          (for [[list-type] lists]
            (str "</li></" (name list-type) ">"))))
 
@@ -328,15 +327,14 @@
       (let [lists-to-close (take-while #(> (second %) num-indents) (reverse (:lists state)))
             remaining-lists (vec (drop-last (count lists-to-close) (:lists state)))]
 
-        [(apply str (close-lists lists-to-close) "</li><li>" content) 
+        [(apply str (close-lists lists-to-close) "</li><li>" content)
          (assoc state :lists (if (> num-indents (second (last remaining-lists)))
                                (conj remaining-lists [row-type num-indents])
                                remaining-lists))])
 
       (> num-indents indents)
-      (do
-        [(str "<" (name row-type) "><li>" content) 
-         (update-in state [:lists] conj [row-type num-indents])])
+      [(str "<" (name row-type) "><li>" content)
+        (update-in state [:lists] conj [row-type num-indents])]
 
       (= num-indents indents)
       [(str "</li><li>" content) state])
@@ -353,7 +351,7 @@
 (defn ol [text state]
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
-        content (string/trim (apply str (drop-while (partial not= \space) (string/trim text))))]
+        content (string/trim (string/join (drop-while (partial not= \space) (string/trim text))))]
     (add-row :ol list-type num-indents indents (or (make-heading content false) content) state)))
 
 
@@ -370,7 +368,7 @@
        (-> state (dissoc :lists) (assoc :last-line-empty? false))]
       [text state])
 
-    (and (not eof) 
+    (and (not eof)
          lists
          (string/blank? text))
     [text (assoc state :last-line-empty? true)]
@@ -386,7 +384,7 @@
         (re-find #"^[0-9]+\." trimmed)
         (ol text state)
 
-        (> indents 0)
+        (pos? indents)
         [text state]
 
         (and (or eof last-line-empty?)
