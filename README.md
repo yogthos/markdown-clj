@@ -12,9 +12,7 @@ You can try out the parser [here](http://yogthos.net/markdown.html).
 
 Leiningen
 
-```clojure
-[markdown-clj "0.9.35"]
-```
+!["Leiningen version"](https://clojars.org/markdown-clj/latest-version.svg)
 
 ## Usage Clojure
 
