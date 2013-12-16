@@ -6,8 +6,9 @@
 (declare ^:dynamic *next-line*)
 
 (defn heading? [text type]
-  (let [trimmed (if text (string/trim text))]
-    (and (not-empty trimmed) (every? #{type} trimmed))))
+  (when-not (every? #{\space} (take 4 text))
+    (let [trimmed (if text (string/trim text))]
+      (and (not-empty trimmed) (every? #{type} trimmed)))))
 
 (defn- h1? [text]
   (heading? text \=))
