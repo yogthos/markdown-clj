@@ -48,6 +48,7 @@
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
+       (string/replace #"\\\\" "&#92;")
        (string/replace #"\\`" "&#8216;")       
        (string/replace #"\\\*" "&#42;")       
        (string/replace #"\\_" "&#95;")
@@ -56,7 +57,12 @@
        (string/replace #"\\\[" "&#91;")
        (string/replace #"\\\]" "&#93;")
        (string/replace #"\\\(" "&#40;")
-       (string/replace #"\\\)" "&#41;")))
+       (string/replace #"\\\)" "&#41;")
+       (string/replace #"\\#"  "&#35;")
+       (string/replace #"\\+"  "&#43;")
+       (string/replace #"\\-"  "&#45;")
+       (string/replace #"\\."  "&#46;")
+       (string/replace #"\\!"  "&#33;")))
    state])
 
 (defn separator [escape? text open close separator state]
