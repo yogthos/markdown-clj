@@ -141,15 +141,21 @@ a string followed by the options as its input, and returns the resulting HTML st
 
 Control characters can be escaped using \
 ```
-\*
-\`
-\_
-\(
-\)
-\[
-\]
-\{
+\\ backslash
+\` backtick
+\* asterisk
+\_ underscore
+\{ curly braces
 \}
+\[ square brackets
+\]
+\( parentheses
+\)
+\# hash mark
+\+ plus sign
+\- minus sign (hyphen)
+\. dot
+\! exclamation mark
 ```
 
 #### Basic Elements
