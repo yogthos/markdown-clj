@@ -16,7 +16,7 @@
         (markdown/md-to-html-string "###foo bar BAz\nsome text" :heading-anchors true))))
 
 (deftest br
-  (is (= "<p>foo  <br /></p>" (markdown/md-to-html-string "foo  ")))
+  (is (= "<p>foo<br /></p>" (markdown/md-to-html-string "foo  ")))
   (is (= "<pre>\nfoo  \n</pre>bar" (markdown/md-to-html-string "```\nfoo  \nbar```"))))
 
 (deftest hr
