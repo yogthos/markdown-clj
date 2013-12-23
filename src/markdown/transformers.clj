@@ -175,7 +175,7 @@
 (defn br [text {:keys [code lists] :as state}]
   [(if (and (= [\space \space] (take-last 2 text))
             (not (or code lists)))
-     (str text "<br />")
+     (str (apply str (drop-last 2 text)) "<br />")
      text)
    state])
 
