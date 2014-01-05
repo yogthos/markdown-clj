@@ -364,6 +364,10 @@ a^2 + b^2 = c^2
 [![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
 ```
 
+## Limitations
+
+The parser reads the content line by line, this means that tag content is not allowed to span multiple lines.
+
 ## License
 
 Copyright (C) 2012 Yogthos
