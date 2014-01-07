@@ -1,8 +1,8 @@
-(ns mdtests  
+(ns mdtests
   (:require [markdown.core :as markdown])
   (:use clojure.test))
 
-(deftest heading1 
+(deftest heading1
   (is (= "<h1>foo</h1>" (markdown/md-to-html-string "#foo")))
   (is (= "<h1>foo</h1>" (markdown/md-to-html-string "foo\n==="))))
 
