@@ -179,6 +179,31 @@
      text)
    state])
 
+(defn autourl-transformer [text state]
+  [(if (:code state)
+     text
+     (clojure.string/replace
+       text
+       #"<https?://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]>"
+       #(let [url (subs % 1 (dec (count %)))]
+         (str "<a href=\"" url "\">" url "</a>"))))
+   state])
+
+(defn autoemail-transformer [text state]
+  [(if (or (:code state) (:codeblock state))
+     text
+     (clojure.string/replace
+       text
+       #"<[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}>"
+       #(let [encoded (if (:clojurescript state)
+                        (subs % 1 (dec (count %)))
+                        (->> (subs % 1 (dec (count %)))
+                             (map int)
+                             (map (partial format "&#x%02x"))
+                             (apply str)))]
+         (str "<a href=\"" encoded "\">" encoded "</a>"))))
+   state])
+
 (defn paragraph-text [last-line-empty? text]
   (if (and (not last-line-empty?) (not-empty text))
     (str " " text) text))
@@ -408,6 +433,8 @@
    code
    escaped-chars
    inline-code
+   autoemail-transformer
+   autourl-transformer
    link
    hr
    li
