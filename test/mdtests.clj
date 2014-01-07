@@ -183,6 +183,9 @@
          (markdown/md-to-html-string"1. a\n2. b\n\ntest **bold** and *italic*"))))
 
 (deftest autourl
+  (is (= "<p><a href=\"http://example.com/\">http://example.com/</a></p>"
+         (markdown/md-to-html-string "<http://example.com/>")))
+  
   (is (= "<p><a href=\"http://foo\">http://foo</a> <a href=\"https://bar/baz\">https://bar/baz</a> <a href=\"http://foo/bar\">foo bar</a></p>"
          (markdown/md-to-html-string "<http://foo> <https://bar/baz> <a href=\"http://foo/bar\">foo bar</a>")))
   
