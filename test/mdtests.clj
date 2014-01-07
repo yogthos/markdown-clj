@@ -191,3 +191,8 @@
   
   (is (= "<p><a href=\"&#x61&#x62&#x63&#x40&#x67&#x6f&#x6f&#x67&#x6c&#x65&#x2e&#x63&#x6f&#x6d\">&#x61&#x62&#x63&#x40&#x67&#x6f&#x6f&#x67&#x6c&#x65&#x2e&#x63&#x6f&#x6d</a></p>"
          (markdown/md-to-html-string "<abc@google.com>"))))
+
+(deftest all-tegether
+  (let [wrt (java.io.StringWriter.)]
+    (markdown/md-to-html (str "test" java.io.File/separator "test.md") wrt)
+    (is (= (slurp (str "test" java.io.File/separator "test.html")) (.toString wrt)))))
