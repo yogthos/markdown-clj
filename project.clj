@@ -8,12 +8,13 @@
                   [org.clojure/clojurescript "0.0-2014"]
                   [criterium "0.3.1" :scope "test"]]
    :plugins [[lein-cljsbuild "1.0.1"]]
-   :hooks [leiningen.cljsbuild]
+   ;:hooks [leiningen.cljsbuild]
    :test-selectors {:default (complement :benchmark)
                     :benchmark :benchmark
                     :all (constantly true)}
    :cljsbuild
-   {:crossovers [markdown.transformers]
+   {:test-commands {}
+    :crossovers [markdown.transformers]
     :crossover-path "crossover"
     :crossover-jar true
     :builds {:main
