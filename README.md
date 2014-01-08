@@ -174,6 +174,30 @@ Control characters can be escaped using \
 [Image](#image),
 [Link](#link)
 
+##### Automatic Links
+
+This is a shortcut style for creating &#8220;automatic&#8221; links for URLs and email addresses: 
+
+```
+<http://example.com/>
+```
+will be turned this into:
+
+```
+<a href="http://example.com/">http://example.com/</a>
+```
+
+Automatic links for email addresses work similarly, except that they are hex encoded:
+
+```
+<address@example.com&>
+```
+
+will be turned into:
+
+```
+<a href=\"&#x61&#x64&#x64&#x72&#x65&#x73&#x73&#x40&#x65&#x78&#x61&#x6d&#x70&#x6c&#x65&#x2e&#x63&#x6f&#x6d\">&#x61&#x64&#x64&#x72&#x65&#x73&#x73&#x40&#x65&#x78&#x61&#x6d&#x70&#x6c&#x65&#x2e&#x63&#x6f&#x6d</a>
+```
 
 #### Lists
 [Ordered List](#ordered-list),
