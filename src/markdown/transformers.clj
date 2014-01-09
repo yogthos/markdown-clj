@@ -1,6 +1,8 @@
 (ns markdown.transformers
   (:require [clojure.string :as string]))
 
+(declare ^{:dynamic true} formatter)
+
 (declare ^{:dynamic true} *substring*)
 
 (declare ^:dynamic *next-line*)
@@ -198,10 +200,9 @@
        #(let [encoded (if (:clojurescript state)
                         (subs % 1 (dec (count %)))
                         (->> (subs % 1 (dec (count %)))
-                             (map int)
-                             (map (partial format "&#x%02x"))
-                             (apply str)))]
-         (str "<a href=\"" encoded "\">" encoded "</a>"))))
+                          (map (fn [c] (if (> (rand) 0.5) (formatter "&#x%02x;" (int c)) c)))
+                          (apply str)))]
+          (str "<a href=\"" encoded "\">" encoded "</a>"))))
    state])
 
 (defn paragraph-text [last-line-empty? text]

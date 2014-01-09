@@ -1,4 +1,4 @@
-(defproject markdown-clj "0.9.39"
+(defproject markdown-clj "0.9.40"
   :clojurescript? true
   :description "Markdown parser"
    :url "https://github.com/yogthos/markdown-clj"
@@ -6,7 +6,8 @@
              :url "http://www.eclipse.org/legal/epl-v10.html"}
    :dependencies [[org.clojure/clojure "1.5.1"]
                   [org.clojure/clojurescript "0.0-2127"]
-                  [criterium "0.3.1" :scope "test"]]
+                  [criterium "0.3.1" :scope "test"]
+                  [commons-lang "2.6" :scope "test"]]
 
    :plugins [[lein-cljsbuild "0.3.2"]]
    :hooks [leiningen.cljsbuild]

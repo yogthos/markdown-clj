@@ -23,7 +23,8 @@
 (defn md-to-html
   "reads markdown content from the input stream and writes HTML to the provided output stream"
   [in out & params]
-  (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))]
+  (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
+            markdown.transformers/formatter clojure.core/format]
     (with-open [^java.io.BufferedReader rdr (io/reader in)
                 ^java.io.BufferedWriter wrt (io/writer out)]
       (let [transformer (init-transformer wrt params)]

@@ -189,8 +189,9 @@
   (is (= "<p><a href=\"http://foo\">http://foo</a> <a href=\"https://bar/baz\">https://bar/baz</a> <a href=\"http://foo/bar\">foo bar</a></p>"
          (markdown/md-to-html-string "<http://foo> <https://bar/baz> <a href=\"http://foo/bar\">foo bar</a>")))
   
-  (is (= "<p><a href=\"&#x61&#x62&#x63&#x40&#x67&#x6f&#x6f&#x67&#x6c&#x65&#x2e&#x63&#x6f&#x6d\">&#x61&#x62&#x63&#x40&#x67&#x6f&#x6f&#x67&#x6c&#x65&#x2e&#x63&#x6f&#x6d</a></p>"
-         (markdown/md-to-html-string "<abc@google.com>"))))
+  (is (= "<p><a href=\"abc@google.com\">abc@google.com</a></p>"
+         (org.apache.commons.lang.StringEscapeUtils/unescapeHtml
+           (markdown/md-to-html-string "<abc@google.com>")))))
 
 (deftest all-tegether
   (let [wrt (java.io.StringWriter.)]

@@ -15,10 +15,14 @@
         (.append html text)
         new-state))))
 
-(defn ^:export mdToHtml 
+(defn format "Removed from cljs.core 0.0-1885, Ref. http://goo.gl/su7Xkj"
+  [fmt & args] (apply goog.string/format fmt args))
+
+(defn ^:export mdToHtml
   "processes input text line by line and outputs an HTML string"
   [text & params]
-  (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))]
+  (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))
+            markdown.transformers/formatter format]
     (let [transformer (init-transformer params)
           html        (goog.string.StringBuffer. "")]
       (loop [[line & more] (.split text "\n")
