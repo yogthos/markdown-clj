@@ -1,4 +1,4 @@
-(defproject markdown-clj "0.9.40"
+(defproject markdown-clj "0.9.41"
   :clojurescript? true
   :description "Markdown parser"
    :url "https://github.com/yogthos/markdown-clj"

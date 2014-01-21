@@ -202,7 +202,7 @@
                         (->> (subs % 1 (dec (count %)))
                           (map (fn [c] (if (> (rand) 0.5) (formatter "&#x%02x;" (int c)) c)))
                           (apply str)))]
-          (str "<a href=\"" encoded "\">" encoded "</a>"))))
+          (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
    state])
 
 (defn paragraph-text [last-line-empty? text]
