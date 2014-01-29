@@ -196,7 +196,7 @@
      text
      (clojure.string/replace
        text
-       #"<[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}>"
+       #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
        #(let [encoded (if (:clojurescript state)
                         (subs % 1 (dec (count %)))
                         (->> (subs % 1 (dec (count %)))
