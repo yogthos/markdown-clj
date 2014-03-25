@@ -4,7 +4,7 @@
    :url "https://github.com/yogthos/markdown-clj"
    :license {:name "Eclipse Public License"
              :url "http://www.eclipse.org/legal/epl-v10.html"}
-   :dependencies [[org.clojure/clojure "1.5.1"]
+   :dependencies [[org.clojure/clojure "1.6.0"]
                   [org.clojure/clojurescript "0.0-2127"]
                   [criterium "0.4.3" :scope "test"]
                   [commons-lang "2.6" :scope "test"]]
