@@ -47,7 +47,7 @@
     (string/replace #"\~" "&#126;")
     seq))
 
-(defn- escaped-chars [text state]  
+(defn- escaped-chars [text state]
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
@@ -139,11 +139,9 @@
           (recur (into buf (first remaining)) (rest remaining)))))))
 
 (defn- heading-text [heading text]
+  (println heading text)
   (->> text
-    (drop heading)
-    (reverse)
     (drop-while #(or (= \# %) (= \space %)))
-    (reverse)
     (string/join)
     (string/trim)))
 

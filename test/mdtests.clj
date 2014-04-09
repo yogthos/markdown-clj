@@ -3,15 +3,16 @@
   (:use clojure.test))
 
 (deftest heading1
+  (is (= "<h1>Foo</h1>" (markdown/md-to-html-string " # Foo")))
   (is (= "<h1>foo</h1>" (markdown/md-to-html-string "#foo")))
   (is (= "<h1>foo</h1>" (markdown/md-to-html-string "foo\n==="))))
 
-(deftest heading2 
+(deftest heading2
   (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo")))
   (is (= "<h2>foo</h2>" (markdown/md-to-html-string "foo\n---"))))
 
 (deftest heading-with-complex-anchor
-  (is (= 
+  (is (=
         "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>some text"
         (markdown/md-to-html-string "###foo bar BAz\nsome text" :heading-anchors true))))
 
@@ -52,11 +53,11 @@
          (markdown/md-to-html-string "\nLorem ipsum dolor\nsit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
 
 (deftest mulitple-paragraphs
-  (is (= "<p>foo bar baz</p><p>foo bar baz</p>" 
+  (is (= "<p>foo bar baz</p><p>foo bar baz</p>"
       (markdown/md-to-html-string "\nfoo bar baz\n\n\nfoo bar baz"))))
 
 (deftest ul
-  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>" 
+  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>"
          (markdown/md-to-html-string "* foo\n* bar\n* baz")))
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>"
          (markdown/md-to-html-string "- foo\n- bar\n- baz")))
@@ -64,11 +65,11 @@
          (markdown/md-to-html-string "+ foo\n+ bar\n+ baz"))))
 
 (deftest ul-followed-by-paragraph
-  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph</p>" 
+  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph</p>"
          (markdown/md-to-html-string "* foo\n* bar\n* baz\n\nparagraph"))))
 
 (deftest ul-nested
-  (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>" 
+  (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>"
          (markdown/md-to-html-string "* first item\n * first sub-item\n  * second sub-item\n * third sub-item\n* second item\n * first sub-item\n * second sub-item\n* third item")))
   (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>"
          (markdown/md-to-html-string "* first item\n - first sub-item\n  - second sub-item\n - third sub-item\n* second item\n + first sub-item\n + second sub-item\n* third item"))))
@@ -78,17 +79,17 @@
          (markdown/md-to-html-string "1. Foo\n2. Bar\n3. Baz"))))
 
 (deftest ul-in-ol
-  (is (= "<ol><li>Bar<ol><li>Subbar<ul><li>foo</li><li>bar</li><li>baz</li></ul></li></ol></li><li>Baz</li></ol>"         
+  (is (= "<ol><li>Bar<ol><li>Subbar<ul><li>foo</li><li>bar</li><li>baz</li></ul></li></ol></li><li>Baz</li></ol>"
          (markdown/md-to-html-string "1. Bar\n 2. Subbar\n  * foo\n  * bar\n  * baz\n3. Baz"))))
 
 (deftest ol-in-ul
-  (is (= "<ul><li>Foo<ol><li>Bar<ol><li>Subbar</li></ol></li></ol></li><li>Baz</li></ul>" 
+  (is (= "<ul><li>Foo<ol><li>Bar<ol><li>Subbar</li></ol></li></ol></li><li>Baz</li></ul>"
          (markdown/md-to-html-string "* Foo\n 1. Bar\n  1. Subbar\n* Baz"))))
 
 (deftest multilist
   (is (=
         "<ul><li>foo</li><li>bar<ul><li>baz<ol><li>foo</li><li>bar</li></ol></li><li>fuzz<ul><li>blah</li><li>blue</li></ul></li></ul></li><li>brass</li></ul>"
-        (markdown/md-to-html-string 
+        (markdown/md-to-html-string
 "* foo
 * bar
 
@@ -114,16 +115,16 @@
   (is (= "<pre>\nx = 5\ny = 6\nz = x + y\n</pre>"
          (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y")))
   (is (= "<pre>\nx = 5\ny = 6\nz = x + y\n&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x&quot;&#41;&#41;\n</pre>"
-         (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y\n    (fn [x & xs] (str \"x\"))")))) 
+         (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y\n    (fn [x & xs] (str \"x\"))"))))
 
 (deftest codeblock
   (is (= "<pre>\n&#40;defn- write &#91;writer text&#93;\n  &#40;doseq &#91;c text&#93;\n    &#40;.write writer &#40;int c&#41;&#41;&#41;&#41;\n</pre>"
          (markdown/md-to-html-string "``` (defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```")))
-  (is (= "<pre>\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</pre>" 
+  (is (= "<pre>\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</pre>"
          (markdown/md-to-html-string "``` (fn [x & xs]\n  (str \"x\"))\n```")))
-  (is (= "<pre>\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</pre>" 
+  (is (= "<pre>\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</pre>"
          (markdown/md-to-html-string "```\n(fn [x & xs]\n  (str \"x\"))\n```")))
-  (is (= "<pre class=\"brush: clojure\">\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</pre>" 
+  (is (= "<pre class=\"brush: clojure\">\n&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</pre>"
          (markdown/md-to-html-string "```clojure (fn [x & xs]\n  (str \"x\"))\n```"))))
 
 (deftest stirkethrough
@@ -147,28 +148,28 @@
          (markdown/md-to-html-string "* [github](http://github.com/*)"))))
 
 (deftest img
-  (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" /></p>" 
+  (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" /></p>"
          (markdown/md-to-html-string "![Alt text](/path/to/img.jpg)")))
-  (is (= "<p><img src=\"/path/to/&#95;img&#95;.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>" 
+  (is (= "<p><img src=\"/path/to/&#95;img&#95;.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>"
          (markdown/md-to-html-string "![Alt text](/path/to/_img_.jpg \"Optional Title\")"))))
 
-(deftest img-link 
+(deftest img-link
   (is (= "<p><a href='http://travis-ci.org/yogthos/markdown-clj'><img src=\"https://secure.travis-ci.org/yogthos/markdown-clj.png\" alt=\"Continuous Integration status\" /></a></p>"
          (markdown/md-to-html-string "[![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)")))
   (is (= "<p><img src=\"https://secure.travis-ci.org/yogthos/markdown-clj.png\" alt=\"\" /></p>"
          (markdown/md-to-html-string "![](https://secure.travis-ci.org/yogthos/markdown-clj.png)"))))
 
 (deftest bad-link
-  (is (= "<p>[github](http://github.comfooo</p>" 
+  (is (= "<p>[github](http://github.comfooo</p>"
          (markdown/md-to-html-string "[github](http://github.comfooo")))
   (is (= "<p>[github] no way (http://github.com)</p>"
          (markdown/md-to-html-string "[github] no way (http://github.com)"))))
 
 (deftest bad-link-title
-  (is (= "<p>[github(http://github.comfooo)</p>" 
+  (is (= "<p>[github(http://github.comfooo)</p>"
          (markdown/md-to-html-string "[github(http://github.comfooo)"))))
 
-(deftest blockquote 
+(deftest blockquote
   (is (= "<blockquote><p>Foo bar baz </p></blockquote>"
          (markdown/md-to-html-string ">Foo bar baz"))))
 
@@ -185,10 +186,10 @@
 (deftest autourl
   (is (= "<p><a href=\"http://example.com/\">http://example.com/</a></p>"
          (markdown/md-to-html-string "<http://example.com/>")))
-  
+
   (is (= "<p><a href=\"http://foo\">http://foo</a> <a href=\"https://bar/baz\">https://bar/baz</a> <a href=\"http://foo/bar\">foo bar</a></p>"
          (markdown/md-to-html-string "<http://foo> <https://bar/baz> <a href=\"http://foo/bar\">foo bar</a>")))
-  
+
   (is (= "<p><a href=\"mailto:abc@google.com\">abc@google.com</a></p>"
          (org.apache.commons.lang.StringEscapeUtils/unescapeHtml
            (markdown/md-to-html-string "<abc@google.com>")))))
