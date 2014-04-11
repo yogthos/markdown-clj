@@ -139,7 +139,6 @@
           (recur (into buf (first remaining)) (rest remaining)))))))
 
 (defn- heading-text [heading text]
-  (println heading text)
   (->> text
     (drop-while #(or (= \# %) (= \space %)))
     (string/join)
