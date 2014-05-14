@@ -65,8 +65,12 @@
          (markdown/md-to-html-string "+ foo\n+ bar\n+ baz"))))
 
 (deftest ul-followed-by-paragraph
+  (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph next line</p>"
+         (markdown/md-to-html-string "* foo\n* bar\n* baz\n\nparagraph\nnext line"))))
+
+(deftest ul-followed-by-multiline-paragraph
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph</p>"
-         (markdown/md-to-html-string "* foo\n* bar\n* baz\n\nparagraph"))))
+        (markdown/md-to-html-string "* foo\n* bar\n* baz\n\nparagraph"))))
 
 (deftest ul-nested
   (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>"

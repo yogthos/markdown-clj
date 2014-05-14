@@ -218,7 +218,7 @@
       [(paragraph-text last-line-empty? text) state])
 
     (and (not eof) last-line-empty?)
-    [(str "<p>" text) (assoc state :paragraph? true)]
+    [(str "<p>" text) (assoc state :paragraph? true :last-line-empty? false)]
 
     :default
     [text state]))
@@ -446,4 +446,3 @@
    blockquote
    paragraph
    br])
-
