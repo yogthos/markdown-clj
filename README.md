@@ -6,6 +6,8 @@ A markdown parser that compiles to both Clojure and ClojureScript.
 [markdown-clj "0.9.44"]
 ```
 
+Note: `markdown-clj` requires Clojure 1.2+ to run.
+
 ## Demo
 
 You can try out the parser [here](http://yogthos.net/markdown.html).
