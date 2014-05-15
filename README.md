@@ -1,22 +1,16 @@
 #Markdown parser written in Clojure
 
-A markdown parser that compiles to both Clojure and ClojureScript.
-
-```clojure
-[markdown-clj "0.9.44"]
-```
-
-Note: `markdown-clj` requires Clojure 1.2+ to run.
-
 ## Demo
 
 You can try out the parser [here](http://yogthos.net/markdown.html).
 
 ## Installation
 
-Leiningen
-
-!["Leiningen version"](https://clojars.org/markdown-clj/latest-version.svg)
+A markdown parser that compiles to both Clojure and ClojureScript.
+```clojure
+[markdown-clj "0.9.44"]
+```
+Note: `markdown-clj` requires Clojure 1.2+ to run.
 
 ## Usage Clojure
 
