@@ -27,4 +27,6 @@
                          :pretty-print false}}
              :dev
              {:compiler {:optimizations :whitespace
-                         :pretty-print true}}}})
+                         :pretty-print true}}}}
+  :profiles
+  {:1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}})
