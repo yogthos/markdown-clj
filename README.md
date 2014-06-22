@@ -8,7 +8,7 @@ You can try out the parser [here](http://yogthos.net/markdown.html).
 
 A markdown parser that compiles to both Clojure and ClojureScript.
 
-![Clojars Project](http://clojars.org/markdown-clj/latest-version.svg)](http://clojars.org/markdown-clj)
+![Clojars Project](http://clojars.org/markdown-clj/latest-version.svg)
 
 Note: `markdown-clj` requires Clojure 1.2+ to run.
 
