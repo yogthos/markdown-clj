@@ -43,5 +43,5 @@
 
 (defn ^:export mdToHtml
   "Js accessible wrapper"
-  [text & params]
-  (apply (partial md->html text) params))
+  [& params]
+  (apply md->html params))
