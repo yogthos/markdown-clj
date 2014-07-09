@@ -134,7 +134,7 @@ a string followed by the options as its input, and returns the resulting HTML st
                :code-style #(str "class=\"" % "\"")))
 ```
 
-## Usage from JavaScript
+## Usage JavaScript
 
 ```javascript
 console.log(markdown.core.mdToHtml("##This is a heading\nwith a paragraph following it"));
