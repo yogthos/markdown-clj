@@ -18,7 +18,7 @@
 (defn format "Removed from cljs.core 0.0-1885, Ref. http://goo.gl/su7Xkj"
   [fmt & args] (apply goog.string/format fmt args))
 
-(defn ^:export mdToHtml
+(defn md->html
   "processes input text line by line and outputs an HTML string"
   [text & params]
   (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))
@@ -40,3 +40,8 @@
                           :last-line-empty? (empty? line)))
             (transformer html line "" (assoc state :eof true)))))
       (.toString html))))
+
+(defn ^:export mdToHtml
+  "Js accessible wrapper"
+  [text & params]
+  (apply (partial md->html text) params))
