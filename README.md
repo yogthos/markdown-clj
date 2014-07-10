@@ -124,13 +124,13 @@ a string followed by the options as its input, and returns the resulting HTML st
 
 ```clojure
 (ns myscript
-  (:require [markdown.core :as md]))
+  (:require [markdown.core :refer [md->html]]))
 
 (.log js/console
-  (md/md->html "##This is a heading\nwith a paragraph following it"))
+  (md->html "##This is a heading\nwith a paragraph following it"))
 
 (.log js/console
-  (md/md->html "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
+  (md->html "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
                :code-style #(str "class=\"" % "\"")))
 ```
 
