@@ -12,17 +12,17 @@
     (let [trimmed (if text (string/trim text))]
       (and (not-empty trimmed) (every? #{type} trimmed)))))
 
-(defn- h1? [text]
+(defn h1? [text]
   (heading? text \=))
 
-(defn- h2? [text]
+(defn h2? [text]
   (heading? text \-))
 
 (defn empty-line [text state]
   [(if (or (h1? text) (h2? text)) "" text)
    (if (string/blank? text) (dissoc state :hr :heading) state)])
 
-(defn- escape-code [s]
+(defn escape-code [s]
   (-> s
     (string/replace #"&" "&amp;")
     (string/replace #"\*" "&#42;")
@@ -38,7 +38,7 @@
     (string/replace #"\)" "&#41;")
     (string/replace #"\"" "&quot;")))
 
-(defn- escape-link [& xs]
+(defn escape-link [& xs]
   (->
     (string/join (apply concat xs))
     (string/replace #"\*" "&#42;")
@@ -47,7 +47,7 @@
     (string/replace #"\~" "&#126;")
     seq))
 
-(defn- escaped-chars [text state]
+(defn escaped-chars [text state]
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
@@ -138,17 +138,17 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
-(defn- heading-text [heading text]
+(defn heading-text [heading text]
   (->> text
     (drop-while #(or (= \# %) (= \space %)))
     (string/join)
     (string/trim)))
 
-(defn- heading-level [text]
+(defn heading-level [text]
   (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
     (if (pos? num-hashes) num-hashes)))
 
-(defn- make-heading [text heading-anchors]
+(defn make-heading [text heading-anchors]
   (if-let [heading (heading-level text)]
     (let [text (heading-text heading text)]
       (str "<h" heading ">"
@@ -297,10 +297,10 @@
       [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true)]
       [text state])))
 
-(defn- href [title link]
+(defn href [title link]
   (escape-link (seq "<a href='") link (seq "'>") title (seq "</a>")))
 
-(defn- img [alt url & [title]]
+(defn img [alt url & [title]]
   (escape-link
     (seq "<img src=\"") url  (seq "\" alt=\"") alt
     (if (not-empty title)
@@ -344,13 +344,13 @@
                   (concat head (href (rest title) (rest link)))))
               (rest tail))))))))
 
-(defn- close-lists [lists]
+(defn close-lists [lists]
   (string/join
          (for [[list-type] lists]
            (str "</li></" (name list-type) ">"))))
 
 
-(defn- add-row [row-type list-type num-indents indents content state]
+(defn add-row [row-type list-type num-indents indents content state]
   (if list-type
     (cond
       (< num-indents indents)
