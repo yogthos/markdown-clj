@@ -119,7 +119,7 @@ This can also be used to add preprocessor transformers. For example, if we wante
 
 ## Usage ClojureScript
 
-The ClojureScript portion works the same as above except that the entry function is called `mdToHtml`. It accepts
+The ClojureScript portion works the same as above except that the entry function is called `md->html`. It accepts
 a string followed by the options as its input, and returns the resulting HTML string:
 
 ```clojure
