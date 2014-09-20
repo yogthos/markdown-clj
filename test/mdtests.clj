@@ -88,7 +88,9 @@
 
 (deftest ol-in-ul
   (is (= "<ul><li>Foo<ol><li>Bar<ol><li>Subbar</li></ol></li></ol></li><li>Baz</li></ul>"
-         (markdown/md-to-html-string "* Foo\n 1. Bar\n  1. Subbar\n* Baz"))))
+         (markdown/md-to-html-string "* Foo\n 1. Bar\n  1. Subbar\n* Baz")))
+  (is (= "<ul><li>Foo<ol><li>Bar</li></ol></li></ul>"
+         (markdown/md-to-html-string "* Foo\n 1. Bar"))))
 
 (deftest multilist
   (is (=
