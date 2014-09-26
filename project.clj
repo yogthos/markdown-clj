@@ -5,7 +5,7 @@
              :url "http://www.eclipse.org/legal/epl-v10.html"}
    :dependencies [[org.clojure/clojure "1.6.0"]]
    :clojurescript? true
-   :source-paths ["src" "src-cljs" "src-cljx" "target/generated/cljs"]
+   :source-paths ["src" "src-cljs" "src-cljx" "target/generated/clj" "target/generated/cljs"]
    :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]
    :test-selectors {:default (complement :benchmark)
                     :benchmark :benchmark
@@ -30,13 +30,11 @@
          :plugins [[lein-cljsbuild "1.0.3"]
                    [com.keminglabs/cljx "0.4.0"]]
          :cljx {:builds [{:source-paths ["src-cljx"]
-                          :output-path "target/generated/cljs"
+                          :output-path "target/generated/clj"
                           :rules :clj}
                          {:source-paths ["src-cljx"]
                           :output-path "target/generated/cljs"
                           :rules :cljs}]}
-         :aliases {"cleantest" ["do" "clean," "cljx" "once," "test," "cljsbuild" "test"]
+         :aliases {"cleantest" ["do" "clean," "cljx" "once," "test,"]
                    "install" ["do" "clean," "cljx" "once," "install"]
                    "deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]}}})
-
-
