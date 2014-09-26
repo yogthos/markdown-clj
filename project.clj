@@ -35,7 +35,8 @@
                          {:source-paths ["src-cljx"]
                           :output-path "target/generated/cljs"
                           :rules :cljs}]}
-         :aliases {"cleantest" ["do" "clean," "cljx" "once," "test," "cljsbuild" "test"]
+         :aliases {"test" ["do" "cljx" "once," "test," "cljsbuild" "test"]
+                   "cleantest" ["do" "clean," "cljx" "once," "test," "cljsbuild" "test"]
                    "install" ["do" "clean," "cljx" "once," "install"]
                    "deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]}}})
 
