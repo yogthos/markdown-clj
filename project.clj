@@ -1,4 +1,4 @@
-(defproject markdown-clj "0.9.52"
+(defproject markdown-clj "0.9.53"
             :description "Markdown parser"
             :url "https://github.com/yogthos/markdown-clj"
             :license {:name "Eclipse Public License"
@@ -10,7 +10,13 @@
             :test-selectors {:default (complement :benchmark)
                              :benchmark :benchmark
                              :all (constantly true)}
+            :auto-clean false
+            :prep-tasks ["cljx" "compile"]
 
+            :aliases {"test" ["do" "cljx" "once," "test"]
+                      "cleantest" ["do" "clean," "cljx" "once," "test"]
+                      "install" ["do" "clean," "cljx" "once," "install"]
+                      "deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]}
             :cljsbuild
             {:builds {:main
                        {:source-paths ["src-cljs" "target/generated/cljs"]
@@ -27,17 +33,11 @@
                   {:dependencies [[criterium "0.4.3" :scope "test"]
                                   [commons-lang "2.6" :scope "test"]
                                   [org.clojure/clojurescript "0.0-2322"]]
-                   :plugins [[lein-cljsbuild "1.0.3"]
-                             [com.keminglabs/cljx "0.4.0"]]
                    :cljx {:builds [{:source-paths ["src-cljx"]
                                     :output-path "target/generated/clj"
                                     :rules :clj}
                                    {:source-paths ["src-cljx"]
                                     :output-path "target/generated/cljs"
                                     :rules :cljs}]}
-                   :prep-tasks ["cljx" "compile"]
-                   :aliases {"test" ["do" "cljx" "once," "test"]
-                             "cleantest" ["do" "clean," "cljx" "once," "test"]
-                             "install" ["do" "clean," "cljx" "once," "install"]
-                             ;"deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]
-                             }}})
+                   :plugins [[lein-cljsbuild "1.0.3"]
+                             [com.keminglabs/cljx "0.4.0"]]}})
