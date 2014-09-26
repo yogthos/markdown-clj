@@ -1,11 +1,11 @@
-(defproject markdown-clj "0.9.48"
-  :clojurescript? true
+(defproject markdown-clj "0.9.49"
   :description "Markdown parser"
    :url "https://github.com/yogthos/markdown-clj"
    :license {:name "Eclipse Public License"
              :url "http://www.eclipse.org/legal/epl-v10.html"}
    :dependencies [[org.clojure/clojure "1.6.0"]]
-
+   :clojurescript? true
+   :source-paths ["src" "src-cljs"]
    :test-selectors {:default (complement :benchmark)
                     :benchmark :benchmark
                     :all (constantly true)}
