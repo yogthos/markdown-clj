@@ -1,4 +1,4 @@
-(defproject markdown-clj "0.9.49"
+(defproject markdown-clj "0.9.52"
             :description "Markdown parser"
             :url "https://github.com/yogthos/markdown-clj"
             :license {:name "Eclipse Public License"
@@ -35,7 +35,9 @@
                                    {:source-paths ["src-cljx"]
                                     :output-path "target/generated/cljs"
                                     :rules :cljs}]}
+                   :prep-tasks ["cljx" "compile"]
                    :aliases {"test" ["do" "cljx" "once," "test"]
                              "cleantest" ["do" "clean," "cljx" "once," "test"]
                              "install" ["do" "clean," "cljx" "once," "install"]
-                             "deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]}}})
+                             ;"deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]
+                             }}})
