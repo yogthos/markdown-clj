@@ -278,11 +278,18 @@ __foo__
 ```
 
 ### Blockquote
+`>` prefixes regular blockquote paragraphs.  `>-` prefixes a
+blockquote footer that can be used for author attribution.
+
 ```
 >This is a blockquote
 with some content
 
 >this is another blockquote
+
+> Everyone thinks of changing the world,
+but no one thinks of changing himself.
+>- Leo Tolstoy
 ```
 
 ### Paragraph
