@@ -290,7 +290,9 @@
     (:blockquote state)
     (if (or eof (empty? (string/trim text)))
       ["</p></blockquote>" (assoc state :blockquote false)]
-      [(str text " ") state])
+      (if (.startsWith text ">-")
+        [(str "</p><footer>" (.substring text 2) "</footer><p>") state]
+        [(str text " ") state]))
 
     :default
     (if (= \> (first text))
