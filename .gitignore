@@ -1,2 +1,4 @@
 crossover
 target
+/.lein-*
+
