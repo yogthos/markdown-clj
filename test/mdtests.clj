@@ -212,3 +212,8 @@
   (let [wrt (java.io.StringWriter.)]
     (markdown/md-to-html (str "test" java.io.File/separator "test.md") wrt)
     (is (= (slurp (str "test" java.io.File/separator "test.html")) (.toString wrt)))))
+
+(deftest not-a-list
+  (is (= "<p>The fish was 192.8 lbs and amazing to see.</p>"
+         (markdown/md-to-html-string "The fish was\n192.8 lbs and was amazing to see."))))
+
