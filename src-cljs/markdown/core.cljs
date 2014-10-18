@@ -26,7 +26,7 @@
     (let [transformer (init-transformer params)
           html        (goog.string.StringBuffer. "")]
       (loop [[line & more] (.split text "\n")
-             state (apply (partial assoc {:clojurescript true} :last-line-empty? false) params)]
+             state (apply (partial assoc {:clojurescript true} :last-line-empty? true) params)]
         (let [state
               (if (:buf state)
                 (transformer html

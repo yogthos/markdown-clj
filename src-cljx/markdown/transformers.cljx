@@ -283,21 +283,22 @@
       [text state])))
 
 (defn blockquote [text {:keys [eof code codeblock lists] :as state}]
-  (cond
-    (or code codeblock lists)
-    [text state]
+  (let [trimmed (string/trim text)]
+    (cond
+      (or code codeblock lists)
+      [text state]
 
-    (:blockquote state)
-    (if (or eof (empty? (string/trim text)))
-      ["</p></blockquote>" (assoc state :blockquote false)]
-      (if (.startsWith text ">-")
-        [(str "</p><footer>" (.substring text 2) "</footer><p>") state]
-        [(str text " ") state]))
+      (:blockquote state)
+      (if (or eof (empty? trimmed))
+        ["</p></blockquote>" (assoc state :blockquote false)]
+        (if (= ">-" (subs trimmed 0 2))
+          [(str "</p><footer>" (subs text 2) "</footer><p>") state]
+          [(str text " ") state]))
 
-    :default
-    (if (= \> (first text))
-      [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true)]
-      [text state])))
+      :default
+      (if (= \> (first text))
+        [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true)]
+        [text state]))))
 
 (defn href [title link]
   (escape-link (seq "<a href='") link (seq "'>") title (seq "</a>")))
