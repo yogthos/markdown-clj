@@ -413,7 +413,7 @@
         (re-find #"^[\*\+-] " trimmed)
         (ul text state)
 
-        (re-find #"^[0-9]+\." trimmed)
+        (re-find #"^[0-9]+\. " trimmed)
         (ol text state)
 
         (pos? indents)
