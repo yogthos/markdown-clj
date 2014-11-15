@@ -52,17 +52,21 @@ Specifying `:heading-anchors` will create anchors for the heading tags, eg:
 <h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>
 ```
 
+The code blocks default to a [highlight.js](https://highlightjs.org/) compatible format of:
+```xml
+<pre><code class="clj">some code</code></pre>
+```
 
 Specifying `:code-style` will override the default code class formatting for code blocks, eg:
 
 ```clojure
 (md-to-html-string "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
-                   :code-style #(str "class=\"" % "\""))
+                   :code-style #(str "class=\"brush: " % "\""))
 ```
 ```xml
-<h1> This is a test</h1>some code follows<pre class="clojure">
+<h1> This is a test</h1>some code follows<pre><code class="brush: clojure">
 &#40;defn foo &#91;&#93;&#41;
-</pre>
+</code></pre>
 ```
 
 Additional transformers can be specified using the `:custom-transformers` key.

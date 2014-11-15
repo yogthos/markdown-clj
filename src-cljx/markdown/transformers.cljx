@@ -138,7 +138,7 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
-(defn heading-text [heading text]
+(defn heading-text [text]
   (->> text
     (drop-while #(or (= \# %) (= \space %)))
     (string/join)
@@ -150,7 +150,7 @@
 
 (defn make-heading [text heading-anchors]
   (if-let [heading (heading-level text)]
-    (let [text (heading-text heading text)]
+    (let [text (heading-text text)]
       (str "<h" heading ">"
            (if heading-anchors (str "<a name=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"></a>"))
            text "</h" heading ">"))))
@@ -230,7 +230,7 @@
 
     code
     (if (or eof (not= "    " (string/join (take 4 text)) ))
-      [(str "\n</pre>" text) (assoc state :code false :last-line-empty? false)]
+      [(str "\n</code></pre>" text) (assoc state :code false :last-line-empty? false)]
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
 
     (empty? (string/trim text))
@@ -239,7 +239,7 @@
     :default
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
-        [(str "<pre>\n" (escape-code (string/replace-first text #"    " "")))
+        [(str "<pre><code>\n" (escape-code (string/replace-first text #"    " "")))
          (assoc state :code true)]
         [text state]))))
 
@@ -248,20 +248,20 @@
   (let [trimmed (string/trim text)]
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
-      [(str "\n</pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "\n</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "\n</pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "\n</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
             s           (apply str (rest code))
             formatter   (:code-style state)]
-        [(str "<pre" (if (not-empty lang)
+        [(str "<pre><code" (if (not-empty lang)
                              (str " "
                                   (if formatter
                                     (formatter (string/join lang))
-                                    (str "class=\"brush: " (string/join lang) "\"")))) ">"
+                                    (str "class=\"" (string/join lang) "\"")))) ">"
               (escape-code (if (empty? s) s (str "\n" s))))
          (assoc state :code true :codeblock true)])
 
