@@ -239,7 +239,7 @@
     :default
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
-        [(str "<pre><code>\n" (escape-code (string/replace-first text #"    " "")))
+        [(str "<pre><code>" (escape-code (string/replace-first text #"    " "")))
          (assoc state :code true)]
         [text state]))))
 
@@ -248,10 +248,10 @@
   (let [trimmed (string/trim text)]
     (cond
       (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
-      [(str "\n</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "\n</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (= [\`\`\`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
@@ -262,11 +262,11 @@
                                   (if formatter
                                     (formatter (string/join lang))
                                     (str "class=\"" (string/join lang) "\"")))) ">"
-              (escape-code (if (empty? s) s (str "\n" s))))
+              (escape-code (if (empty? s) s (str s "\n"))))
          (assoc state :code true :codeblock true)])
 
     (:codeblock state)
-    [(str "\n" (escape-code text)) state]
+    [(str (escape-code text) "\n") state]
 
     :default
     [text state])))

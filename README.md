@@ -35,9 +35,8 @@ The `md-to-html-string` function accepts a string with markdown content and retu
 (md-to-html-string "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```")
 ```
 ```xml
-<h1> This is a test</h1>some code follows<pre class="brush: clojure">
-&#40;defn foo &#91;&#93;&#41;
-</pre>
+<h1> This is a test</h1>some code follows<pre><code class="clojure">&#40;defn foo &#91;&#93;&#41;
+</code></pre>
 ```
 
 Both `md-to-html` and `md-to-html-string` can accept optional parameters:
@@ -54,7 +53,7 @@ Specifying `:heading-anchors` will create anchors for the heading tags, eg:
 
 The code blocks default to a [highlight.js](https://highlightjs.org/) compatible format of:
 ```xml
-<pre><code class="clj">some code</code></pre>
+<pre><code class="clojure">some code</code></pre>
 ```
 
 Specifying `:code-style` will override the default code class formatting for code blocks, eg:
@@ -355,7 +354,7 @@ Here's some code `x + y = z` that's inlined.
 ### Code block
 
 Using three backquotes indicates a start of a code block, the next three backquotes ends the code block section.
-Optionally, the language name can be put after the backquotes to produce a tag compatible with the [Syntax Highlighter](http://alexgorbatchev.com/SyntaxHighlighter/), eg:
+Optionally, the language name can be put after the backquotes to produce a tag compatible with [highlight.js](https://highlightjs.org/), eg:
 
 &#96;&#96;&#96;clojure
 
