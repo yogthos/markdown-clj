@@ -67,6 +67,7 @@ Specifying `:code-style` will override the default code class formatting for cod
 &#40;defn foo &#91;&#93;&#41;
 </code></pre>
 ```
+## Customizing the Parser
 
 Additional transformers can be specified using the `:custom-transformers` key.
 A transformer function must accept two arguments.
@@ -119,6 +120,34 @@ This can also be used to add preprocessor transformers. For example, if we wante
 ```xml
 "<p>foo  bar <a href='http://test'>text</a></p>"
 ```
+Another example would be to escape HTML tags:
+
+```clojure
+(require '[markdown.core :as md])
+(require '[markdown.transformer :as mdtrans])
+
+(defn escape-html [text state]
+                (let [sanitized-text (clojure.string/replace text #"\&|\<|\>|\"|\'" 
+                                         {"&" "&amp;" 
+                                          "<" "&lt;" 
+                                          ">" "&gt;" 
+                                          "\"" "&quot;"
+                                          "'" "&#39;"})]
+                [sanitized-text state]))
+
+(def markdown-with-html 
+                 "## I am a title <h1></h1> with HTML tags ! 
+<script src=\"http://bad-url\">")
+
+(md/md-to-html-string markdown-with-html 
+                                  :replacement-transformers 
+                                  (cons escape-html mdtrans/transformer-vector))
+```
+
+```xml
+<h2>I am a title &lt;h1&gt;&lt;/h1&gt; with HTML tags !</h2>&lt;script src=&quot;http://bad-url&quot;&gt;
+```
+
 
 ## Usage ClojureScript
 
