@@ -127,12 +127,12 @@ Another example would be to escape HTML tags:
 (require '[markdown.transformer :as mdtrans])
 
 (defn escape-html [text state]
-                (let [sanitized-text (clojure.string/replace text #"\&|\<|\>|\"|\'" 
-                                         {"&" "&amp;" 
-                                          "<" "&lt;" 
-                                          ">" "&gt;" 
-                                          "\"" "&quot;"
-                                          "'" "&#39;"})]
+                (let [sanitized-text (clojure.string/escape text
+                                       {\& "&amp;" 
+                                        \< "&lt;" 
+                                        \> "&gt;" 
+                                        \" "&quot;"
+                                        \' "&#39;"})]
                 [sanitized-text state]))
 
 (def markdown-with-html 
