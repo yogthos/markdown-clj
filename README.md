@@ -136,8 +136,7 @@ Another example would be to escape HTML tags:
                 [sanitized-text state]))
 
 (def markdown-with-html 
-                 "## I am a title <h1></h1> with HTML tags ! 
-<script src=\"http://bad-url\">")
+                 "## I am a title <h1></h1> with HTML tags !\n<script src=\"http://bad-url\">")
 
 (md/md-to-html-string markdown-with-html 
                                   :replacement-transformers 
