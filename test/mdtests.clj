@@ -208,6 +208,11 @@
          (org.apache.commons.lang.StringEscapeUtils/unescapeHtml
            (markdown/md-to-html-string "<abc@google.com>")))))
 
+(deftest references
+  (let [wrt (java.io.StringWriter.)]
+    (markdown/md-to-html (str "test" java.io.File/separator "references.md") wrt)
+    (is (= (slurp (str "test" java.io.File/separator "references.html")) (.toString wrt)))))
+
 (deftest all-tegether
   (let [wrt (java.io.StringWriter.)]
     (markdown/md-to-html (str "test" java.io.File/separator "test.md") wrt)

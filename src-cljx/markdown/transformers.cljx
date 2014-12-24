@@ -347,6 +347,33 @@
                   (concat head (href (rest title) (rest link)))))
               (rest tail))))))))
 
+(defn reference [text]
+  (re-find #"^\[[a-zA-Z0-9 ]+\]:" (clojure.string/trim text)))
+
+(defn parse-reference [reference start]
+  (-> reference
+      (subs start)
+      (clojure.string/trim)
+      (clojure.string/split #"\s+" 2)))
+
+(defn parse-reference-link [line references]
+  (when-let [link (reference line)]
+    (swap! references assoc (subs link 0 (dec (count link)))
+           (parse-reference line (inc (count link))))))
+
+(defn replace-reference-link [references reference]
+  (let [[title id] (clojure.string/split reference #"\]\s*" 2)
+        [link alt] (get references id)]
+    (str "<a href='" link "'" (when alt (str " alt='" (subs alt 1 (dec (count alt))) "'")) ">" (subs title 1) "</a>")))
+
+(defn reference-link [text {:keys [code codeblock references] :as state}]
+  (if (reference text)
+    ["" state]
+    [(if (or code codeblock)
+       text
+       (clojure.string/replace text #"\[[a-zA-Z0-9 ]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references)))
+     state]))
+
 (defn close-lists [lists]
   (string/join
          (for [[list-type] lists]
@@ -437,6 +464,7 @@
    autoemail-transformer
    autourl-transformer
    link
+   reference-link
    hr
    li
    heading
