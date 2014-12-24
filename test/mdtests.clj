@@ -210,7 +210,7 @@
 
 (deftest references
   (let [wrt (java.io.StringWriter.)]
-    (markdown/md-to-html (str "test" java.io.File/separator "references.md") wrt)
+    (markdown/md-to-html (str "test" java.io.File/separator "references.md") wrt :reference-links? true)
     (is (= (slurp (str "test" java.io.File/separator "references.html")) (.toString wrt)))))
 
 (deftest all-tegether

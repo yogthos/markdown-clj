@@ -29,11 +29,16 @@
   [text & params]
   (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))
             markdown.transformers/formatter format]
-    (let [transformer (init-transformer params)
+    (let [params      (when params (apply (partial assoc {}) params))
           lines       (.split text "\n")
-          html        (goog.string.StringBuffer. "")]
+          html        (goog.string.StringBuffer. "")
+          references  (when (:reference-links? params) (parse-referenes lines))
+          transformer (init-transformer params)]
       (loop [[line & more] lines
-             state (apply (partial assoc {:clojurescript true} :references (parse-referenes lines) :last-line-empty? true) params)]
+             state (merge {:clojurescript true
+                           :references references
+                           :last-line-empty? true}
+                          params)]
         (let [state
               (if (:buf state)
                 (transformer html

@@ -67,6 +67,19 @@ Specifying `:code-style` will override the default code class formatting for cod
 &#40;defn foo &#91;&#93;&#41;
 </code></pre>
 ```
+
+### reference style links
+
+The parser defaults to using inline reference for performance reasons, to enable reference style links pass in the `:reference-links? true` option:
+
+```clojure
+(md-to-html-string
+  "This is [an example][id] reference-style link.
+
+   [id]: http://example.com/ 'Optional Title Here'"
+   :reference-links? true)
+```
+
 ## Customizing the Parser
 
 Additional transformers can be specified using the `:custom-transformers` key.
@@ -79,7 +92,7 @@ The default state keys are:
 * `:codeblock` - inside a code block
 * `:eof` - end of file
 * `:heading` - in a heading
-* `:hr` - in a horizontal line 
+* `:hr` - in a horizontal line
 * `:lists` - inside a list
 * `:blockquote` - inside a blockquote
 * `:paragraph?` - in a paragraph?
@@ -128,18 +141,18 @@ Another example would be to escape HTML tags:
 
 (defn escape-html [text state]
                 (let [sanitized-text (clojure.string/escape text
-                                       {\& "&amp;" 
-                                        \< "&lt;" 
-                                        \> "&gt;" 
+                                       {\& "&amp;"
+                                        \< "&lt;"
+                                        \> "&gt;"
                                         \" "&quot;"
                                         \' "&#39;"})]
                 [sanitized-text state]))
 
-(def markdown-with-html 
+(def markdown-with-html
                  "## I am a title <h1></h1> with HTML tags !\n<script src=\"http://bad-url\">")
 
-(md/md-to-html-string markdown-with-html 
-                                  :replacement-transformers 
+(md/md-to-html-string markdown-with-html
+                                  :replacement-transformers
                                   (cons escape-html mdtrans/transformer-vector))
 ```
 
@@ -210,7 +223,7 @@ Control characters can be escaped using \
 
 ##### Automatic Links
 
-This is a shortcut style for creating &#8220;automatic&#8221; links for URLs and email addresses: 
+This is a shortcut style for creating &#8220;automatic&#8221; links for URLs and email addresses:
 
 ```
 <http://example.com/>
@@ -417,6 +430,16 @@ a^2 + b^2 = c^2
 ```
 [github](http://github.com)
 ```
+
+##### Reference Link
+
+```
+This is [an example][id] reference-style link.
+
+[id]: http://example.com/  "Optional Title Here"
+```
+
+note: reference links require the `:reference-links?` option to be set to true
 
 ### Image
 ```

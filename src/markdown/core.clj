@@ -37,13 +37,16 @@
   [in out & params]
   (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/formatter clojure.core/format]
-    (let [references (parse-referenes in)]
+    (let [params (when params (apply (partial assoc {}) params))
+          references (when (:reference-links? params) (parse-referenes in))]
       (with-open [^java.io.BufferedReader rdr (io/reader in)
                   ^java.io.BufferedWriter wrt (io/writer out)]
         (let [transformer (init-transformer wrt params)]
           (loop [^String line (.readLine rdr)
                  next-line (.readLine rdr)
-                 state (apply (partial assoc {} :last-line-empty? true :references references) params)]
+                 state (merge {:last-line-empty? true
+                               :references references}
+                              params)]
             (let [state (if (:buf state)
                           (transformer (:buf state) next-line (-> state (dissoc :buf :lists) (assoc :last-line-empty? true)))
                           state)]

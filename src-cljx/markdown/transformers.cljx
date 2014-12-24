@@ -24,19 +24,19 @@
 
 (defn escape-code [s]
   (-> s
-    (string/replace #"&" "&amp;")
-    (string/replace #"\*" "&#42;")
-    (string/replace #"\^" "&#94;")
-    (string/replace #"\_" "&#95;")
-    (string/replace #"\~" "&#126;")
-    (string/replace #"\<" "&lt;")
-    (string/replace #"\>" "&gt;")
-    ;(string/replace #"\/" "&frasl;") ;screws up ClojureScript compiling
-    (string/replace #"\[" "&#91;")
-    (string/replace #"\]" "&#93;")
-    (string/replace #"\(" "&#40;")
-    (string/replace #"\)" "&#41;")
-    (string/replace #"\"" "&quot;")))
+      (string/replace #"&" "&amp;")
+      (string/replace #"\*" "&#42;")
+      (string/replace #"\^" "&#94;")
+      (string/replace #"\_" "&#95;")
+      (string/replace #"\~" "&#126;")
+      (string/replace #"\<" "&lt;")
+      (string/replace #"\>" "&gt;")
+      ;(string/replace #"\/" "&frasl;") ;screws up ClojureScript compiling
+      (string/replace #"\[" "&#91;")
+      (string/replace #"\]" "&#93;")
+      (string/replace #"\(" "&#40;")
+      (string/replace #"\)" "&#41;")
+      (string/replace #"\"" "&quot;")))
 
 (defn escape-link [& xs]
   (->
@@ -51,21 +51,21 @@
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
-       (string/replace #"\\\\" "&#92;")
-       (string/replace #"\\`"  "&#8216;")
-       (string/replace #"\\\*" "&#42;")
-       (string/replace #"\\_"  "&#95;")
-       (string/replace #"\\\{" "&#123;")
-       (string/replace #"\\\}" "&#125;")
-       (string/replace #"\\\[" "&#91;")
-       (string/replace #"\\\]" "&#93;")
-       (string/replace #"\\\(" "&#40;")
-       (string/replace #"\\\)" "&#41;")
-       (string/replace #"\\#"  "&#35;")
-       (string/replace #"\\\+" "&#43;")
-       (string/replace #"\\-"  "&#45;")
-       (string/replace #"\\\." "&#46;")
-       (string/replace #"\\!"  "&#33;")))
+         (string/replace #"\\\\" "&#92;")
+         (string/replace #"\\`" "&#8216;")
+         (string/replace #"\\\*" "&#42;")
+         (string/replace #"\\_" "&#95;")
+         (string/replace #"\\\{" "&#123;")
+         (string/replace #"\\\}" "&#125;")
+         (string/replace #"\\\[" "&#91;")
+         (string/replace #"\\\]" "&#93;")
+         (string/replace #"\\\(" "&#40;")
+         (string/replace #"\\\)" "&#41;")
+         (string/replace #"\\#" "&#35;")
+         (string/replace #"\\\+" "&#43;")
+         (string/replace #"\\-" "&#45;")
+         (string/replace #"\\\." "&#46;")
+         (string/replace #"\\!" "&#33;")))
    state])
 
 (defn separator [escape? text open close separator state]
@@ -140,9 +140,9 @@
 
 (defn heading-text [text]
   (->> text
-    (drop-while #(or (= \# %) (= \space %)))
-    (string/join)
-    (string/trim)))
+       (drop-while #(or (= \# %) (= \space %)))
+       (string/join)
+       (string/trim)))
 
 (defn heading-level [text]
   (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
@@ -197,9 +197,9 @@
        #(let [encoded (if (:clojurescript state)
                         (subs % 1 (dec (count %)))
                         (->> (subs % 1 (dec (count %)))
-                          (map (fn [c] (if (> (rand) 0.5) (formatter "&#x%02x;" (int c)) c)))
-                          (apply str)))]
-          (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
+                             (map (fn [c] (if (> (rand) 0.5) (formatter "&#x%02x;" (int c)) c)))
+                             (apply str)))]
+         (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
    state])
 
 (defn paragraph-text [last-line-empty? text]
@@ -229,7 +229,7 @@
     [text state]
 
     code
-    (if (or eof (not= "    " (string/join (take 4 text)) ))
+    (if (or eof (not= "    " (string/join (take 4 text))))
       [(str "\n</code></pre>" text) (assoc state :code false :last-line-empty? false)]
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
 
@@ -247,16 +247,16 @@
 (defn codeblock [text state]
   (let [trimmed (string/trim text)]
     (cond
-      (and (= [\`\`\`] (take 3 trimmed)) (:codeblock state))
+      (and (= [\` \` \`] (take 3 trimmed)) (:codeblock state))
       [(str "</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
-      (and (= [\`\`\`] (take-last 3 trimmed)) (:codeblock state))
+      (and (= [\` \` \`] (take-last 3 trimmed)) (:codeblock state))
       [(str "</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
-      (= [\`\`\`] (take 3 trimmed))
+      (= [\` \` \`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
-            s           (apply str (rest code))
-            formatter   (:code-style state)]
+            s (apply str (rest code))
+            formatter (:code-style state)]
         [(str "<pre><code" (if (not-empty lang)
                              (str " "
                                   (if formatter
@@ -265,11 +265,11 @@
               (escape-code (if (empty? s) s (str s "\n"))))
          (assoc state :code true :codeblock true)])
 
-    (:codeblock state)
-    [(str (escape-code text) "\n") state]
+      (:codeblock state)
+      [(str (escape-code text) "\n") state]
 
-    :default
-    [text state])))
+      :default
+      [text state])))
 
 (defn hr [text state]
   (if (:code state)
@@ -305,7 +305,7 @@
 
 (defn img [alt url & [title]]
   (escape-link
-    (seq "<img src=\"") url  (seq "\" alt=\"") alt
+    (seq "<img src=\"") url (seq "\" alt=\"") alt
     (if (not-empty title)
       (seq (apply str "\" title=" (string/join title) " />"))
       (seq "\" />"))))
@@ -327,10 +327,10 @@
       (if (empty? tokens)
         [(string/join out) state]
 
-        (let [[head xs]   (split-with (partial not= \[) tokens)
-              xs          (handle-img-link xs)
-              [title ys]  (split-with (partial not= \]) xs)
-              [dud zs]    (split-with (partial not= \() ys)
+        (let [[head xs] (split-with (partial not= \[) tokens)
+              xs (handle-img-link xs)
+              [title ys] (split-with (partial not= \]) xs)
+              [dud zs] (split-with (partial not= \() ys)
               [link tail] (split-with (partial not= \)) zs)]
 
           (if (or (< (count link) 2)
@@ -339,16 +339,16 @@
             (recur (concat out head title dud link) tail)
             (recur
               (into out
-                (if (= (last head) \!)
-                  (let [alt (rest title)
-                        [url title] (split-with (partial not= \space) (rest link))
-                        title (string/join (rest title))]
-                    (concat (butlast head) (img alt url title)))
-                  (concat head (href (rest title) (rest link)))))
+                    (if (= (last head) \!)
+                      (let [alt (rest title)
+                            [url title] (split-with (partial not= \space) (rest link))
+                            title (string/join (rest title))]
+                        (concat (butlast head) (img alt url title)))
+                      (concat head (href (rest title) (rest link)))))
               (rest tail))))))))
 
 (defn reference [text]
-  (re-find #"^\[[a-zA-Z0-9 ]+\]:" (clojure.string/trim text)))
+  (re-find #"^\[[a-zA-Z0-9 ]+\]:" text))
 
 (defn parse-reference [reference start]
   (-> reference
@@ -357,9 +357,10 @@
       (clojure.string/split #"\s+" 2)))
 
 (defn parse-reference-link [line references]
-  (when-let [link (reference line)]
-    (swap! references assoc (subs link 0 (dec (count link)))
-           (parse-reference line (inc (count link))))))
+  (let [trimmed (string/trim line)]
+    (when-let [link (reference trimmed)]
+      (swap! references assoc (subs link 0 (dec (count link)))
+             (parse-reference trimmed (inc (count link)))))))
 
 (defn replace-reference-link [references reference]
   (let [[title id] (clojure.string/split reference #"\]\s*" 2)
@@ -367,8 +368,14 @@
     (str "<a href='" link "'" (when alt (str " alt='" (subs alt 1 (dec (count alt))) "'")) ">" (subs title 1) "</a>")))
 
 (defn reference-link [text {:keys [code codeblock references] :as state}]
-  (if (reference text)
+  (cond
+    (nil? references)
+    [text state]
+
+    (reference (string/trim text))
     ["" state]
+
+    :else
     [(if (or code codeblock)
        text
        (clojure.string/replace text #"\[[a-zA-Z0-9 ]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references)))
@@ -376,8 +383,8 @@
 
 (defn close-lists [lists]
   (string/join
-         (for [[list-type] lists]
-           (str "</li></" (name list-type) ">"))))
+    (for [[list-type] lists]
+      (str "</li></" (name list-type) ">"))))
 
 
 (defn add-row [row-type list-type num-indents indents content state]
@@ -394,7 +401,7 @@
 
       (> num-indents indents)
       [(str "<" (name row-type) "><li>" content)
-        (update-in state [:lists] conj [row-type num-indents])]
+       (update-in state [:lists] conj [row-type num-indents])]
 
       (= num-indents indents)
       [(str "</li><li>" content) state])
