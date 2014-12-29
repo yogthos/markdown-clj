@@ -19,8 +19,10 @@
   (heading? text \-))
 
 (defn empty-line [text state]
-  [(if (or (h1? text) (h2? text)) "" text)
-   (if (string/blank? text) (dissoc state :hr :heading) state)])
+  (if (or (:code state) (:codeblock state))
+    [text state]
+    [(if (or (h1? text) (h2? text)) "" text)
+     (if (string/blank? text) (dissoc state :hr :heading) state)]))
 
 (defn escape-code [s]
   (-> s
@@ -157,7 +159,7 @@
 
 (defn heading [text state]
   (cond
-    (:code state)
+    (or (:codeblock state) (:code state))
     [text state]
 
     (h1? *next-line*)
@@ -365,7 +367,7 @@
 (defn replace-reference-link [references reference]
   (let [[title id] (clojure.string/split reference #"\]\s*" 2)
         [link alt] (get references id)]
-    (str "<a href='" link "'" (when alt (str " alt='" (subs alt 1 (dec (count alt))) "'")) ">" (subs title 1) "</a>")))
+    (str "<a href='" link "'" (when alt (str " title='" (subs alt 1 (dec (count alt))) "'")) ">" (subs title 1) "</a>")))
 
 (defn reference-link [text {:keys [code codeblock references] :as state}]
   (cond

@@ -131,7 +131,18 @@
   (is (= "<pre><code>&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
          (markdown/md-to-html-string "```\n(fn [x & xs]\n  (str \"x\"))\n```")))
   (is (= "<pre><code class=\"clojure\">&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
-         (markdown/md-to-html-string "```clojure (fn [x & xs]\n  (str \"x\"))\n```"))))
+         (markdown/md-to-html-string "```clojure (fn [x & xs]\n  (str \"x\"))\n```")))
+  (is (= "<pre><code class=\"nohighlight\">------------\n============\n    ------------\n    ============\n</code></pre>"
+         (markdown/md-to-html-string
+           "
+```nohighlight
+------------
+============
+    ------------
+    ============
+```
+"
+           ))))
 
 (deftest stirkethrough
   (is (= "<p><del>foo</del></p>"
