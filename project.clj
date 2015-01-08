@@ -40,4 +40,4 @@
                                     :output-path "target/generated/cljs"
                                     :rules :cljs}]}
                    :plugins [[lein-cljsbuild "1.0.3"]
-                             [com.keminglabs/cljx "0.4.0"]]}})
+                             [com.keminglabs/cljx "0.5.0"]]}})
