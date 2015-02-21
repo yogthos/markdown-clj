@@ -20,7 +20,7 @@
         (write writer text)
         new-state))))
 
-(defn parse-referenes [in]
+(defn parse-references [in]
   (let [references (atom {})]
     (if (instance? java.io.StringReader in)
       (do
@@ -38,7 +38,7 @@
   (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/formatter clojure.core/format]
     (let [params (when params (apply (partial assoc {}) params))
-          references (when (:reference-links? params) (parse-referenes in))]
+          references (when (:reference-links? params) (parse-references in))]
       (with-open [^java.io.BufferedReader rdr (io/reader in)
                   ^java.io.BufferedWriter wrt (io/writer out)]
         (let [transformer (init-transformer wrt params)]

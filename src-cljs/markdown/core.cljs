@@ -18,7 +18,7 @@
 (defn format "Removed from cljs.core 0.0-1885, Ref. http://goo.gl/su7Xkj"
   [fmt & args] (apply goog.string/format fmt args))
 
-(defn parse-referenes [lines]
+(defn parse-references [lines]
   (let [references (atom {})]
     (doseq [line lines]
       (parse-reference-link line references))
@@ -32,7 +32,7 @@
     (let [params      (when params (apply (partial assoc {}) params))
           lines       (.split text "\n")
           html        (goog.string.StringBuffer. "")
-          references  (when (:reference-links? params) (parse-referenes lines))
+          references  (when (:reference-links? params) (parse-references lines))
           transformer (init-transformer params)]
       (loop [[line & more] lines
              state (merge {:clojurescript true
