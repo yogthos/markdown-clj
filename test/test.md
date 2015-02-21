@@ -39,10 +39,10 @@ The default state keys are:
 * `:codeblock` - inside a code block
 * `:eof` - end of file
 * `:heading` - in a heading
-* `:hr` - in a horizontal line 
+* `:hr` - in a horizontal line
 * `:lists` - inside a list
 * `:blockquote` - inside a blockquote
-* `:paragraph?` - in a paragraph?
+* `:paragraph` - in a paragraph
 * `:last-line-empty?` - was last line an empty line?
 
 \\ backslash
@@ -83,7 +83,7 @@ Heading 2
 
 ______
 
-If a line ends with two or more spaces a `<br />` tag will be inserted at the end.  
+If a line ends with two or more spaces a `<br />` tag will be inserted at the end.
 
 *emph* _italics_ **strong** __bold__ ~~strike~~ a^2 + b^2 = c^2
 
@@ -100,7 +100,7 @@ This is another paragraph.
 * Foo
 * Bar
  * Baz
- 
+
  * foo
 * bar
 

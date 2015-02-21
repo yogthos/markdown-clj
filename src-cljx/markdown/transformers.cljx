@@ -209,18 +209,18 @@
     (str " " text) text))
 
 (defn paragraph
-  [text {:keys [eof heading hr code lists blockquote paragraph? last-line-empty?] :as state}]
+  [text {:keys [eof heading hr code lists blockquote paragraph last-line-empty?] :as state}]
   (cond
     (or heading hr code lists blockquote)
     [text state]
 
-    paragraph?
+    paragraph
     (if (or eof (empty? (string/trim text)))
-      [(str (paragraph-text last-line-empty? text) "</p>") (assoc state :paragraph? false)]
+      [(str (paragraph-text last-line-empty? text) "</p>") (assoc state :paragraph false)]
       [(paragraph-text last-line-empty? text) state])
 
     (and (not eof) last-line-empty?)
-    [(str "<p>" text) (assoc state :paragraph? true :last-line-empty? false)]
+    [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
 
     :default
     [text state]))

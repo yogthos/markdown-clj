@@ -66,4 +66,3 @@
           output (new StringWriter)]
       (apply (partial md-to-html input output) params)
       (.toString output))))
-

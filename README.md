@@ -95,7 +95,7 @@ The default state keys are:
 * `:hr` - in a horizontal line
 * `:lists` - inside a list
 * `:blockquote` - inside a blockquote
-* `:paragraph?` - in a paragraph?
+* `:paragraph` - in a paragraph
 * `:last-line-empty?` - was last line an empty line?
 
 For example, if we wanted to add a transformer that would capitalize all text we could do the following:
