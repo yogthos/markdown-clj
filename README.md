@@ -39,7 +39,7 @@ The `md-to-html-string` function accepts a string with markdown content and retu
 </code></pre>
 ```
 
-Both `md-to-html` and `md-to-html-string` can accept optional parameters:
+Both `md-to-html` and `md-to-html-string` accept optional parameters:
 
 Specifying `:heading-anchors` will create anchors for the heading tags, eg:
 
