@@ -443,7 +443,7 @@
     [text (assoc state :last-line-empty? true)]
 
     :else
-    (let [indents (count (take-while (partial = \space) text))
+    (let [indents (if last-line-empty? 0 (count (take-while (partial = \space) text)))
           trimmed (string/trim text)]
 
       (cond
