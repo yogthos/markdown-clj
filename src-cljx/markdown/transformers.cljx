@@ -424,7 +424,6 @@
         content (string/trim (string/join (drop-while (partial not= \space) (string/trim text))))]
     (add-row :ol list-type num-indents indents (or (make-heading content false) content) state)))
 
-
 (defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]
   (cond
 
@@ -445,14 +444,14 @@
 
     :else
     (let [indents (if last-line-empty? 0 (count (take-while (partial = \space) text)))
-          trimmed (string/trim text)]
-
+          trimmed (string/trim text)
+          in-list? (:lists state)]
       (cond
         (re-find #"^[\*\+-] " trimmed)
-        (ul text state)
+        (ul (if in-list? text trimmed) state)
 
         (re-find #"^[0-9]+\. " trimmed)
-        (ol text state)
+        (ol (if in-list? text trimmed) state)
 
         (pos? indents)
         [text state]
