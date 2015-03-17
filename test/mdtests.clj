@@ -5,16 +5,23 @@
 (deftest heading1
   (is (= "<h1>Foo</h1>" (markdown/md-to-html-string " # Foo")))
   (is (= "<h1>foo</h1>" (markdown/md-to-html-string "#foo")))
-  (is (= "<h1>foo</h1>" (markdown/md-to-html-string "foo\n==="))))
+  (is (= "<h1>foo</h1>" (markdown/md-to-html-string "foo\n===")))
+  (is (= "<h1>foo</h1>" (markdown/md-to-html-string "#foo#")))
+  (is (= "<h1>foo</h1>" (markdown/md-to-html-string "#foo#\n"))))
 
 (deftest heading2
   (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo")))
-  (is (= "<h2>foo</h2>" (markdown/md-to-html-string "foo\n---"))))
+  (is (= "<h2>foo</h2>" (markdown/md-to-html-string "foo\n---")))
+  (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo##")))
+  (is (= "<h2>foo</h2>" (markdown/md-to-html-string "##foo##\n"))))
 
 (deftest heading-with-complex-anchor
   (is (=
         "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>some text"
-        (markdown/md-to-html-string "###foo bar BAz\nsome text" :heading-anchors true))))
+        (markdown/md-to-html-string "###foo bar BAz\nsome text" :heading-anchors true)))
+  (is (=
+        "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>some text"
+        (markdown/md-to-html-string "###foo bar BAz##\nsome text" :heading-anchors true))))
 
 (deftest br
   (is (= "<p>foo<br /></p>" (markdown/md-to-html-string "foo  ")))

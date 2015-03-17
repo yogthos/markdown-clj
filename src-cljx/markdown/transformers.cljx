@@ -143,6 +143,7 @@
 (defn heading-text [text]
   (->> text
        (drop-while #(or (= \# %) (= \space %)))
+       (take-while #(not= \# %))
        (string/join)
        (string/trim)))
 
