@@ -458,7 +458,7 @@ The parser reads the content line by line, this means that tag content is not al
 
 ## License
 
-Copyright (C) 2012 Yogthos
+Copyright © 2015 Dmitri Sotnikov
 
 Distributed under the Eclipse Public License, the same as Clojure.
 
