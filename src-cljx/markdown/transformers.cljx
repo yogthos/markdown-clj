@@ -323,12 +323,11 @@
     xs))
 
 (defn process-link-title [title state]
-  (let [italicized (first (italics title state))
-        emphasized (first (em italicized state))
-        stronged   (first (strong emphasized state))
-        bolded     (first (bold stronged state))
-        struck     (first (strikethrough bolded state))]
-    struck))
+  (first
+   (reduce
+    #(apply %2 %1)
+    [title state]
+    [italics em strong bold strikethrough])))
 
 (defn link [text {:keys [code codeblock] :as state}]
   (if (or code codeblock)
