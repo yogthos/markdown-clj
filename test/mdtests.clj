@@ -172,6 +172,19 @@
   (is (= "<ul><li><a href='http://github.com/&#42;'>github</a></li></ul>"
          (markdown/md-to-html-string "* [github](http://github.com/*)"))))
 
+(deftest styled-link
+  (is (= "<p><a href='http://github.com'><em>github</em></a></p>"
+         (markdown/md-to-html-string "[*github*](http://github.com)")))
+  (is (= "<p><a href='http://github.com'><i>github</i></a></p>"
+         (markdown/md-to-html-string "[_github_](http://github.com)")))
+  (is (= "<p><a href='http://github.com'><b>github</b></a></p>"
+         (markdown/md-to-html-string "[__github__](http://github.com)")))
+  (is (= "<p><a href='http://github.com'><strong>github</strong></a></p>"
+         (markdown/md-to-html-string "[**github**](http://github.com)")))
+  (is (= "<p><a href='http://github.com'><del>github</del></a></p>"
+         (markdown/md-to-html-string "[~~github~~](http://github.com)")))
+  )
+
 (deftest img
   (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" /></p>"
          (markdown/md-to-html-string "![Alt text](/path/to/img.jpg)")))
@@ -240,4 +253,3 @@
 (deftest not-a-list
   (is (= "<p>The fish was 192.8 lbs and was amazing to see.</p>"
          (markdown/md-to-html-string "The fish was\n192.8 lbs and was amazing to see."))))
-

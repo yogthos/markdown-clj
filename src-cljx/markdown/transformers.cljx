@@ -322,6 +322,14 @@
       (concat "[" (img alt url (not-empty title)) (rest zy)))
     xs))
 
+(defn process-link-title [title state]
+  (let [italicized (first (italics title state))
+        emphasized (first (em italicized state))
+        stronged   (first (strong emphasized state))
+        bolded     (first (bold stronged state))
+        struck     (first (strikethrough bolded state))]
+    struck))
+
 (defn link [text {:keys [code codeblock] :as state}]
   (if (or code codeblock)
     [text state]
@@ -339,15 +347,15 @@
           (if (or (< (count link) 2)
                   (< (count tail) 1)
                   (> (count dud) 1))
-            (recur (concat out head title dud link) tail)
+            (recur (concat out head (process-link-title title state) dud link) tail)
             (recur
               (into out
                     (if (= (last head) \!)
                       (let [alt (rest title)
                             [url title] (split-with (partial not= \space) (rest link))
-                            title (string/join (rest title))]
+                            title (process-link-title (string/join (rest title)) state)]
                         (concat (butlast head) (img alt url title)))
-                      (concat head (href (rest title) (rest link)))))
+                      (concat head (href (rest (process-link-title title state)) (rest link)))))
               (rest tail))))))))
 
 (defn reference [text]
