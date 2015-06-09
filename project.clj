@@ -32,7 +32,7 @@
              :dev
                   {:dependencies [[criterium "0.4.3" :scope "test"]
                                   [commons-lang "2.6" :scope "test"]
-                                  [org.clojure/clojurescript "0.0-3297"]]
+                                  [org.clojure/clojurescript "0.0-3308"]]
                    :cljx {:builds [{:source-paths ["src-cljx"]
                                     :output-path "target/generated/clj"
                                     :rules :clj}
