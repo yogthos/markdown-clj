@@ -219,6 +219,14 @@
   (is (= "<blockquote><p> Foo bar baz </p><footer></footer><p></p></blockquote>"
          (markdown/md-to-html-string "> Foo bar baz\n>-"))))
 
+(deftest blockquote-multiline-without-leading-angle-bracket
+  (is (= "<blockquote><p> Foo bar baz </p></blockquote>"
+         (markdown/md-to-html-string "> Foo bar\nbaz"))))
+
+(deftest blockquote-multiple-paragraphs
+  (is (= "<blockquote><p> Foo bar </p><p> baz </p></blockquote>"
+         (markdown/md-to-html-string "> Foo bar\n>\n> baz"))))
+
 (deftest escaped-characters
   (is
     (= "<p>&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"

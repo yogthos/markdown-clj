@@ -292,11 +292,20 @@
       [text state]
 
       (:blockquote state)
-      (if (or eof (empty? trimmed))
-        ["</p></blockquote>" (assoc state :blockquote false)]
-        (if (= ">-" (subs trimmed 0 2))
-          [(str "</p><footer>" (subs text 2) "</footer><p>") state]
-          [(str text " ") state]))
+      (cond (or eof (empty? trimmed))
+            ["</p></blockquote>" (assoc state :blockquote false)]
+
+            (= ">" trimmed)
+            ["</p><p>" state]
+
+            (= ">-" (subs trimmed 0 2))
+            [(str "</p><footer>" (subs text 2) "</footer><p>") state]
+
+            (= ">" (subs trimmed 0 1))
+            [(str (subs text 1) " ") state]
+
+            :default
+            [(str text " ") state])
 
       :default
       (if (= \> (first text))
