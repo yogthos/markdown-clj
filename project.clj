@@ -3,7 +3,7 @@
             :url "https://github.com/yogthos/markdown-clj"
             :license {:name "Eclipse Public License"
                       :url "http://www.eclipse.org/legal/epl-v10.html"}
-            :dependencies [[org.clojure/clojure "1.7.0-RC1"]]
+            :dependencies [[org.clojure/clojure "1.7.0"]]
             :clojurescript? true
             :source-paths ["src" "src-cljs" "src-cljx" "target/generated/clj" "target/generated/cljs"]
             :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]
