@@ -212,6 +212,9 @@
 (defn paragraph
   [text {:keys [eof heading hr code lists blockquote paragraph last-line-empty?] :as state}]
   (cond
+    (and paragraph lists)
+    [(str "</p>" text) (assoc state :paragraph false)]
+
     (or heading hr code lists blockquote)
     [text state]
 

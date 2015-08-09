@@ -237,6 +237,10 @@
   (is (= "<ol><li>a</li><li>b</li></ol><p>test <strong>bold</strong> and <em>italic</em></p>"
          (markdown/md-to-html-string"1. a\n2. b\n\ntest **bold** and *italic*"))))
 
+(deftest paragraph-close-before-list
+  (is (= "<p>in paragraph</p><ul><li>list</li></ul>"
+         (markdown/md-to-html-string "in paragraph\n- list"))))
+
 (deftest autourl
   (is (= "<p><a href=\"http://example.com/\">http://example.com/</a></p>"
          (markdown/md-to-html-string "<http://example.com/>")))
