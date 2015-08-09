@@ -5,7 +5,7 @@
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]]
   :clojurescript? true
-  :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]
+  :jar-exclusions [#"\.swp|\.swo|\.DS_Store"]
   :test-selectors {:default   (complement :benchmark)
                    :benchmark :benchmark
                    :all       (constantly true)}
@@ -27,9 +27,8 @@
             {:compiler {:optimizations :whitespace
                         :pretty-print  true}}}}
   :profiles
-  {:1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
-   :dev
-        {:dependencies [[criterium "0.4.3" :scope "test"]
-                        [commons-lang "2.6" :scope "test"]
-                        [org.clojure/clojurescript "0.0-3308"]]
-         :plugins      [[lein-cljsbuild "1.0.6"]]}})
+  {:dev
+   {:dependencies [[criterium "0.4.3" :scope "test"]
+                   [commons-lang "2.6" :scope "test"]
+                   [org.clojure/clojurescript "1.7.58"]]
+    :plugins      [[lein-cljsbuild "1.0.6"]]}})
