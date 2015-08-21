@@ -37,24 +37,27 @@
   [in out & params]
   (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/formatter clojure.core/format]
-    (let [params (when params (apply (partial assoc {}) params))
+    (let [params     (when params (apply (partial assoc {}) params))
           references (when (:reference-links? params) (parse-references in))]
       (with-open [^java.io.BufferedReader rdr (io/reader in)
                   ^java.io.BufferedWriter wrt (io/writer out)]
         (let [transformer (init-transformer wrt params)]
           (loop [^String line (.readLine rdr)
-                 next-line (.readLine rdr)
-                 state (merge {:last-line-empty? true
-                               :references references}
-                              params)]
+                 next-line    (.readLine rdr)
+                 state        (merge {:last-line-empty? true
+                                      :references       references}
+                                     params)]
             (let [state (if (:buf state)
-                          (transformer (:buf state) next-line (-> state (dissoc :buf :lists) (assoc :last-line-empty? true)))
+                          (transformer (:buf state)
+                                       next-line
+                                       (-> state (dissoc :buf :lists)
+                                           (assoc :last-line-empty? true)))
                           state)]
               (if line
                 (recur next-line
                        (.readLine rdr)
                        (assoc (transformer line next-line state)
-                              :last-line-empty? (empty? (.trim line))))
+                         :last-line-empty? (empty? (.trim line))))
                 (transformer "" nil (assoc state :eof true))))))
         (.flush wrt)))))
 
@@ -62,7 +65,7 @@
   "converts a markdown formatted string to an HTML formatted string"
   [text & params]
   (when text
-    (let [input (new StringReader text)
+    (let [input  (new StringReader text)
           output (new StringWriter)]
       (apply (partial md-to-html input output) params)
       (.toString output))))
