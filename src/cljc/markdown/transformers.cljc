@@ -184,7 +184,7 @@
 (defn autourl-transformer [text state]
   [(if (:code state)
      text
-     (clojure.string/replace
+     (string/replace
        text
        #"<https?://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]>"
        #(let [url (subs % 1 (dec (count %)))]
@@ -194,7 +194,7 @@
 (defn autoemail-transformer [text state]
   [(if (or (:code state) (:codeblock state))
      text
-     (clojure.string/replace
+     (string/replace
        text
        #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
        #(let [encoded (if (:clojurescript state)
@@ -375,8 +375,8 @@
 (defn parse-reference [reference start]
   (-> reference
       (subs start)
-      (clojure.string/trim)
-      (clojure.string/split #"\s+" 2)))
+      (string/trim)
+      (string/split #"\s+" 2)))
 
 (defn parse-reference-link [line references]
   (let [trimmed (string/trim line)]
@@ -385,7 +385,7 @@
              (parse-reference trimmed (inc (count link)))))))
 
 (defn replace-reference-link [references reference]
-  (let [[title id] (clojure.string/split reference #"\]\s*" 2)
+  (let [[title id] (string/split reference #"\]\s*" 2)
         [link alt] (get references id)]
     (str "<a href='" link "'" (when alt (str " title='" (subs alt 1 (dec (count alt))) "'")) ">" (subs title 1) "</a>")))
 
@@ -400,7 +400,7 @@
     :else
     [(if (or code codeblock)
        text
-       (clojure.string/replace text #"\[[a-zA-Z0-9 ]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references)))
+       (string/replace text #"\[[a-zA-Z0-9 ]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references)))
      state]))
 
 (defn close-lists [lists]
