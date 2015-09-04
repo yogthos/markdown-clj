@@ -40,14 +40,34 @@
       (string/replace #"\)" "&#41;")
       (string/replace #"\"" "&quot;")))
 
-(defn escape-link [& xs]
-  (->
-    (string/join (apply concat xs))
-    (string/replace #"\*" "&#42;")
-    (string/replace #"\^" "&#94;")
-    (string/replace #"\_" "&#95;")
-    (string/replace #"\~" "&#126;")
-    seq))
+(def terminal-char-encodings
+  [ ["*" #"\*" "&terminal#42"]
+    ["^" #"\^" "&terminal#94"]
+    ["_" #"\_" "&terminal#95"]
+    ["~" #"\~" "&terminal#126"]])
+
+(defn unescape-terminally-encoded-chars
+  "Remove the terminal encodings. Should probably only do this at the very end
+   or unless you know exactly what you are doing!"
+  [& xs]
+
+  (seq
+    (reduce (fn [str [char-str char-regex char-replacement]]
+        (string/replace str char-replacement char-str))
+      (string/join (apply concat xs))
+      terminal-char-encodings)))
+
+(defn escape-terminally-encoded-chars
+  " Terminally encode these chars, so that at the end we can replace them.
+  This is so that subsequent processing does not accidentally convert these into
+  html (like italics or bold) -- what a mess that would be!"
+  [& xs]
+
+  (seq
+    (reduce (fn [str [char-str char-regex char-replacement]]
+        (string/replace str char-regex char-replacement))
+      (string/join (apply concat xs))
+      terminal-char-encodings)))
 
 (defn escaped-chars [text state]
   [(if (or (:code state) (:codeblock state))
@@ -316,10 +336,10 @@
         [text state]))))
 
 (defn href [title link]
-  (escape-link (seq "<a href='") link (seq "'>") title (seq "</a>")))
+  (escape-terminally-encoded-chars (seq "<a href='") link (seq "'>") title (seq "</a>")))
 
 (defn img [alt url & [title]]
-  (escape-link
+  (escape-terminally-encoded-chars
     (seq "<img src=\"") url (seq "\" alt=\"") alt
     (if (not-empty title)
       (seq (apply str "\" title=" (string/join title) " />"))
@@ -483,6 +503,15 @@
         :else
         [text state]))))
 
+(defn cleanup-terminally-encoded-chars
+  "Terminally encoded chars are ones that we've determined should no longer be processed or evaluated
+  Things like _ in a href for a link, for example."
+  [text state]
+
+  [(unescape-terminally-encoded-chars text) state]
+  )
+
+
 (def transformer-vector
   [empty-line
    codeblock
@@ -504,4 +533,5 @@
    superscript
    blockquote
    paragraph
-   br])
+   br
+   cleanup-terminally-encoded-chars])
