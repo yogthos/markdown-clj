@@ -41,33 +41,29 @@
       (string/replace #"\"" "&quot;")))
 
 (def terminal-char-encodings
-  [ ["*" #"\*" "&terminal#42"]
-    ["^" #"\^" "&terminal#94"]
-    ["_" #"\_" "&terminal#95"]
-    ["~" #"\~" "&terminal#126"]])
+  [["*" #"\*" "&terminal#42"]
+   ["^" #"\^" "&terminal#94"]
+   ["_" #"\_" "&terminal#95"]
+   ["~" #"\~" "&terminal#126"]])
 
 (defn unescape-terminally-encoded-chars
   "Remove the terminal encodings. Should probably only do this at the very end
    or unless you know exactly what you are doing!"
-  [& xs]
-
-  (seq
-    (reduce (fn [str [char-str char-regex char-replacement]]
-        (string/replace str char-replacement char-str))
-      (string/join (apply concat xs))
-      terminal-char-encodings)))
+  [text]
+  (reduce (fn [text [char-str _ char-replacement]]
+            (string/replace text char-replacement char-str))
+          text
+          terminal-char-encodings))
 
 (defn escape-terminally-encoded-chars
   " Terminally encode these chars, so that at the end we can replace them.
   This is so that subsequent processing does not accidentally convert these into
   html (like italics or bold) -- what a mess that would be!"
   [& xs]
-
-  (seq
-    (reduce (fn [str [char-str char-regex char-replacement]]
-        (string/replace str char-regex char-replacement))
-      (string/join (apply concat xs))
-      terminal-char-encodings)))
+  (reduce (fn [str [_ char-regex char-replacement]]
+            (string/replace str char-regex char-replacement))
+          (->> xs (apply concat) string/join)
+          terminal-char-encodings))
 
 (defn escaped-chars [text state]
   [(if (or (:code state) (:codeblock state))
@@ -93,9 +89,9 @@
 (defn separator [escape? text open close separator state]
   (if (:code state)
     [text state]
-    (loop [out []
-           buf []
-           tokens (partition-by (partial = (first separator)) (seq text))
+    (loop [out       []
+           buf       []
+           tokens    (partition-by (partial = (first separator)) (seq text))
            cur-state (assoc state :found-token false)]
       (cond
         (empty? tokens)
@@ -147,7 +143,7 @@
   (if (:code state)
     [text state]
     (let [tokens (partition-by (partial contains? #{\^ \space}) text)]
-      (loop [buf []
+      (loop [buf       []
              remaining tokens]
         (cond
           (empty? remaining)
@@ -281,7 +277,7 @@
 
       (= [\` \` \`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
-            s (apply str (rest code))
+            s         (apply str (rest code))
             formatter (:code-style state)]
         [(str "<pre><code" (if (not-empty lang)
                              (str " "
@@ -356,15 +352,15 @@
 
 (defn process-link-title [title state]
   (first
-   (reduce
-    #(apply %2 %1)
-    [title state]
-    [italics em strong bold strikethrough])))
+    (reduce
+      #(apply %2 %1)
+      [title state]
+      [italics em strong bold strikethrough])))
 
 (defn link [text {:keys [code codeblock] :as state}]
   (if (or code codeblock)
     [text state]
-    (loop [out []
+    (loop [out    []
            tokens (seq text)]
       (if (empty? tokens)
         [(string/join out) state]
@@ -382,7 +378,7 @@
             (recur
               (into out
                     (if (= (last head) \!)
-                      (let [alt (rest title)
+                      (let [alt   (rest title)
                             [url title] (split-with (partial not= \space) (rest link))
                             title (process-link-title (string/join (rest title)) state)]
                         (concat (butlast head) (img alt url title)))
@@ -433,7 +429,7 @@
   (if list-type
     (cond
       (< num-indents indents)
-      (let [lists-to-close (take-while #(> (second %) num-indents) (reverse (:lists state)))
+      (let [lists-to-close  (take-while #(> (second %) num-indents) (reverse (:lists state)))
             remaining-lists (vec (drop-last (count lists-to-close) (:lists state)))]
 
         [(apply str (close-lists lists-to-close) "</li><li>" content)
@@ -454,13 +450,13 @@
 (defn ul [text state]
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
-        content (string/trim (*substring* text (inc num-indents)))]
+        content     (string/trim (*substring* text (inc num-indents)))]
     (add-row :ul list-type num-indents indents (or (make-heading content false) content) state)))
 
 (defn ol [text state]
   (let [[list-type indents] (last (:lists state))
         num-indents (count (take-while (partial = \space) text))
-        content (string/trim (string/join (drop-while (partial not= \space) (string/trim text))))]
+        content     (string/trim (string/join (drop-while (partial not= \space) (string/trim text))))]
     (add-row :ol list-type num-indents indents (or (make-heading content false) content) state)))
 
 (defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]
@@ -482,8 +478,8 @@
     [text (assoc state :last-line-empty? true)]
 
     :else
-    (let [indents (if last-line-empty? 0 (count (take-while (partial = \space) text)))
-          trimmed (string/trim text)
+    (let [indents  (if last-line-empty? 0 (count (take-while (partial = \space) text)))
+          trimmed  (string/trim text)
           in-list? (:lists state)]
       (cond
         (re-find #"^[\*\+-] " trimmed)
@@ -507,9 +503,7 @@
   "Terminally encoded chars are ones that we've determined should no longer be processed or evaluated
   Things like _ in a href for a link, for example."
   [text state]
-
-  [(unescape-terminally-encoded-chars text) state]
-  )
+  [(unescape-terminally-encoded-chars text) state])
 
 
 (def transformer-vector
