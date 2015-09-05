@@ -163,13 +163,13 @@
 (deftest link
   (is (= "<p><a href='http://github.com'>github</a></p>"
          (markdown/md-to-html-string "[github](http://github.com)")))
-  (is (= "<p><a href='http://github.com/&#126;'>github</a></p>"
+  (is (= "<p><a href='http://github.com/~'>github</a></p>"
          (markdown/md-to-html-string "[github](http://github.com/~)")))
-  (is (= "<p><a href='http://github.com/&#94;'>github</a></p>"
+  (is (= "<p><a href='http://github.com/^'>github</a></p>"
          (markdown/md-to-html-string "[github](http://github.com/^)")))
-  (is (= "<p><a href='http://github.com/&#42;'>github</a></p>"
+  (is (= "<p><a href='http://github.com/*'>github</a></p>"
          (markdown/md-to-html-string "[github](http://github.com/*)")))
-  (is (= "<ul><li><a href='http://github.com/&#42;'>github</a></li></ul>"
+  (is (= "<ul><li><a href='http://github.com/*'>github</a></li></ul>"
          (markdown/md-to-html-string "* [github](http://github.com/*)"))))
 
 (deftest styled-link
@@ -188,7 +188,7 @@
 (deftest img
   (is (= "<p><img src=\"/path/to/img.jpg\" alt=\"Alt text\" /></p>"
          (markdown/md-to-html-string "![Alt text](/path/to/img.jpg)")))
-  (is (= "<p><img src=\"/path/to/&#95;img&#95;.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>"
+  (is (= "<p><img src=\"/path/to/_img_.jpg\" alt=\"Alt text\" title=\"Optional Title\" /></p>"
          (markdown/md-to-html-string "![Alt text](/path/to/_img_.jpg \"Optional Title\")"))))
 
 (deftest img-link
@@ -265,3 +265,7 @@
 (deftest not-a-list
   (is (= "<p>The fish was 192.8 lbs and was amazing to see.</p>"
          (markdown/md-to-html-string "The fish was\n192.8 lbs and was amazing to see."))))
+
+(deftest dont-encode-chars-in-hrefs
+  (is (= "<p><a href='http://www.google.com/example_link_foo~_^*'>example_link with tilde ~ and carat ^ and splat *</a></p>"
+         (markdown/md-to-html-string "[example_link with tilde ~ and carat ^ and splat *](http://www.google.com/example_link_foo~_^*)"))))
