@@ -1,5 +1,6 @@
 (ns mdtests
-  (:require [markdown.core :as markdown])
+  (:require [markdown.core :as markdown]
+            [markdown.transformers :as transformers])
   (:use clojure.test))
 
 (deftest heading1
@@ -273,3 +274,6 @@
 (deftest complex-link-with-terminal-encoding-inside-header
   (is (= "<h2>With a link <a href='http://a.com/under_score_in_the_link/'>the contents of the_link</a></h2>"
       (markdown/md-to-html-string "##With a link [the contents of the_link](http://a.com/under_score_in_the_link/)"))))
+
+(comment
+  (apply transformers/thaw-string (transformers/freeze-string "Tickle-me-pink" {})))
