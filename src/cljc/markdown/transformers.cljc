@@ -41,10 +41,10 @@
       (string/replace #"\"" "&quot;")))
 
 (def terminal-char-encodings
-  [["*" #"\*" "&terminal#42"]
-   ["^" #"\^" "&terminal#94"]
-   ["_" #"\_" "&terminal#95"]
-   ["~" #"\~" "&terminal#126"]])
+  [["*" #"\*" "||terminal-42||"]
+   ["^" #"\^" "||terminal-94||"]
+   ["_" #"\_" "||terminal-95||"]
+   ["~" #"\~" "||terminal-126||"]])
 
 (defn unescape-terminally-encoded-chars
   "Remove the terminal encodings. Should probably only do this at the very end

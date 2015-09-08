@@ -269,3 +269,7 @@
 (deftest dont-encode-chars-in-hrefs
   (is (= "<p><a href='http://www.google.com/example_link_foo~_^*'>example_link with tilde ~ and carat ^ and splat *</a></p>"
          (markdown/md-to-html-string "[example_link with tilde ~ and carat ^ and splat *](http://www.google.com/example_link_foo~_^*)"))))
+
+(deftest complex-link-with-terminal-encoding-inside-header
+  (is (= "<h2>With a link <a href='http://a.com/under_score_in_the_link/'>the contents of the_link</a></h2>"
+      (markdown/md-to-html-string "##With a link [the contents of the_link](http://a.com/under_score_in_the_link/)"))))
