@@ -40,6 +40,8 @@
       (string/replace #"\)" "&#41;")
       (string/replace #"\"" "&quot;")))
 
+(def escape-delimiter-char (char 254))
+
 (defn freeze-string
   "Freezes an output string.  Converts to a placeholder token and puts that into the output.
   Returns the [text, state] pair.  Adds it into the state, the 'frozen-strings' hashmap
@@ -48,14 +50,14 @@
   (let [state                   (last args)
         text                    (reduce str (flatten (drop-last args)))
         count-of-frozen-strings (count (:frozen-strings state))
-        token                   (str (char 222) (+ 1 count-of-frozen-strings) (char 222))]
+        token                   (str escape-delimiter-char (+ 1 count-of-frozen-strings) escape-delimiter-char)]
     [token (assoc-in state [:frozen-strings token] text)]))
 
 (defn thaw-string
   "Unfreezes the output string.  Converts to output. Recursively does this."
   [text state]
   (let [unfrozen-text (string/replace text
-                                      (re-pattern (str (char 222) "\\d+" (char 222)))
+                                      (re-pattern (str escape-delimiter-char "\\d+" escape-delimiter-char))
                                       #(get (:frozen-strings state) % %))]
     (if (= text unfrozen-text)
       [unfrozen-text state]
