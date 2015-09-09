@@ -48,14 +48,14 @@
   (let [state                   (last args)
         text                    (reduce str (flatten (drop-last args)))
         count-of-frozen-strings (count (:frozen-strings state))
-        token                   (str "|!" (+ 1 count-of-frozen-strings) "!|")]
+        token                   (str (char 222) (+ 1 count-of-frozen-strings) (char 222))]
     [token (assoc-in state [:frozen-strings token] text)]))
 
 (defn thaw-string
   "Unfreezes the output string.  Converts to output. Recursively does this."
   [text state]
   (let [unfrozen-text (string/replace text
-                                      #"\|\!\d+\!\|"
+                                      (re-pattern (str (char 222) "\\d+" (char 222)))
                                       #(get (:frozen-strings state) % %))]
     (if (= text unfrozen-text)
       [unfrozen-text state]
