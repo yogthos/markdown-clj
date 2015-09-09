@@ -368,7 +368,6 @@
            loop-state state]
       (if (empty? tokens)
         [(string/join out) loop-state]
-
         (let [[head xs] (split-with (partial not= \[) tokens)
               ;; Overwriting the loop-state here
               [xs loop-state] (handle-img-link xs loop-state)
@@ -390,7 +389,7 @@
                 (recur (concat (butlast head) img-text) (rest tail) new-loop-state))
               ;; Process a normal A anchor
               (let [[link-text new-loop-state] (href (rest (process-link-title title state)) (rest link) loop-state)]
-                (recur (concat head link-text) (rest tail) new-loop-state))))
+                (recur (concat out head link-text) (rest tail) new-loop-state))))
           )))))
 
 (defn reference [text]
