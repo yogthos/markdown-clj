@@ -45,23 +45,21 @@
   Returns the [text, state] pair.  Adds it into the state, the 'frozen-strings' hashmap
   So that it can be unfrozen later."
   [& args]
-  (let [state (last args)
-        text  (reduce str (flatten (drop-last args)))
+  (let [state                   (last args)
+        text                    (reduce str (flatten (drop-last args)))
         count-of-frozen-strings (count (:frozen-strings state))
-        token  (str "|!" (+ 1 count-of-frozen-strings) "!|")
-        new-state (assoc-in state [:frozen-strings token] text)
-       ]
-    [token new-state]))
+        token                   (str "|!" (+ 1 count-of-frozen-strings) "!|")]
+    [token (assoc-in state [:frozen-strings token] text)]))
 
 (defn thaw-string
   "Unfreezes the output string.  Converts to output. Recursively does this."
   [text state]
   (let [unfrozen-text (string/replace text
-                               #"\|\!\d+\!\|"
-                               (fn [token] (get (or (:frozen-strings state) {}) token)))]
-    (if (not (= text unfrozen-text))
-     (thaw-string unfrozen-text state)
-     [unfrozen-text state])))
+                                      #"\|\!\d+\!\|"
+                                      #(get (:frozen-strings state) % %))]
+    (if (= text unfrozen-text)
+      [unfrozen-text state]
+      (recur unfrozen-text state))))
 
 (defn escaped-chars [text state]
   [(if (or (:code state) (:codeblock state))
@@ -346,7 +344,7 @@
           [alt xy] (split-with (partial not= \]) xs)
           [url-title zy] (->> xy (drop 2) (split-with (partial not= \))))
           [url title] (split-with (partial not= \space) url-title)
-          [new-text new-state] (img alt url state (not-empty title)) ]
+          [new-text new-state] (img alt url state (not-empty title))]
       [(concat "[" new-text (rest zy)) new-state])
     [xs state]))
 
@@ -360,8 +358,8 @@
 (defn link [text {:keys [code codeblock] :as state}]
   (if (or code codeblock)
     [text state]
-    (loop [out    []
-           tokens (seq text)
+    (loop [out        []
+           tokens     (seq text)
            loop-state state]
       (if (empty? tokens)
         [(string/join out) loop-state]
@@ -384,11 +382,11 @@
                     title (process-link-title (string/join (rest title)) loop-state)
                     ;; Now process / generate the img data
                     [img-text new-loop-state] (img alt url loop-state title)]
-                    (recur (concat (butlast head) img-text) (rest tail) new-loop-state))
+                (recur (concat (butlast head) img-text) (rest tail) new-loop-state))
               ;; Process a normal A anchor
               (let [[link-text new-loop-state] (href (rest (process-link-title title state)) (rest link) loop-state)]
                 (recur (concat head link-text) (rest tail) new-loop-state))))
-              )))))
+          )))))
 
 (defn reference [text]
   (re-find #"^\[[a-zA-Z0-9 ]+\]:" text))
