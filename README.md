@@ -10,7 +10,7 @@ A markdown parser that compiles to both Clojure and ClojureScript.
 
 [![Clojars Project](http://clojars.org/markdown-clj/latest-version.svg)](http://clojars.org/markdown-clj)
 
-Note: `markdown-clj` requires Clojure 1.2+ to run.
+Note: `markdown-clj` versions prior to `0.9.68` requires Clojure 1.2+ to run, versions `0.9.68+` require Clojrue 1.7.
 
 ## Usage Clojure
 
