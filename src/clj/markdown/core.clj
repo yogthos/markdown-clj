@@ -2,9 +2,13 @@
   (:use [markdown.transformers
          :only [*next-line* *substring* transformer-vector parse-reference parse-reference-link]])
   (:require [clojure.java.io :as io])
-  (:import [java.io StringReader StringWriter]))
+  (:import [java.io BufferedReader
+                    BufferedWriter
+                    StringReader
+                    StringWriter
+                    Writer]))
 
-(defn- write [^java.io.Writer writer ^String text]
+(defn- write [^Writer writer ^String text]
   (doseq [c text] (.write writer (int c))))
 
 (defn- init-transformer [writer {:keys [replacement-transformers custom-transformers]}]
@@ -22,14 +26,13 @@
 
 (defn parse-references [in]
   (let [references (atom {})]
-    (if (instance? java.io.StringReader in)
+    (if (instance? StringReader in)
       (do
         (doseq [line (line-seq (io/reader in))]
           (parse-reference-link line references))
         (.reset in))
-      (with-open [rdr (io/reader in)]
-        (doseq [line (line-seq (io/reader in))]
-          (parse-reference-link line references))))
+      (doseq [line (line-seq (io/reader in))]
+        (parse-reference-link line references)))
     @references))
 
 (defn md-to-html
@@ -39,8 +42,8 @@
             markdown.transformers/formatter clojure.core/format]
     (let [params     (when params (apply (partial assoc {}) params))
           references (when (:reference-links? params) (parse-references in))]
-      (with-open [^java.io.BufferedReader rdr (io/reader in)
-                  ^java.io.BufferedWriter wrt (io/writer out)]
+      (with-open [^BufferedReader rdr (io/reader in)
+                  ^BufferedWriter wrt (io/writer out)]
         (let [transformer (init-transformer wrt params)]
           (loop [^String line (.readLine rdr)
                  next-line    (.readLine rdr)

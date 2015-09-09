@@ -1,6 +1,10 @@
 (ns markdown.core
-  (:use [markdown.transformers
-         :only [*next-line* *substring* transformer-vector parse-reference parse-reference-link]]))
+  (:require [markdown.transformers
+         :refer [*next-line*
+                 *substring*
+                 transformer-vector
+                 parse-reference
+                 parse-reference-link]]))
 
 (defn- init-transformer [{:keys [replacement-transformers custom-transformers]}]
   (fn [html line next-line state]

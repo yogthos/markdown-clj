@@ -63,7 +63,7 @@
                         (re-pattern (str escape-delimiter "\\d+" escape-delimiter))
                         #(get (:frozen-strings state) % %))]
     (if (= text unfrozen-text)
-      [unfrozen-text state]
+      [unfrozen-text (dissoc state :frozen-strings)]
       (recur unfrozen-text state))))
 
 (defn escaped-chars [text state]
@@ -510,7 +510,9 @@
 (defn thaw-strings
   "Terminally encoded strings are ones that we've determined should no longer be processed or evaluated"
   [text state]
-  (thaw-string text state))
+  (if (:frozen-strings state)
+    (thaw-string text state)
+    [text state]))
 
 
 (def transformer-vector
@@ -535,5 +537,4 @@
    blockquote
    paragraph
    br
-   thaw-strings
-   ])
+   thaw-strings])
