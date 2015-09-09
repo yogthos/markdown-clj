@@ -40,30 +40,28 @@
       (string/replace #"\)" "&#41;")
       (string/replace #"\"" "&quot;")))
 
-(def terminal-char-encodings
-  [["*" #"\*" "&terminal#42"]
-   ["^" #"\^" "&terminal#94"]
-   ["_" #"\_" "&terminal#95"]
-   ["~" #"\~" "&terminal#126"]])
+(defn freeze-string
+  "Freezes an output string.  Converts to a placeholder token and puts that into the output.
+  Returns the [text, state] pair.  Adds it into the state, the 'frozen-strings' hashmap
+  So that it can be unfrozen later."
+  [& args]
+  (let [state (last args)
+        text  (reduce str (flatten (drop-last args)))
+        count-of-frozen-strings (count (:frozen-strings state))
+        token  (str "|!" (+ 1 count-of-frozen-strings) "!|")
+        new-state (assoc-in state [:frozen-strings token] text)
+       ]
+    [token new-state]))
 
-(defn unescape-terminally-encoded-chars
-  "Remove the terminal encodings. Should probably only do this at the very end
-   or unless you know exactly what you are doing!"
-  [text]
-  (reduce (fn [text [char-str _ char-replacement]]
-            (string/replace text char-replacement char-str))
-          text
-          terminal-char-encodings))
-
-(defn escape-terminally-encoded-chars
-  " Terminally encode these chars, so that at the end we can replace them.
-  This is so that subsequent processing does not accidentally convert these into
-  html (like italics or bold) -- what a mess that would be!"
-  [& xs]
-  (reduce (fn [str [_ char-regex char-replacement]]
-            (string/replace str char-regex char-replacement))
-          (->> xs (apply concat) string/join)
-          terminal-char-encodings))
+(defn thaw-string
+  "Unfreezes the output string.  Converts to output. Recursively does this."
+  [text state]
+  (let [unfrozen-text (string/replace text
+                               #"\|\!\d+\!\|"
+                               (fn [token] (get (or (:frozen-strings state) {}) token)))]
+    (if (not (= text unfrozen-text))
+     (thaw-string unfrozen-text state)
+     [unfrozen-text state])))
 
 (defn escaped-chars [text state]
   [(if (or (:code state) (:codeblock state))
@@ -331,24 +329,26 @@
         [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true)]
         [text state]))))
 
-(defn href [title link]
-  (escape-terminally-encoded-chars (seq "<a href='") link (seq "'>") title (seq "</a>")))
+(defn href [title link state]
+  (freeze-string (seq "<a href='") link (seq "'>") title (seq "</a>") state))
 
-(defn img [alt url & [title]]
-  (escape-terminally-encoded-chars
+(defn img [alt url state & [title]]
+  (freeze-string
     (seq "<img src=\"") url (seq "\" alt=\"") alt
     (if (not-empty title)
       (seq (apply str "\" title=" (string/join title) " />"))
-      (seq "\" />"))))
+      (seq "\" />"))
+    state))
 
-(defn handle-img-link [xs]
+(defn handle-img-link [xs state]
   (if (= [\[ \! \[] (take 3 xs))
     (let [xs (drop 3 xs)
           [alt xy] (split-with (partial not= \]) xs)
           [url-title zy] (->> xy (drop 2) (split-with (partial not= \))))
-          [url title] (split-with (partial not= \space) url-title)]
-      (concat "[" (img alt url (not-empty title)) (rest zy)))
-    xs))
+          [url title] (split-with (partial not= \space) url-title)
+          [new-text new-state] (img alt url state (not-empty title)) ]
+      [(concat "[" new-text (rest zy)) new-state])
+    [xs state]))
 
 (defn process-link-title [title state]
   (first
@@ -361,12 +361,14 @@
   (if (or code codeblock)
     [text state]
     (loop [out    []
-           tokens (seq text)]
+           tokens (seq text)
+           loop-state state]
       (if (empty? tokens)
-        [(string/join out) state]
+        [(string/join out) loop-state]
 
         (let [[head xs] (split-with (partial not= \[) tokens)
-              xs (handle-img-link xs)
+              ;; Overwriting the loop-state here
+              [xs loop-state] (handle-img-link xs loop-state)
               [title ys] (split-with (partial not= \]) xs)
               [dud zs] (split-with (partial not= \() ys)
               [link tail] (split-with (partial not= \)) zs)]
@@ -374,16 +376,19 @@
           (if (or (< (count link) 2)
                   (< (count tail) 1)
                   (> (count dud) 1))
-            (recur (concat out head (process-link-title title state) dud link) tail)
-            (recur
-              (into out
-                    (if (= (last head) \!)
-                      (let [alt   (rest title)
-                            [url title] (split-with (partial not= \space) (rest link))
-                            title (process-link-title (string/join (rest title)) state)]
-                        (concat (butlast head) (img alt url title)))
-                      (concat head (href (rest (process-link-title title state)) (rest link)))))
-              (rest tail))))))))
+            (recur (concat out head (process-link-title title state) dud link) tail loop-state)
+            (if (= (last head) \!)
+              ;; Process the IMG tag
+              (let [alt   (rest title)
+                    [url title] (split-with (partial not= \space) (rest link))
+                    title (process-link-title (string/join (rest title)) loop-state)
+                    ;; Now process / generate the img data
+                    [img-text new-loop-state] (img alt url loop-state title)]
+                    (recur (concat (butlast head) img-text) (rest tail) new-loop-state))
+              ;; Process a normal A anchor
+              (let [[link-text new-loop-state] (href (rest (process-link-title title state)) (rest link) loop-state)]
+                (recur (concat head link-text) (rest tail) new-loop-state))))
+              )))))
 
 (defn reference [text]
   (re-find #"^\[[a-zA-Z0-9 ]+\]:" text))
@@ -499,11 +504,10 @@
         :else
         [text state]))))
 
-(defn cleanup-terminally-encoded-chars
-  "Terminally encoded chars are ones that we've determined should no longer be processed or evaluated
-  Things like _ in a href for a link, for example."
+(defn thaw-strings
+  "Terminally encoded strings are ones that we've determined should no longer be processed or evaluated"
   [text state]
-  [(unescape-terminally-encoded-chars text) state])
+  (thaw-string text state))
 
 
 (def transformer-vector
@@ -528,4 +532,5 @@
    blockquote
    paragraph
    br
-   cleanup-terminally-encoded-chars])
+   thaw-strings
+   ])

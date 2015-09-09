@@ -140,7 +140,3 @@ note: XML is escaped in code sections
 
 ![Alt text](http://server/path/to/img.jpg)
 ![Alt text](/path/to/img.jpg "Optional Title")
-
-
-
-
