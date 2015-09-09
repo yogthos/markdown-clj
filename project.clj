@@ -20,7 +20,7 @@
   {:builds {:main
             {:source-paths ["src/cljc" "src/cljs"]
              :jar          true
-             :compiler     {:output-to     "js/markdown.js"
+             :compiler     {:output-to     "demo/js/markdown.js"
                             :optimizations :advanced
                             :pretty-print  false}}
             :dev
