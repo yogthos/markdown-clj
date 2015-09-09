@@ -2,7 +2,7 @@
 
 ## Demo
 
-You can try out the parser [here](https://rawgit.com/yogthos/markdown-clj/master/markdown.html).
+You can try out the parser [here](https://cdn.rawgit.com/yogthos/markdown-clj/master/demo/markdown.html).
 
 ## Installation
 
