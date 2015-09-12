@@ -28,7 +28,8 @@
                         :pretty-print  true}}}}
   :profiles
   {:dev
-   {:dependencies [[criterium "0.4.3" :scope "test"]
+   {:jvm-opts ["-XX:-TieredCompilation"]
+    :dependencies [[criterium "0.4.3" :scope "test"]
                    [commons-lang "2.6" :scope "test"]
                    [org.clojure/clojurescript "1.7.58"]]
     :plugins      [[lein-cljsbuild "1.0.6"]]}})
