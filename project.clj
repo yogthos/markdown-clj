@@ -31,5 +31,5 @@
    {:jvm-opts ["-XX:-TieredCompilation"]
     :dependencies [[criterium "0.4.3" :scope "test"]
                    [commons-lang "2.6" :scope "test"]
-                   [org.clojure/clojurescript "1.7.58"]]
+                   [org.clojure/clojurescript "1.7.122"]]
     :plugins      [[lein-cljsbuild "1.0.6"]]}})
