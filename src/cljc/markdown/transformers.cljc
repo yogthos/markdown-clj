@@ -423,7 +423,7 @@
     :else
     [(if (or code codeblock)
        text
-       (string/replace text #"\[[a-zA-Z0-9 ]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references)))
+       (string/replace text #"\[[^\]]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references)))
      state]))
 
 (defn close-lists [lists]
