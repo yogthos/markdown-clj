@@ -414,17 +414,17 @@
 
 (defn reference-link [text {:keys [code codeblock references] :as state}]
   (cond
-    (nil? references)
+    (or (nil? references) code codeblock)
     [text state]
 
     (reference (string/trim text))
     ["" state]
 
     :else
-    [(if (or code codeblock)
-       text
-       (string/replace text #"\[[^\]]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references)))
-     state]))
+    (let [replaced (string/replace text #"\[[^\]]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references))]
+      (if (= replaced text)
+        [text state]
+        (freeze-string replaced state)))))
 
 (defn close-lists [lists]
   (string/join

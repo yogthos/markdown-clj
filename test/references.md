@@ -19,8 +19,12 @@ This is [an example][id2] reference-style link.
 
 This is [an example][id3] reference-style link.
 
+A link with [an underscore][underscore].
+
 [id1]: http://example.com/  'Optional Title Here'
 
 [id2]: http://example.com/  (Optional Title Here)
 
 [id3]: http://example.com/
+
+[underscore]: http://example.com/#_a_b
