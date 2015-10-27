@@ -4,7 +4,9 @@
                  *substring*
                  transformer-vector
                  parse-reference
-                 parse-reference-link]]))
+                 parse-reference-link
+                 parse-footnote-link
+                 footer]]))
 
 (defn- init-transformer [{:keys [replacement-transformers custom-transformers]}]
   (fn [html line next-line state]
@@ -28,6 +30,12 @@
       (parse-reference-link line references))
     @references))
 
+(defn parse-footnotes [lines]
+  (let [footnotes (atom {:next-fn-id 1 :processed {} :unprocessed {}})]
+    (doseq [line lines]
+      (parse-footnote-link line footnotes))
+    @footnotes))
+
 (defn md->html
   "processes input text line by line and outputs an HTML string"
   [text & params]
@@ -37,10 +45,12 @@
           lines       (.split (str text "\n") "\n")
           html        (goog.string.StringBuffer. "")
           references  (when (:reference-links? params) (parse-references lines))
+          footnotes   (when (:footnotes? params) (parse-footnotes lines))
           transformer (init-transformer params)]
       (loop [[line & more] lines
              state (merge {:clojurescript    true
                            :references       references
+                           :footnotes        footnotes
                            :last-line-empty? true}
                           params)]
         (let [state
@@ -54,7 +64,7 @@
             (recur more
                    (assoc (transformer html line (first more) state)
                      :last-line-empty? (empty? line)))
-            (transformer html line "" (assoc state :eof true)))))
+            (transformer (.append html (footer (:footnotes state))) line "" (assoc state :eof true)))))
       (.toString html))))
 
 (defn ^:export mdToHtml

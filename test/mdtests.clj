@@ -258,6 +258,11 @@
     (markdown/md-to-html (str "test" java.io.File/separator "references.md") wrt :reference-links? true)
     (is (= (slurp (str "test" java.io.File/separator "references.html")) (.toString wrt)))))
 
+(deftest footnotes
+  (let [wrt (java.io.StringWriter.)]
+    (markdown/md-to-html (str "test" java.io.File/separator "footnotes.md") wrt :footnotes? true)
+    (is (= (slurp (str "test" java.io.File/separator "footnotes.html")) (.toString wrt)))))
+
 (deftest all-tegether
   (let [wrt (java.io.StringWriter.)]
     (markdown/md-to-html (str "test" java.io.File/separator "test.md") wrt)

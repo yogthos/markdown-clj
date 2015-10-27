@@ -80,6 +80,18 @@ The parser defaults to using inline reference for performance reasons, to enable
    :reference-links? true)
 ```
 
+### footnotes
+
+To enable footnotes, pass the `:footnotes? true` option:
+
+```clojure
+(md-to-html-string
+  "Footnotes will appear automatically numbered with a link to the footnote at bottom of the page [^footnote1].
+
+  [^footnote1]: The footnote will contain a back link to to the referring text."
+  :footnotes? true)
+```
+
 ## Customizing the Parser
 
 Additional transformers can be specified using the `:custom-transformers` key.
@@ -441,6 +453,15 @@ This is [an example][id] reference-style link.
 
 note: reference links require the `:reference-links?` option to be set to true
 
+### Footnote
+
+```
+"Footnotes will appear automatically numbered with a link to the footnote at bottom of the page [^footnote1].
+[^footnote1]: The footnote will contain a back link to to the referring text."
+```
+
+note: to enable footnotes, the `:footnotes?` option must be set to true.
+
 ### Image
 ```
 ![Alt text](http://server/path/to/img.jpg)
@@ -461,10 +482,3 @@ The parser reads the content line by line, this means that tag content is not al
 Copyright © 2015 Dmitri Sotnikov
 
 Distributed under the Eclipse Public License, the same as Clojure.
-
-
-
-
-
-
-

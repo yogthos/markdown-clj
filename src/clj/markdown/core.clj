@@ -1,6 +1,7 @@
 (ns markdown.core
   (:use [markdown.transformers
-         :only [*next-line* *substring* transformer-vector parse-reference parse-reference-link]])
+         :only [*next-line* *substring* transformer-vector parse-reference parse-reference-link
+                parse-footnote-link footer]])
   (:require [clojure.java.io :as io])
   (:import [java.io BufferedReader
                     BufferedWriter
@@ -35,20 +36,33 @@
         (parse-reference-link line references)))
     @references))
 
+(defn parse-footnotes [in]
+  (let [footnotes (atom {:next-fn-id 1 :processed {} :unprocessed {}})]
+    (if (instance? StringReader in)
+      (do
+        (doseq [line (line-seq (io/reader in))]
+          (parse-footnote-link line footnotes))
+        (.reset in))
+      (doseq [line (line-seq (io/reader in))]
+        (parse-footnote-link line footnotes)))
+    @footnotes))
+
 (defn md-to-html
   "reads markdown content from the input stream and writes HTML to the provided output stream"
   [in out & params]
   (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/formatter clojure.core/format]
     (let [params     (when params (apply (partial assoc {}) params))
-          references (when (:reference-links? params) (parse-references in))]
+          references (when (:reference-links? params) (parse-references in))
+          footnotes (when (:footnotes? params) (parse-footnotes in))]
       (with-open [^BufferedReader rdr (io/reader in)
                   ^BufferedWriter wrt (io/writer out)]
         (let [transformer (init-transformer wrt params)]
           (loop [^String line (.readLine rdr)
                  next-line    (.readLine rdr)
                  state        (merge {:last-line-empty? true
-                                      :references       references}
+                                      :references       references
+                                      :footnotes        footnotes}
                                      params)]
             (let [state (if (:buf state)
                           (transformer (:buf state)
@@ -61,7 +75,7 @@
                        (.readLine rdr)
                        (assoc (transformer line next-line state)
                          :last-line-empty? (empty? (.trim line))))
-                (transformer "" nil (assoc state :eof true))))))
+                (transformer (footer (:footnotes state)) nil (assoc state :eof true))))))
         (.flush wrt)))))
 
 (defn md-to-html-string
