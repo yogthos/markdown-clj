@@ -426,6 +426,59 @@
         [text state]
         (freeze-string replaced state)))))
 
+(defn footnote [text]
+  (re-find #"^\[\^[a-zA-Z0-9_-]+\]:" text))
+
+(defn parse-footnote-link [line footnotes]
+  (let [trimmed (string/trim line)]
+    (when-let [link (footnote trimmed)]
+      (swap! footnotes assoc-in [:unprocessed (subs link 0 (dec (count link)))]
+             (parse-reference trimmed (inc (count link)))))))
+
+(defn replace-footnote-link [footnotes footnote]
+  (let [next-fn-id (:next-fn-id footnotes)
+        link (str "#fn-" next-fn-id)]
+    (str "<a href='" link "' id='fnref" next-fn-id "'><sup>" next-fn-id "</sup></a>")))
+
+(defn replace-all-footnote-links [text {:keys [footnotes] :as state}]
+  (let [matcher  #"\[\^[a-zA-Z0-9_-]+\]"
+        match (re-find matcher text)]
+    (if (nil? match)
+      [text state]
+      (let [next-text (string/replace-first text matcher (partial replace-footnote-link footnotes))
+            next-state
+            (-> state
+                (update-in [:footnotes :next-fn-id] inc)
+                (assoc-in [:footnotes :processed (get-in state [:footnotes :next-fn-id])]
+                          (get-in state [:footnotes :unprocessed match])))]
+        (recur next-text next-state)))))
+
+(defn footnote-link [text {:keys [code codeblock footnotes] :as state}]
+  (cond
+    (or (nil? (:unprocessed footnotes)) code codeblock)
+    [text state]
+
+    (footnote (string/trim text))
+    ["" state]
+
+    :else
+    (let [[text state] (replace-all-footnote-links text state)]
+      [text state])))
+
+(defn footer [footnotes]
+  (if (empty? (:processed footnotes))
+    ""
+    (->> (:processed  footnotes)
+         (into (sorted-map))
+         (reduce
+          (fn [footnotes [id label]]
+            (str footnotes
+                 "<li id='fn-" id "'>"
+                 (apply str (interpose " " label))
+                 "<a href='#fnref" id "'>&#8617;</a></li>"))
+          "")
+         (#(str "<ol>" % "</ol>")))))
+
 (defn close-lists [lists]
   (string/join
     (for [[list-type] lists]
@@ -524,6 +577,7 @@
    autourl-transformer
    link
    reference-link
+   footnote-link
    hr
    li
    heading
