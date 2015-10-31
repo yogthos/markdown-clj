@@ -566,6 +566,56 @@
     (thaw-string text state)
     [text state]))
 
+(defn parse-metadata-line
+  "Given a line of metadata header text return either a list containing a parsed
+  and normalizd key and the original text of the value, or if no header is found
+  (this is a continuation or new value from a pervious header key) simply
+  return the text. If a blank or invalid line is found return nil."
+  [line]
+  (let [[_ key val] (re-matches #"^([0-9A-Za-z_-]*):(.*)$" line)
+        [_ next-val] (re-matches #"^    (.*)$" line)]
+    (when (not= (string/trim line) "")
+      (cond
+        key [(keyword (string/lower-case key)) val]
+        next-val line))))
+
+(defn flatten-metadata
+  "Given a list of maps which contain a single key/value, flatten them all into
+  a single map with all the leading spaces removed. If an empty list is provided
+  then return nil."
+  [metadata]
+  (if (= 0 (count metadata))
+    nil
+    (loop [acc {}
+           remain metadata
+           prev-key nil]
+      (if (not (empty? remain))
+        (let [data (first remain)
+              [key val] (if (sequential? data)
+                          [(first data) (last data)]
+                          [prev-key data])
+              prev-val (or (get acc key) [])
+              postfix (if (= [\space \space] (take-last 2 val)) "\n" "")
+              norm-val (str (string/trim val) postfix)
+              new-val (if (not= "" norm-val)
+                        (conj prev-val norm-val)
+                        prev-val)]
+          (recur (merge acc {key new-val}) (rest remain) key))
+        acc))))
+
+(defn parse-metadata-headers
+  "Given a sequence of lines from a markdown document, attempt to parse a
+  metadata header if it exists."
+  [lines-seq]
+  {:pre [(sequential? lines-seq)
+         (every? string? lines-seq)]}
+  (loop [acc []
+         lines lines-seq]
+    (let [line (first lines)
+          parsed (parse-metadata-line line)]
+      (if parsed
+        (recur (conj acc parsed) (rest lines))
+        (flatten-metadata acc)))))
 
 (def transformer-vector
   [empty-line
