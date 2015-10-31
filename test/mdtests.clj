@@ -283,3 +283,19 @@
 (deftest two-links-tests-link-processing
   (is (= "<h2>When you have a pair of links <a href='http://123.com/1'>link1</a> and you want both <a href='That's crazy'>Wow</a></h2>"
       (markdown/md-to-html-string "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That's crazy)"))))
+
+(deftest md-metadata
+  (testing "Finds all metadata and correctly parses rest of file."
+    (let [md (slurp (str "test/metadata.md"))
+          {:keys [metadata html]} (markdown/md-to-html-string
+                                    md :parse-meta? true)]
+      (is (= "<h1>The Document</h1>" html))
+      (is (= {:title ["My Document"]
+              :summary ["A brief description of my document."]
+              :authors ["Justin May"
+                        "Spooky Mulder"
+                        "End Line At End\n"]
+              :date ["October 31, 2015"]
+              :blank-value []
+              :base_url ["http://example.com"]}
+             metadata)))))

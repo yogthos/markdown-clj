@@ -92,6 +92,26 @@ To enable footnotes, pass the `:footnotes? true` option:
   :footnotes? true)
 ```
 
+### Metadata
+
+To enable parsing of metadata, pass the `:parse-meta? true` option. This will change the output of the function to a map with contains two keys, `:html` which contains all the parsed HTML, and `:metadata` which will contain a map of all metadata included at the top of the document. The metadata format is based on the syntax described by [MultiMarkdown](https://github.com/fletcher/MultiMarkdown/wiki/MultiMarkdown-Syntax-Guide#metadata). 
+
+The value of each key in the metadata map will be a list of either 0, 1 or many strings. If a metadata value ends in two spaces then the string will end in a newline. If a line does not contain a header and has at least 4 spaces in front of it then it will be considered to be a member of the last key that was found.
+
+```clojure
+(md-to-html-string
+  "Author: Rexella van Imp
+    Kim Jong-un    
+Date: October 31, 2015
+   
+   # Hello!" :parse-meta? true)
+
+{:metadata {:author ["Rexella van Imp"
+                     "Kim Jong-un"], 
+            :date ["October 31, 2015"]}, 
+ :html "<h1>Hello!</h1>"}
+``` 
+
 ## Customizing the Parser
 
 Additional transformers can be specified using the `:custom-transformers` key.
