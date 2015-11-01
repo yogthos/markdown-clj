@@ -437,20 +437,20 @@
 
 (defn replace-footnote-link [footnotes footnote]
   (let [next-fn-id (:next-fn-id footnotes)
-        link (str "#fn-" next-fn-id)]
+        link       (str "#fn-" next-fn-id)]
     (str "<a href='" link "' id='fnref" next-fn-id "'><sup>" next-fn-id "</sup></a>")))
 
 (defn replace-all-footnote-links [text {:keys [footnotes] :as state}]
-  (let [matcher  #"\[\^[a-zA-Z0-9_-]+\]"
-        match (re-find matcher text)]
+  (let [matcher #"\[\^[a-zA-Z0-9_-]+\]"
+        match   (re-find matcher text)]
     (if (nil? match)
       [text state]
       (let [next-text (string/replace-first text matcher (partial replace-footnote-link footnotes))
             next-state
-            (-> state
-                (update-in [:footnotes :next-fn-id] inc)
-                (assoc-in [:footnotes :processed (get-in state [:footnotes :next-fn-id])]
-                          (get-in state [:footnotes :unprocessed match])))]
+                      (-> state
+                          (update-in [:footnotes :next-fn-id] inc)
+                          (assoc-in [:footnotes :processed (get-in state [:footnotes :next-fn-id])]
+                                    (get-in state [:footnotes :unprocessed match])))]
         (recur next-text next-state)))))
 
 (defn footnote-link [text {:keys [code codeblock footnotes] :as state}]
@@ -468,15 +468,15 @@
 (defn footer [footnotes]
   (if (empty? (:processed footnotes))
     ""
-    (->> (:processed  footnotes)
+    (->> (:processed footnotes)
          (into (sorted-map))
          (reduce
-          (fn [footnotes [id label]]
-            (str footnotes
-                 "<li id='fn-" id "'>"
-                 (apply str (interpose " " label))
-                 "<a href='#fnref" id "'>&#8617;</a></li>"))
-          "")
+           (fn [footnotes [id label]]
+             (str footnotes
+                  "<li id='fn-" id "'>"
+                  (apply str (interpose " " label))
+                  "<a href='#fnref" id "'>&#8617;</a></li>"))
+           "")
          (#(str "<ol>" % "</ol>")))))
 
 (defn close-lists [lists]
@@ -572,34 +572,32 @@
   (this is a continuation or new value from a pervious header key) simply
   return the text. If a blank or invalid line is found return nil."
   [line]
-  (let [[_ key val] (re-matches #"^([0-9A-Za-z_-]*):(.*)$" line)
-        [_ next-val] (re-matches #"^    (.*)$" line)]
-    (when (not= (string/trim line) "")
-      (cond
-        key [(keyword (string/lower-case key)) val]
-        next-val line))))
+  (when line
+    (let [[_ key val] (re-matches #"^([0-9A-Za-z_-]*):(.*)$" line)
+          [_ next-val] (re-matches #"^    (.*)$" line)]
+      (when (not= (string/trim line) "")
+        (cond
+          key [(keyword (string/lower-case key)) val]
+          next-val line)))))
 
 (defn flatten-metadata
   "Given a list of maps which contain a single key/value, flatten them all into
   a single map with all the leading spaces removed. If an empty list is provided
   then return nil."
   [metadata]
-  (if (= 0 (count metadata))
-    nil
-    (loop [acc {}
-           remain metadata
+  (when (pos? (count metadata))
+    (loop [acc      {}
+           remain   metadata
            prev-key nil]
       (if (not (empty? remain))
-        (let [data (first remain)
-              [key val] (if (sequential? data)
-                          [(first data) (last data)]
-                          [prev-key data])
-              prev-val (or (get acc key) [])
-              postfix (if (= [\space \space] (take-last 2 val)) "\n" "")
+        (let [data     (first remain)
+              [key val] (if (sequential? data) data [prev-key data])
+              prev-val (get acc key [])
+              postfix  (if (= [\space \space] (take-last 2 val)) "\n" "")
               norm-val (str (string/trim val) postfix)
-              new-val (if (not= "" norm-val)
-                        (conj prev-val norm-val)
-                        prev-val)]
+              new-val  (if-not (empty? norm-val)
+                         (conj prev-val norm-val)
+                         prev-val)]
           (recur (merge acc {key new-val}) (rest remain) key))
         acc))))
 
@@ -609,13 +607,12 @@
   [lines-seq]
   {:pre [(sequential? lines-seq)
          (every? string? lines-seq)]}
-  (loop [acc []
-         lines lines-seq]
-    (let [line (first lines)
-          parsed (parse-metadata-line line)]
-      (if parsed
-        (recur (conj acc parsed) (rest lines))
-        (flatten-metadata acc)))))
+  (reduce
+    (fn [acc line]
+      (if-let [parsed (parse-metadata-line line)]
+        (conj acc parsed)
+        (reduced (flatten-metadata acc))))
+    [] lines-seq))
 
 (def transformer-vector
   [empty-line

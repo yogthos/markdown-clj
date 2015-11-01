@@ -94,17 +94,26 @@ To enable footnotes, pass the `:footnotes? true` option:
 
 ### Metadata
 
-To enable parsing of metadata, pass the `:parse-meta? true` option. This will change the output of the function to a map with contains two keys, `:html` which contains all the parsed HTML, and `:metadata` which will contain a map of all metadata included at the top of the document. The metadata format is based on the syntax described by [MultiMarkdown](https://github.com/fletcher/MultiMarkdown/wiki/MultiMarkdown-Syntax-Guide#metadata). 
+The metadata encoded using the syntax described by [MultiMarkdown](https://github.com/fletcher/MultiMarkdown/wiki/MultiMarkdown-Syntax-Guide#metadata) can be optionally extracted from the document.
+ 
+The `md-to-html` function will attempt to parse the metadata when passed the `:parse-meta? true` option and return it as its output.
+Additionally, `md-to-html-string-with-meta` function can be used to parse string input. The function returns a map with two keys, `:html` containing the parsed HTML, and `:metadata` containing a map with the metadata included at the top of the document.
 
 The value of each key in the metadata map will be a list of either 0, 1 or many strings. If a metadata value ends in two spaces then the string will end in a newline. If a line does not contain a header and has at least 4 spaces in front of it then it will be considered to be a member of the last key that was found.
 
 ```clojure
-(md-to-html-string
+(let [input    (new StringReader text)
+      output   (new StringWriter)
+      metadata (md-to-html input output :parse-meta? true)
+      html     (.toString output)]
+  {:metadata metadata :html html})
+
+(md-to-html-string-with-meta
   "Author: Rexella van Imp
     Kim Jong-un    
 Date: October 31, 2015
    
-   # Hello!" :parse-meta? true)
+   # Hello!")
 
 {:metadata {:author ["Rexella van Imp"
                      "Kim Jong-un"], 
@@ -208,6 +217,8 @@ a string followed by the options as its input, and returns the resulting HTML st
 (.log js/console
   (md->html "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
                :code-style #(str "class=\"" % "\"")))
+               
+(md->html-with-meta "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```")               
 ```
 
 ## Usage JavaScript

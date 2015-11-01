@@ -49,7 +49,7 @@
     @footnotes))
 
 (defn parse-metadata [in]
-  (let [lines (line-seq (io/reader in))
+  (let [lines    (line-seq (io/reader in))
         metadata (parse-metadata-headers lines)]
     (when (instance? StringReader in)
       (.reset in))
@@ -60,7 +60,7 @@
   (when (not= 0 (mod (count params) 2))
     (throw (IllegalArgumentException.
              "Must supply an even number of parameters")))
-  (when params (apply (partial assoc {}) params)))
+  (when params (apply assoc {} params)))
 
 (defn md-to-html
   "reads markdown content from the input stream and writes HTML to the provided
@@ -69,10 +69,10 @@
   [in out & params]
   (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/formatter clojure.core/format]
-    (let [params (parse-params params)
+    (let [params     (parse-params params)
           references (when (:reference-links? params) (parse-references in))
-          footnotes (when (:footnotes? params) (parse-footnotes in))
-          metadata (when (:parse-meta? params) (parse-metadata in))]
+          footnotes  (when (:footnotes? params) (parse-footnotes in))
+          metadata   (when (:parse-meta? params) (parse-metadata in))]
       (with-open [^BufferedReader rdr (io/reader in)
                   ^BufferedWriter wrt (io/writer out)]
         (when (and metadata (:parse-meta? params))
@@ -99,14 +99,18 @@
         (.flush wrt)
         metadata))))
 
-(defn md-to-html-string
+(defn md-to-html-string*
   "converts a markdown formatted string to an HTML formatted string"
-  [text & params]
+  [text params]
   (when text
-    (let [input  (new StringReader text)
-          output (new StringWriter)
-          metadata (apply (partial md-to-html input output) params)
-          html (.toString output)]
-      (if (:parse-meta? (parse-params params))
-        {:metadata metadata :html html}
-        html))))
+    (let [input    (new StringReader text)
+          output   (new StringWriter)
+          metadata (apply md-to-html input output params)
+          html     (.toString output)]
+      {:metadata metadata :html html})))
+
+(defn md-to-html-string [text & params]
+  (:html (md-to-html-string* text params)))
+
+(defn md-to-html-string-with-meta [text & params]
+  (md-to-html-string* text (into [:parse-meta? true] params)))

@@ -1,12 +1,13 @@
 (ns markdown.core
   (:require [markdown.transformers
-         :refer [*next-line*
-                 *substring*
-                 transformer-vector
-                 parse-reference
-                 parse-reference-link
-                 parse-footnote-link
-                 footer]]))
+             :refer [*next-line*
+                     *substring*
+                     transformer-vector
+                     parse-reference
+                     parse-reference-link
+                     parse-footnote-link
+                     parse-metadata-headers
+                     footer]]))
 
 (defn- init-transformer [{:keys [replacement-transformers custom-transformers]}]
   (fn [html line next-line state]
@@ -36,9 +37,13 @@
       (parse-footnote-link line footnotes))
     @footnotes))
 
-(defn md->html
+(defn parse-metadata [lines]
+  (let [[metadata lines] (split-with #(not-empty (.trim %)) lines)]
+    [(parse-metadata-headers metadata) lines]))
+
+(defn md-to-html-string*
   "processes input text line by line and outputs an HTML string"
-  [text & params]
+  [text params]
   (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))
             markdown.transformers/formatter format]
     (let [params      (when params (apply (partial assoc {}) params))
@@ -46,6 +51,7 @@
           html        (goog.string.StringBuffer. "")
           references  (when (:reference-links? params) (parse-references lines))
           footnotes   (when (:footnotes? params) (parse-footnotes lines))
+          [metadata lines] (if (:parse-meta? params) (parse-metadata lines) [nil lines])
           transformer (init-transformer params)]
       (loop [[line & more] lines
              state (merge {:clojurescript    true
@@ -65,9 +71,20 @@
                    (assoc (transformer html line (first more) state)
                      :last-line-empty? (empty? line)))
             (transformer (.append html (footer (:footnotes state))) line "" (assoc state :eof true)))))
-      (.toString html))))
+      {:metadata metadata :html (.toString html)})))
+
+(defn md->html [text & params]
+  (:html (md-to-html-string* text params)))
+
+(defn md->html-with-meta [text & params]
+  (md-to-html-string* text (into [:parse-meta? true] params)))
 
 (defn ^:export mdToHtml
   "Js accessible wrapper"
   [& params]
   (apply md->html params))
+
+(defn ^:export mdToHtmlWithMeta
+  "Js accessible wrapper"
+  [& params]
+  (apply md->html-with-meta params))

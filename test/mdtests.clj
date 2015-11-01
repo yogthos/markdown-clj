@@ -287,8 +287,7 @@
 (deftest md-metadata
   (testing "Finds all metadata and correctly parses rest of file."
     (let [md (slurp (str "test/metadata.md"))
-          {:keys [metadata html]} (markdown/md-to-html-string
-                                    md :parse-meta? true)]
+          {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)]
       (is (= "<h1>The Document</h1>" html))
       (is (= {:title ["My Document"]
               :summary ["A brief description of my document."]
