@@ -504,6 +504,30 @@ note: to enable footnotes, the `:footnotes?` option must be set to true.
 [![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
 ```
 
+### Table
+
+You can create tables by assembling a list of words and dividing them with hyphens - (for the first row), and then separating each column with a pipe |:
+
+```
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |
+```
+
+By including colons : within the header row, you can define text to be left-aligned, right-aligned, or center-aligned:
+
+```
+| Left-Aligned  | Center Aligned  | Right Aligned |
+| :------------ |:---------------:| -----:|
+| col 3 is      | some wordy text | $1600 |
+| col 2 is      | centered        |   $12 |
+| zebra stripes | are neat        |    $1 |
+```
+
+A colon on the left-most side indicates a left-aligned column; a colon on the right-most side indicates a right-aligned column; a colon on both sides indicates a center-aligned column.
+
+
 ## Limitations
 
 The parser reads the content line by line, this means that tag content is not allowed to span multiple lines.

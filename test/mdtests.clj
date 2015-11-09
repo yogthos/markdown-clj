@@ -284,6 +284,52 @@
   (is (= "<h2>When you have a pair of links <a href='http://123.com/1'>link1</a> and you want both <a href='That's crazy'>Wow</a></h2>"
       (markdown/md-to-html-string "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That's crazy)"))))
 
+(deftest parse-table-row
+  (is (= (transformers/parse-table-row "| table cell contents |") [{:text "table cell contents"}]))
+  (is (= (transformers/parse-table-row "| contents 1 | contents 2 | contents 3 | contents 4 |")
+         [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}])))
+
+(deftest table-row->str
+  (is (= (transformers/table-row->str
+          [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
+          true)
+         "<th>contents 1</th><th>contents 2</th><th>contents 3</th><th>contents 4</th>"))
+  (is (= (transformers/table-row->str
+          [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
+          false)
+         "<td>contents 1</td><td>contents 2</td><td>contents 3</td><td>contents 4</td>"))
+  (is (= (transformers/table-row->str
+          [{:text "contents 1" :alignment :left}
+           {:text "contents 2" :alignment :center}
+           {:text "contents 3" :alignment :right}
+           {:text "contents 4"}]
+          false)
+         "<td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td>")))
+
+(deftest table->str
+  (is (= (transformers/table->str
+          {:alignment-seq
+           [{:alignment :left} {:alignment :center} {:alignment :right} {:alignment nil}]
+           :data [[{:text "Header 1"}
+                   {:text "Header 2"}
+                   {:text "Header 3"}
+                   {:text "Header 4"}]
+                  [{:text "contents 1"}
+                   {:text "contents 2"}
+                   {:text "contents 3"}
+                   {:text "contents 4"}]]})
+         "<table><thead><tr><th align='left'>Header 1</th><th align='center'>Header 2</th><th align='right'>Header 3</th><th>Header 4</th></tr></thead><tbody><tr><td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td></tr></tbody></table>")))
+
+(deftest divider-seq->alignment
+  (is (= (transformers/divider-seq->alignment
+          [{:text "-----"} {:text ":-----"} {:text "-----:"} {:text ":-----:"}])
+         [nil {:alignment :left} {:alignment :right} {:alignment :center}])))
+
+(deftest tables
+  (let [wrt (java.io.StringWriter.)]
+    (markdown/md-to-html (str "test" java.io.File/separator "tables.md") wrt)
+    (is (= (slurp (str "test" java.io.File/separator "tables.html")) (.toString wrt)))))
+
 (deftest md-metadata
   (testing "Finds all metadata and correctly parses rest of file."
     (let [md (slurp (str "test/metadata.md"))
