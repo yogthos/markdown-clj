@@ -1,9 +1,12 @@
 (ns markdown.core
-  (:use [markdown.transformers
-         :only [*next-line* *substring* transformer-vector parse-reference parse-reference-link
-                parse-footnote-link footer parse-metadata-headers]])
   (:require [clojure.java.io :as io]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [markdown.common
+             :refer [*substring*]]
+            [markdown.links
+             :refer [parse-reference parse-reference-link parse-footnote-link]]
+            [markdown.transformers
+             :refer [*next-line*  transformer-vector footer parse-metadata-headers]])
   (:import [java.io BufferedReader
                     BufferedWriter
                     StringReader
@@ -67,7 +70,7 @@
   output stream. If metadata was requested to be parsed it is returned, otherwise
   nil is returned."
   [in out & params]
-  (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
+  (binding [markdown.common/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/formatter clojure.core/format]
     (let [params     (parse-params params)
           references (when (:reference-links? params) (parse-references in))

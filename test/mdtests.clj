@@ -1,6 +1,7 @@
 (ns mdtests
   (:require [markdown.core :as markdown]
-            [markdown.transformers :as transformers])
+            [markdown.transformers :as transformers]
+            [markdown.tables :as tables])
   (:use clojure.test))
 
 (deftest heading1
@@ -127,9 +128,9 @@
          (markdown/md-to-html-string "foo bar baz `(fn [x & xs] (str \"x:\" x))` foo"))))
 
 (deftest multiline-code
-  (is (= "<pre><code>x = 5\ny = 6\nz = x + y\n</code></pre>"
+  (is (= "<pre><code>x = 5\ny = 6\nz = x + y</code></pre>"
          (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y")))
-  (is (= "<pre><code>x = 5\ny = 6\nz = x + y\n&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
+  (is (= "<pre><code>x = 5\ny = 6\nz = x + y\n&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x&quot;&#41;&#41;</code></pre>"
          (markdown/md-to-html-string "    x = 5\n    y = 6\n    z = x + y\n    (fn [x & xs] (str \"x\"))"))))
 
 (deftest codeblock
@@ -285,20 +286,20 @@
       (markdown/md-to-html-string "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That's crazy)"))))
 
 (deftest parse-table-row
-  (is (= (transformers/parse-table-row "| table cell contents |") [{:text "table cell contents"}]))
-  (is (= (transformers/parse-table-row "| contents 1 | contents 2 | contents 3 | contents 4 |")
+  (is (= (tables/parse-table-row "| table cell contents |") [{:text "table cell contents"}]))
+  (is (= (tables/parse-table-row "| contents 1 | contents 2 | contents 3 | contents 4 |")
          [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}])))
 
 (deftest table-row->str
-  (is (= (transformers/table-row->str
+  (is (= (tables/table-row->str
           [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
           true)
          "<th>contents 1</th><th>contents 2</th><th>contents 3</th><th>contents 4</th>"))
-  (is (= (transformers/table-row->str
+  (is (= (tables/table-row->str
           [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
           false)
          "<td>contents 1</td><td>contents 2</td><td>contents 3</td><td>contents 4</td>"))
-  (is (= (transformers/table-row->str
+  (is (= (tables/table-row->str
           [{:text "contents 1" :alignment :left}
            {:text "contents 2" :alignment :center}
            {:text "contents 3" :alignment :right}
@@ -307,7 +308,7 @@
          "<td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td>")))
 
 (deftest table->str
-  (is (= (transformers/table->str
+  (is (= (tables/table->str
           {:alignment-seq
            [{:alignment :left} {:alignment :center} {:alignment :right} {:alignment nil}]
            :data [[{:text "Header 1"}
@@ -321,7 +322,7 @@
          "<table><thead><tr><th align='left'>Header 1</th><th align='center'>Header 2</th><th align='right'>Header 3</th><th>Header 4</th></tr></thead><tbody><tr><td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td></tr></tbody></table>")))
 
 (deftest divider-seq->alignment
-  (is (= (transformers/divider-seq->alignment
+  (is (= (tables/divider-seq->alignment
           [{:text "-----"} {:text ":-----"} {:text "-----:"} {:text ":-----:"}])
          [nil {:alignment :left} {:alignment :right} {:alignment :center}])))
 

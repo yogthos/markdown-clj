@@ -1,13 +1,10 @@
 (ns markdown.core
-  (:require [markdown.transformers
-             :refer [*next-line*
-                     *substring*
-                     transformer-vector
-                     parse-reference
-                     parse-reference-link
-                     parse-footnote-link
-                     parse-metadata-headers
-                     footer]]))
+  (:require [markdown.common
+             :refer [*substring*]]
+            [markdown.links
+             :refer [parse-reference parse-reference-link parse-footnote-link]]
+            [markdown.transformers
+             :refer [*next-line*  transformer-vector footer parse-metadata-headers]]))
 
 (defn- init-transformer [{:keys [replacement-transformers custom-transformers]}]
   (fn [html line next-line state]
@@ -44,7 +41,7 @@
 (defn md-to-html-string*
   "processes input text line by line and outputs an HTML string"
   [text params]
-  (binding [markdown.transformers/*substring* (fn [s n] (apply str (drop n s)))
+  (binding [markdown.common/*substring* (fn [s n] (apply str (drop n s)))
             markdown.transformers/formatter format]
     (let [params      (when params (apply (partial assoc {}) params))
           lines       (.split (str text "\n") "\n")
