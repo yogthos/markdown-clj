@@ -142,3 +142,11 @@
       (str "<h" heading ">"
            (if heading-anchors (str "<a name=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"></a>"))
            text "</h" heading ">"))))
+
+(defn dashes [text state]
+  [(if (or (:code state) (:codeblock state))
+     text
+     (-> text
+         (string/replace #"\-\-\-" "&mdash;")
+         (string/replace #"\-\-" "&ndash;")))
+   state])

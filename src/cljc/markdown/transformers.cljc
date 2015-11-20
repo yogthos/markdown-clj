@@ -18,7 +18,8 @@
               italics
               strikethrough
               inline-code
-              make-heading]]))
+              make-heading
+              dashes]]))
 
 (declare ^{:dynamic true} formatter)
 
@@ -301,4 +302,5 @@
    table
    paragraph
    br
-   thaw-strings])
+   thaw-strings
+   dashes])

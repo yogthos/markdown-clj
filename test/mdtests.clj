@@ -345,3 +345,9 @@
               :blank-value []
               :base_url ["http://example.com"]}
              metadata)))))
+
+(deftest n-dash
+  (is (= "<p>boo &ndash; bar</p>" (markdown/md-to-html-string "boo -- bar"))))
+
+(deftest m-dash
+  (is (= "<p>boo &mdash; bar</p>" (markdown/md-to-html-string "boo --- bar"))))
