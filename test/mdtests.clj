@@ -63,7 +63,7 @@
 
 (deftest mulitple-paragraphs
   (is (= "<p>foo bar baz</p><p>foo bar baz</p>"
-      (markdown/md-to-html-string "\nfoo bar baz\n\n\nfoo bar baz"))))
+         (markdown/md-to-html-string "\nfoo bar baz\n\n\nfoo bar baz"))))
 
 (deftest ul
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>"
@@ -79,7 +79,7 @@
 
 (deftest ul-followed-by-multiline-paragraph
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph</p>"
-        (markdown/md-to-html-string "* foo\n* bar\n* baz\n\nparagraph"))))
+         (markdown/md-to-html-string "* foo\n* bar\n* baz\n\nparagraph"))))
 
 (deftest ul-nested
   (is (= "<ul><li>first item<ul><li>first sub-item<ul><li>second sub-item</li></ul></li><li>third sub-item</li></ul></li><li>second item<ul><li>first sub-item</li><li>second sub-item</li></ul></li><li>third item</li></ul>"
@@ -172,7 +172,9 @@
   (is (= "<p><a href='http://github.com/*'>github</a></p>"
          (markdown/md-to-html-string "[github](http://github.com/*)")))
   (is (= "<ul><li><a href='http://github.com/*'>github</a></li></ul>"
-         (markdown/md-to-html-string "* [github](http://github.com/*)"))))
+         (markdown/md-to-html-string "* [github](http://github.com/*)")))
+  (is (= "<ul><li>hi</li></ul><p><a href='https://see-here'>a link</a></p>"
+         (markdown/md-to-html-string "* hi\n\n[a link](https://see-here)"))))
 
 (deftest styled-link
   (is (= "<p><a href='http://github.com'><em>github</em></a></p>"
@@ -237,7 +239,7 @@
 
 (deftest paragraph-after-list
   (is (= "<ol><li>a</li><li>b</li></ol><p>test <strong>bold</strong> and <em>italic</em></p>"
-         (markdown/md-to-html-string"1. a\n2. b\n\ntest **bold** and *italic*"))))
+         (markdown/md-to-html-string "1. a\n2. b\n\ntest **bold** and *italic*"))))
 
 (deftest paragraph-close-before-list
   (is (= "<p>in paragraph</p><ul><li>list</li></ul>"
@@ -279,11 +281,11 @@
 
 (deftest complex-link-with-terminal-encoding-inside-header
   (is (= "<h2>With a link <a href='http://a.com/under_score_in_the_link/'>the contents of the_link</a></h2>"
-      (markdown/md-to-html-string "##With a link [the contents of the_link](http://a.com/under_score_in_the_link/)"))))
+         (markdown/md-to-html-string "##With a link [the contents of the_link](http://a.com/under_score_in_the_link/)"))))
 
 (deftest two-links-tests-link-processing
   (is (= "<h2>When you have a pair of links <a href='http://123.com/1'>link1</a> and you want both <a href='That's crazy'>Wow</a></h2>"
-      (markdown/md-to-html-string "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That's crazy)"))))
+         (markdown/md-to-html-string "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That's crazy)"))))
 
 (deftest parse-table-row
   (is (= (tables/parse-table-row "| table cell contents |") [{:text "table cell contents"}]))
@@ -292,38 +294,38 @@
 
 (deftest table-row->str
   (is (= (tables/table-row->str
-          [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
-          true)
+           [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
+           true)
          "<th>contents 1</th><th>contents 2</th><th>contents 3</th><th>contents 4</th>"))
   (is (= (tables/table-row->str
-          [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
-          false)
+           [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]
+           false)
          "<td>contents 1</td><td>contents 2</td><td>contents 3</td><td>contents 4</td>"))
   (is (= (tables/table-row->str
-          [{:text "contents 1" :alignment :left}
-           {:text "contents 2" :alignment :center}
-           {:text "contents 3" :alignment :right}
-           {:text "contents 4"}]
-          false)
+           [{:text "contents 1" :alignment :left}
+            {:text "contents 2" :alignment :center}
+            {:text "contents 3" :alignment :right}
+            {:text "contents 4"}]
+           false)
          "<td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td>")))
 
 (deftest table->str
   (is (= (tables/table->str
-          {:alignment-seq
-           [{:alignment :left} {:alignment :center} {:alignment :right} {:alignment nil}]
-           :data [[{:text "Header 1"}
-                   {:text "Header 2"}
-                   {:text "Header 3"}
-                   {:text "Header 4"}]
-                  [{:text "contents 1"}
-                   {:text "contents 2"}
-                   {:text "contents 3"}
-                   {:text "contents 4"}]]})
+           {:alignment-seq
+                  [{:alignment :left} {:alignment :center} {:alignment :right} {:alignment nil}]
+            :data [[{:text "Header 1"}
+                    {:text "Header 2"}
+                    {:text "Header 3"}
+                    {:text "Header 4"}]
+                   [{:text "contents 1"}
+                    {:text "contents 2"}
+                    {:text "contents 3"}
+                    {:text "contents 4"}]]})
          "<table><thead><tr><th align='left'>Header 1</th><th align='center'>Header 2</th><th align='right'>Header 3</th><th>Header 4</th></tr></thead><tbody><tr><td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td></tr></tbody></table>")))
 
 (deftest divider-seq->alignment
   (is (= (tables/divider-seq->alignment
-          [{:text "-----"} {:text ":-----"} {:text "-----:"} {:text ":-----:"}])
+           [{:text "-----"} {:text ":-----"} {:text "-----:"} {:text ":-----:"}])
          [nil {:alignment :left} {:alignment :right} {:alignment :center}])))
 
 (deftest tables
@@ -336,14 +338,14 @@
     (let [md (slurp (str "test/metadata.md"))
           {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)]
       (is (= "<h1>The Document</h1>" html))
-      (is (= {:title ["My Document"]
-              :summary ["A brief description of my document."]
-              :authors ["Justin May"
-                        "Spooky Mulder"
-                        "End Line At End\n"]
-              :date ["October 31, 2015"]
+      (is (= {:title       ["My Document"]
+              :summary     ["A brief description of my document."]
+              :authors     ["Justin May"
+                            "Spooky Mulder"
+                            "End Line At End\n"]
+              :date        ["October 31, 2015"]
               :blank-value []
-              :base_url ["http://example.com"]}
+              :base_url    ["http://example.com"]}
              metadata)))))
 
 (deftest n-dash

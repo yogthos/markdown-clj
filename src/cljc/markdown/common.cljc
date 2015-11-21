@@ -21,18 +21,19 @@
 (defn thaw-string
   "Recursively replaces the frozen strings in the output with the original text."
   [text state]
-  (let [unfrozen-text (string/replace
-                        text
-                        (re-pattern (str escape-delimiter "\\d+" escape-delimiter))
-                        #(get (:frozen-strings state) % %))]
-    (if (= text unfrozen-text)
-      [unfrozen-text (dissoc state :frozen-strings)]
-      (recur unfrozen-text state))))
+  (if-let [matches (re-seq (re-pattern (str escape-delimiter "\\d+" escape-delimiter)) text)]
+    (recur
+      (reduce
+        (fn [s r]
+          (string/replace s (re-pattern r) #(get (:frozen-strings state) % %)))
+        text matches)
+      (update state :frozen-strings #(apply dissoc % matches)))
+    [text state]))
 
 (defn thaw-strings
   "Terminally encoded strings are ones that we've determined should no longer be processed or evaluated"
   [text state]
-  (if (:frozen-strings state)
+  (if-not (empty? (:frozen-strings state))
     (thaw-string text state)
     [text state]))
 

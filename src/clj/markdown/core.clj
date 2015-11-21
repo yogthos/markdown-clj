@@ -6,7 +6,7 @@
             [markdown.links
              :refer [parse-reference parse-reference-link parse-footnote-link]]
             [markdown.transformers
-             :refer [*next-line*  transformer-vector footer parse-metadata-headers]])
+             :refer [*next-line* transformer-vector footer parse-metadata-headers]])
   (:import [java.io BufferedReader
                     BufferedWriter
                     StringReader

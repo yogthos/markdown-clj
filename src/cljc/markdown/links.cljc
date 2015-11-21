@@ -3,7 +3,6 @@
             [markdown.common
              :refer
              [freeze-string
-              thaw-string
               strong
               bold
               em
