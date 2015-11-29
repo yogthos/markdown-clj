@@ -1,4 +1,4 @@
-#Markdown parser written in Clojure
+#Markdown parser written in Clojure/Script
 
 ## Demo
 
