@@ -37,37 +37,43 @@
       [title state]
       [italics em strong bold strikethrough])))
 
-(defn link [text {:keys [code codeblock] :as state}]
-  (if (or code codeblock)
-    [text state]
-    (loop [out        []
-           tokens     (seq text)
-           loop-state state]
-      (if (empty? tokens)
-        [(string/join out) loop-state]
-        (let [[head xs] (split-with (partial not= \[) tokens)
-              ;; Overwriting the loop-state here
-              [xs loop-state] (handle-img-link xs loop-state)
-              [title ys] (split-with (partial not= \]) xs)
-              [dud zs] (split-with (partial not= \() ys)
-              [link tail] (split-with (partial not= \)) zs)]
+(defn make-link
+  [img?]
+  (fn link [text {:keys [code codeblock] :as state}]
+    (if (or code codeblock)
+      [text state]
+      (loop [out        []
+             tokens     (seq text)
+             loop-state state]
+        (if (empty? tokens)
+          [(string/join out) loop-state]
+          (let [[head xs] (split-with (partial not= \[) tokens)
+                ;; Overwriting the loop-state here
+                [xs loop-state] (handle-img-link xs loop-state)
+                [title ys] (split-with (partial not= \]) xs)
+                [dud zs] (split-with (partial not= \() ys)
+                [link tail] (split-with (partial not= \)) zs)]
 
-          (if (or (< (count link) 2)
-                  (< (count tail) 1)
-                  (> (count dud) 1))
-            (recur (concat out head (process-link-title title state) dud link) tail loop-state)
-            (if (= (last head) \!)
-              ;; Process the IMG tag
-              (let [alt   (rest title)
-                    [url title] (split-with (partial not= \space) (rest link))
-                    title (process-link-title (string/join (rest title)) loop-state)
-                    ;; Now process / generate the img data
-                    [img-text new-loop-state] (img alt url loop-state title)]
-                (recur (concat (butlast head) img-text) (rest tail) new-loop-state))
+            (if (or (< (count link) 2)
+                    (< (count tail) 1)
+                    (> (count dud) 1))
+              (recur (concat out head (process-link-title title state) dud link) tail loop-state)
               ;; Process a normal A anchor
-              (let [[link-text new-loop-state] (href (rest (process-link-title title state)) (rest link) loop-state)]
-                (recur (concat out head link-text) (rest tail) new-loop-state))))
-          )))))
+              (cond
+                (and (not img?) (not= (last head) \!))
+                (let [[link-text new-loop-state] (href (rest (process-link-title title state)) (rest link) loop-state)]
+                  (recur (concat out head link-text) (rest tail) new-loop-state))
+                (and img? (= (last head) \!))
+                (let [alt   (rest title)
+                      [url title] (split-with (partial not= \space) (rest link))
+                      title (process-link-title (string/join (rest title)) loop-state)
+                      ;; Now process / generate the img data
+                      [img-text new-loop-state] (img alt url loop-state title)]
+                  (recur (concat (butlast head) img-text) (rest tail) new-loop-state))
+                :else [text state]))))))))
+
+(def link (make-link false))
+(def image (make-link true))
 
 (defn reference [text]
   (re-find #"^\[[a-zA-Z0-9 ]+\]:" text))
