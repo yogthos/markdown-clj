@@ -228,7 +228,7 @@
                   (apply str (interpose " " label))
                   "<a href='#fnref" id "'>&#8617;</a></li>"))
            "")
-         (#(str "<ol>" % "</ol>")))))
+         (#(str "<ol class='footnotes'>" % "</ol>")))))
 
 (defn parse-metadata-line
   "Given a line of metadata header text return either a list containing a parsed
