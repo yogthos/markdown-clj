@@ -1,5 +1,7 @@
 #Markdown parser written in Clojure/Script
 
+[![Continuous Integration status](https://api.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)
+
 ## Demo
 
 You can try out the parser [here](https://cdn.rawgit.com/yogthos/markdown-clj/master/demo/markdown.html).
