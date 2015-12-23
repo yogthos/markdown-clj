@@ -2,6 +2,7 @@
   (:require [clojure.string :as string]
             [markdown.links
              :refer [link
+                     image
                      reference-link
                      footnote-link]]
             [markdown.lists :refer [li]]
@@ -286,6 +287,7 @@
    inline-code
    autoemail-transformer
    autourl-transformer
+   image
    link
    reference-link
    footnote-link
