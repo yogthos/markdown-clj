@@ -11,9 +11,11 @@
                    :all       (constantly true)}
   :auto-clean false
 
-  :aliases {"cleantest" ["do" "clean," "test"]
-            "install"   ["do" "clean," "install"]
-            "deploy"    ["do" "clean," "deploy" "clojars"]}
+   :aliases {"test-cljs" ["doo" "rhino" "test" "once"]
+             "test"      ["do" "test," "test-cljs"]
+             "cleantest" ["do" "clean," "test"]
+             "install"   ["do" "clean," "install"]
+             "deploy"    ["do" "clean," "deploy" "clojars"]}
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
   :cljsbuild
@@ -25,11 +27,21 @@
                             :pretty-print  false}}
             :dev
             {:compiler {:optimizations :whitespace
-                        :pretty-print  true}}}}
+                        :pretty-print  true}}
+
+            :test
+            {:source-paths ["src/cljc" "src/cljs" "test"]
+             :compiler {:output-to "target/unit-test.js"
+                        :output-dir "target"
+                        :main mdtest.runner
+                        :optimizations :whitespace}}}}
   :profiles
   {:dev
    {:jvm-opts ["-XX:-TieredCompilation"]
     :dependencies [[criterium "0.4.3" :scope "test"]
                    [commons-lang "2.6" :scope "test"]
-                   [org.clojure/clojurescript "1.7.145"]]
-    :plugins      [[lein-cljsbuild "1.0.6"]]}})
+                   [org.clojure/clojurescript "1.7.145"]
+                   [org.mozilla/rhino "1.7.7"]]
+    :plugins      [[lein-cljsbuild "1.0.6"]
+                   [lein-doo "0.1.6"]]}}
+  :doo {:paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}})
