@@ -15,7 +15,9 @@
   (is (= "<h1>foo</h1>" (entry-function "#foo")))
   (is (= "<h1>foo</h1>" (entry-function "foo\n===")))
   (is (= "<h1>foo</h1>" (entry-function "#foo#")))
-  (is (= "<h1>foo</h1>" (entry-function "#foo#\n"))))
+  (is (= "<h1>foo</h1>" (entry-function "#foo#\n")))
+  (is (= "<h1>some header <code>with&#95;an&#95;underscore</code></h1>"
+         (entry-function "# some header `with_an_underscore`"))))
 
 (deftest heading2
   (is (= "<h2>foo</h2>" (entry-function "##foo")))

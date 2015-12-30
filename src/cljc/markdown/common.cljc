@@ -127,18 +127,16 @@
   (separator true text "<code>" "</code>" [\`] state))
 
 (defn heading-text [text]
-  (->> text
-       (drop-while #(or (= \# %) (= \space %)))
-       (take-while #(not= \# %))
-       (string/join)
-       (string/trim)))
+  (-> (clojure.string/replace text #"^([ ]+)?[#]+" "")
+      (clojure.string/replace #"[#]+$" "")
+      string/trim))
 
 (defn heading-level [text]
   (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
     (if (pos? num-hashes) num-hashes)))
 
 (defn make-heading [text heading-anchors]
-  (if-let [heading (heading-level text)]
+  (when-let [heading (heading-level text)]
     (let [text (heading-text text)]
       (str "<h" heading ">"
            (if heading-anchors (str "<a name=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"></a>"))
