@@ -4,6 +4,7 @@
              :refer [link
                      image
                      reference-link
+                     implicit-reference-link
                      footnote-link]]
             [markdown.lists :refer [li]]
             [markdown.tables :refer [table]]
@@ -289,6 +290,7 @@
    autourl-transformer
    image
    link
+   implicit-reference-link
    reference-link
    footnote-link
    hr

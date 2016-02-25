@@ -109,6 +109,10 @@
         [text state]
         (freeze-string replaced state)))))
 
+(defn implicit-reference-link [text state]
+  (let [replacement-text (string/replace text #"\[([^\]]+)\]\[\]" "[$1][$1]")]
+    [replacement-text state]))
+
 (defn footnote [text]
   (re-find #"^\[\^[a-zA-Z0-9_-]+\]:" text))
 
