@@ -13,6 +13,8 @@ This is [an/example][id1] reference-style link.
 
 This is [an'example][id1] reference-style link.
 
+This is an implicit reference-style link to [id1][].
+
 Then, anywhere in the document, you define your link label like this, on a line by itself:
 
 This is [an example][id2] reference-style link.
