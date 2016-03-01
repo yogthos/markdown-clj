@@ -11,6 +11,7 @@
      :cljs markdown/md->html))
 
 (deftest heading1
+  (is (= "<h1>Ticket #123</h1>" (entry-function "# Ticket #123")))
   (is (= "<h1>Foo</h1>" (entry-function " # Foo")))
   (is (= "<h1>foo</h1>" (entry-function "#foo")))
   (is (= "<h1>foo</h1>" (entry-function "foo\n===")))
