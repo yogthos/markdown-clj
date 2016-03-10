@@ -1,4 +1,4 @@
-(ns mdtests-file
+(ns markdown.md-file-test
   (:require [markdown.core :as markdown]
             [markdown.transformers :as transformers]
             [markdown.tables :as tables]
@@ -6,27 +6,27 @@
 
 (deftest references
   (let [wrt (java.io.StringWriter.)]
-    (markdown/md-to-html (str "test" java.io.File/separator "references.md") wrt :reference-links? true)
-    (is (= (slurp (str "test" java.io.File/separator "references.html")) (.toString wrt)))))
+    (markdown/md-to-html (str "test/files" java.io.File/separator "references.md") wrt :reference-links? true)
+    (is (= (slurp (str "test/files" java.io.File/separator "references.html")) (.toString wrt)))))
 
 (deftest footnotes
   (let [wrt (java.io.StringWriter.)]
-    (markdown/md-to-html (str "test" java.io.File/separator "footnotes.md") wrt :footnotes? true)
-    (is (= (slurp (str "test" java.io.File/separator "footnotes.html")) (.toString wrt)))))
+    (markdown/md-to-html (str "test/files" java.io.File/separator "footnotes.md") wrt :footnotes? true)
+    (is (= (slurp (str "test/files" java.io.File/separator "footnotes.html")) (.toString wrt)))))
 
 (deftest all-together
   (let [wrt (java.io.StringWriter.)]
-    (markdown/md-to-html (str "test" java.io.File/separator "test.md") wrt)
-    (is (= (slurp (str "test" java.io.File/separator "test.html")) (.toString wrt)))))
+    (markdown/md-to-html (str "test/files" java.io.File/separator "test.md") wrt)
+    (is (= (slurp (str "test/files" java.io.File/separator "test.html")) (.toString wrt)))))
 
 (deftest tables
   (let [wrt (java.io.StringWriter.)]
-    (markdown/md-to-html (str "test" java.io.File/separator "tables.md") wrt)
-    (is (= (slurp (str "test" java.io.File/separator "tables.html")) (.toString wrt)))))
+    (markdown/md-to-html (str "test/files" java.io.File/separator "tables.md") wrt)
+    (is (= (slurp (str "test/files" java.io.File/separator "tables.html")) (.toString wrt)))))
 
 (deftest md-metadata
   (testing "Finds all metadata and correctly parses rest of file."
-    (let [md (slurp (str "test/metadata.md"))
+    (let [md (slurp (str "test/files/metadata.md"))
           {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)]
       (is (= "<h1>The Document</h1>" html))
       (is (= {:title       ["My Document"]

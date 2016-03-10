@@ -33,7 +33,7 @@
             {:source-paths ["src/cljc" "src/cljs" "test"]
              :compiler {:output-to "target/unit-test.js"
                         :output-dir "target"
-                        :main mdtest.runner
+                        :main mdrunner.test
                         :optimizations :whitespace}}}}
   :profiles
   {:dev
