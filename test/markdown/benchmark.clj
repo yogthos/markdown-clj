@@ -1,4 +1,4 @@
-(ns benchmark
+(ns markdown.benchmark
   (:require [clojure.test :refer :all]
             [markdown.core :as markdown]
             [criterium.core :as criterium]))
@@ -12,4 +12,4 @@
 
 (deftest ^:benchmark bench-file []
   (criterium/bench
-    (markdown/md-to-html (str "test" java.io.File/separator "bench.md") (java.io.StringWriter.))))
+    (markdown/md-to-html (str "test/files" java.io.File/separator "bench.md") (java.io.StringWriter.))))
