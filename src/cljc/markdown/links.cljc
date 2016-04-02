@@ -133,11 +133,10 @@
     (if (nil? match)
       [text state]
       (let [next-text (string/replace-first text matcher (partial replace-footnote-link footnotes))
-            next-state
-                      (-> state
-                          (update-in [:footnotes :next-fn-id] inc)
-                          (assoc-in [:footnotes :processed (get-in state [:footnotes :next-fn-id])]
-                                    (get-in state [:footnotes :unprocessed match])))]
+            next-state (-> state
+                           (update-in [:footnotes :next-fn-id] inc)
+                           (assoc-in [:footnotes :processed (get-in state [:footnotes :next-fn-id])]
+                                     (get-in state [:footnotes :unprocessed match])))]
         (recur next-text next-state)))))
 
 (defn footnote-link [text {:keys [code codeblock footnotes] :as state}]
@@ -151,3 +150,21 @@
     :else
     (let [[text state] (replace-all-footnote-links text state)]
       [text state])))
+
+(defn make-image-reference [src alt title]
+  (let [title-text (str (if title (str "\" title=" (string/join title) "") "\""))]
+   (str "<img src=\"" src "\" alt=\"" alt title-text " />")))
+
+(defn image-reference-link [text {:keys [references] :as state}]
+  (if (or (not (:reference-links? state)) (empty? references))
+    [text state]
+    (let [matcher #"!\[([^\]]+)\]\s*(\[[a-zA-Z0-9 ]+\])"
+          matches (distinct (re-seq matcher text))]
+      (loop [ms matches
+             new-text text]
+        (if (seq ms)
+          (let [[m alt ref] (first ms)
+                refval (get references ref)
+                im (make-image-reference (first refval) alt (second refval))]
+            (recur (rest ms) (string/replace new-text m im)))
+          [new-text state])))))

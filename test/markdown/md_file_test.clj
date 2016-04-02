@@ -9,6 +9,13 @@
     (markdown/md-to-html (str "test/files" java.io.File/separator "references.md") wrt :reference-links? true)
     (is (= (slurp (str "test/files" java.io.File/separator "references.html")) (.toString wrt)))))
 
+(deftest img-references
+  (let [wrt (java.io.StringWriter.)]
+    (markdown/md-to-html (str "test/files" java.io.File/separator "img_references.md") wrt :reference-links? true)
+    (is (= (clojure.string/trim-newline
+            (slurp (str "test/files" java.io.File/separator "img_references.html")))
+           (.toString wrt)))))
+
 (deftest footnotes
   (let [wrt (java.io.StringWriter.)]
     (markdown/md-to-html (str "test/files" java.io.File/separator "footnotes.md") wrt :footnotes? true)
