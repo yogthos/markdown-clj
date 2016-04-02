@@ -501,6 +501,17 @@ note: to enable footnotes, the `:footnotes?` option must be set to true.
 ![Alt text](/path/to/img.jpg "Optional Title")
 ```
 
+##### Image Reference
+
+```
+This is ![an example][id] reference-style image descriptor.
+
+[id]: http://example.com/  "Optional Title Here"
+```
+
+note: reference links require the `:reference-links?` option to be set to true
+
+
 ### Image Link
 ```
 [![Continuous Integration status](https://secure.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj)

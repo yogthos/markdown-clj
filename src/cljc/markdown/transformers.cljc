@@ -4,6 +4,7 @@
              :refer [link
                      image
                      reference-link
+                     image-reference-link
                      implicit-reference-link
                      footnote-link]]
             [markdown.lists :refer [li]]
@@ -289,6 +290,7 @@
    autoemail-transformer
    autourl-transformer
    image
+   image-reference-link
    link
    implicit-reference-link
    reference-link
