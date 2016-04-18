@@ -5,6 +5,8 @@ You can optionally use a space to separate the sets of brackets:
 
 This is [an example] [id] reference-style link.
 
+This *is* [an example] [id] reference-style link.
+
 This is [an example][id] reference-style link.
 
 This is [an example][id1] reference-style link.
