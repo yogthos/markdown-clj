@@ -1,7 +1,5 @@
 (ns markdown.md-file-test
   (:require [markdown.core :as markdown]
-            [markdown.transformers :as transformers]
-            [markdown.tables :as tables]
             [clojure.test :refer :all]))
 
 (deftest references
