@@ -3,6 +3,7 @@
             [markdown.common
              :refer
              [freeze-string
+              gen-token
               strong
               bold
               em
@@ -42,8 +43,8 @@
   (fn link [text {:keys [code codeblock] :as state}]
     (if (or code codeblock)
       [text state]
-      (loop [out        []
-             tokens     (seq text)
+      (loop [out []
+             tokens (seq text)
              loop-state state]
         (if (empty? tokens)
           [(string/join out) loop-state]
@@ -64,7 +65,7 @@
                 (let [[link-text new-loop-state] (href (rest (process-link-title title state)) (rest link) loop-state)]
                   (recur (concat out head link-text) (rest tail) new-loop-state))
                 (and img? (= (last head) \!))
-                (let [alt   (rest title)
+                (let [alt (rest title)
                       [url title] (split-with (partial not= \space) (rest link))
                       title (process-link-title (string/join (rest title)) loop-state)
                       ;; Now process / generate the img data
@@ -95,6 +96,33 @@
         [link alt] (get references id)]
     (str "<a href='" link "'" (when alt (str " title='" (subs alt 1 (dec (count alt))) "'")) ">" (subs title 1) "</a>")))
 
+(defn encode-links [links i]
+  (second
+    (reduce
+      (fn [[i encoded] link]
+        [(inc i) (assoc encoded (gen-token i) link)])
+      [i {}]
+      links)))
+
+(defn parse-links [references links]
+  (into {} (map
+             (fn [[k v]]
+               [k (replace-reference-link references v)])
+             links)))
+
+(defn freeze-links [references text state]
+  (let [links
+        (re-seq
+          #"\[[^\]]+\]\s*\[[a-zA-Z0-9 ]+\]"
+          text)
+        encoded-links
+        (encode-links links ((fnil count []) (:frozen-strings state)))]
+    [(reduce
+       (fn [s [id link]]
+         (string/replace s link id))
+       text encoded-links)
+     (update state :frozen-strings merge (parse-links references encoded-links))]))
+
 (defn reference-link [text {:keys [code codeblock references] :as state}]
   (cond
     (or (nil? references) code codeblock)
@@ -104,10 +132,7 @@
     ["" state]
 
     :else
-    (let [replaced (string/replace text #"\[[^\]]+\]\s*\[[a-zA-Z0-9 ]+\]" (partial replace-reference-link references))]
-      (if (= replaced text)
-        [text state]
-        (freeze-string replaced state)))))
+    (freeze-links references text state)))
 
 (defn implicit-reference-link [text state]
   (let [replacement-text (string/replace text #"\[([^\]]+)\]\[\]" "[$1][$1]")]
@@ -124,12 +149,12 @@
 
 (defn replace-footnote-link [footnotes footnote]
   (let [next-fn-id (:next-fn-id footnotes)
-        link       (str "#fn-" next-fn-id)]
+        link (str "#fn-" next-fn-id)]
     (str "<a href='" link "' id='fnref" next-fn-id "'><sup>" next-fn-id "</sup></a>")))
 
 (defn replace-all-footnote-links [text {:keys [footnotes] :as state}]
   (let [matcher #"\[\^[a-zA-Z0-9_-]+\]"
-        match   (re-find matcher text)]
+        match (re-find matcher text)]
     (if (nil? match)
       [text state]
       (let [next-text (string/replace-first text matcher (partial replace-footnote-link footnotes))
@@ -153,7 +178,7 @@
 
 (defn make-image-reference [src alt title]
   (let [title-text (str (if title (str "\" title=" (string/join title) "") "\""))]
-   (str "<img src=\"" src "\" alt=\"" alt title-text " />")))
+    (str "<img src=\"" src "\" alt=\"" alt title-text " />")))
 
 (defn image-reference-link [text {:keys [references] :as state}]
   (if (or (not (:reference-links? state)) (empty? references))

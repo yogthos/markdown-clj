@@ -5,15 +5,16 @@
 
 (def escape-delimiter (str (char 254) (char 491)))
 
+(defn gen-token [n]
+  (str escape-delimiter n escape-delimiter))
+
 (defn freeze-string
   "Freezes an output string.  Converts to a placeholder token and puts that into the output.
   Returns the [text, state] pair.  Adds it into the state, the 'frozen-strings' hashmap
   So that it can be unfrozen later."
   [& args]
   (let [state (last args)
-        token (str escape-delimiter
-                   (count (:frozen-strings state))
-                   escape-delimiter)]
+        token (gen-token (count (:frozen-strings state)))]
     [token (assoc-in state
                      [:frozen-strings token]
                      (reduce str (flatten (drop-last args))))]))
