@@ -36,12 +36,14 @@
                         :main mdrunner.test
                         :optimizations :whitespace}}}}
   :profiles
-  {:dev
+  {:demo
+   {}
+   :dev
    {:jvm-opts ["-XX:-TieredCompilation"]
     :dependencies [[criterium "0.4.4" :scope "test"]
                    [commons-lang "2.6" :scope "test"]
-                   [org.clojure/clojurescript "1.7.228"]
+                   [org.clojure/clojurescript "1.8.51"]
                    [org.mozilla/rhino "1.7.7"]]
-    :plugins      [[lein-cljsbuild "1.0.6"]
+    :plugins      [[lein-cljsbuild "1.1.3"]
                    [lein-doo "0.1.6"]]}}
   :doo {:paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}})
