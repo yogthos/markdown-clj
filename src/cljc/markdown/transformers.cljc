@@ -75,7 +75,7 @@
 
     :else
     (if-let [heading (make-heading text (:heading-anchors state))]
-      [heading (assoc state :heading true)]
+      [heading (assoc state :inline-heading true)]
       [text state])))
 
 (defn br [text {:keys [code lists] :as state}]
@@ -109,17 +109,25 @@
          (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
    state])
 
+(defn set-line-state [text state]
+  [text
+   (-> state (dissoc :inline-heading)
+       (assoc-in [:temp :inline-heading] (:inline-heading state)))])
+
+(defn clear-line-state [text state]
+  [text (dissoc state :temp)])
+
 (defn paragraph-text [last-line-empty? text]
   (if (and (not last-line-empty?) (not-empty text))
     (str " " text) text))
 
 (defn paragraph
-  [text {:keys [eof heading hr code lists blockquote paragraph last-line-empty?] :as state}]
+  [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty?] :as state}]
   (cond
     (and paragraph lists)
     [(str "</p>" text) (assoc state :paragraph false)]
 
-    (or heading hr code lists blockquote)
+    (or heading inline-heading hr code lists blockquote)
     [text state]
 
     paragraph
@@ -127,7 +135,7 @@
       [(str (paragraph-text last-line-empty? text) "</p>") (assoc state :paragraph false)]
       [(paragraph-text last-line-empty? text) state])
 
-    (and (not eof) last-line-empty?)
+    (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty?))
     [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
 
     :default
@@ -282,7 +290,8 @@
     [] lines-seq))
 
 (def transformer-vector
-  [empty-line
+  [set-line-state
+   empty-line
    codeblock
    code
    escaped-chars
@@ -309,4 +318,5 @@
    paragraph
    br
    thaw-strings
-   dashes])
+   dashes
+   clear-line-state])

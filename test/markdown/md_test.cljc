@@ -28,10 +28,10 @@
 
 (deftest heading-with-complex-anchor
   (is (=
-        "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>some text"
+        "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3><p>some text</p>"
         (entry-function "###foo bar BAz\nsome text" :heading-anchors true)))
   (is (=
-        "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>some text"
+        "<h3><a name=\"foo&#95;bar&#95;baz\"></a>foo bar BAz</h3><p>some text</p>"
         (entry-function "###foo bar BAz##\nsome text" :heading-anchors true))))
 
 (deftest br
