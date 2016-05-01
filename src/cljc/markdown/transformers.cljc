@@ -109,10 +109,11 @@
          (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
    state])
 
-(defn set-line-state [text state]
+(defn set-line-state [text {:keys [inline-heading] :as state}]
   [text
-   (-> state (dissoc :inline-heading)
-       (assoc-in [:temp :inline-heading] (:inline-heading state)))])
+   (-> state
+       (dissoc :inline-heading)
+       (assoc-in [:temp :inline-heading] inline-heading))])
 
 (defn clear-line-state [text state]
   [text (dissoc state :temp)])
