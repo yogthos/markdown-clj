@@ -182,7 +182,11 @@
   (is (= "<ul><li><a href='http://github.com/*'>github</a></li></ul>"
          (entry-function "* [github](http://github.com/*)")))
   (is (= "<ul><li>hi</li></ul><p><a href='https://see-here'>a link</a></p>"
-         (entry-function "* hi\n\n[a link](https://see-here)"))))
+         (entry-function "* hi\n\n[a link](https://see-here)")))
+  (is (= "<p><a href='https://clojure.github.io/core.async/#clojure.core.async/>!'>>!</a></p>"
+         (entry-function "[>!](https://clojure.github.io/core.async/#clojure.core.async/>!)")))
+  (is (= "<p><a href='https://clojure.github.io/core.async/#clojure.core.async/<!'><!</a></p>"
+         (entry-function "[<!](https://clojure.github.io/core.async/#clojure.core.async/<!)"))))
 
 (deftest styled-link
   (is (= "<p><a href='http://github.com'><em>github</em></a></p>"
