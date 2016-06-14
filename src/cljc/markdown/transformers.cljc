@@ -15,6 +15,7 @@
               escaped-chars
               separator
               thaw-strings
+              literal
               strong
               bold
               em
@@ -297,6 +298,7 @@
    code
    escaped-chars
    inline-code
+   literal
    autoemail-transformer
    autourl-transformer
    image
