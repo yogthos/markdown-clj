@@ -83,41 +83,42 @@
   ([separator open close]
    (make-separator separator open close identity))
   ([separator open close transformer]
-   (fn [text state]
-     (if (:code state)
-       [text state]
-       (loop [out       []
-              buf       []
-              tokens    (partition-by (partial = (first separator)) (seq text))
-              cur-state (assoc state :found-token false)]
-         (cond
-           (empty? tokens)
-           [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
-            (dissoc cur-state :found-token)]
+   (let [separator (seq separator)]  ;; allow char seq or string
+     (fn [text state]
+       (if (:code state)
+         [text state]
+         (loop [out       []
+                buf       []
+                tokens    (partition-by (partial = (first separator)) (seq text))
+                cur-state (assoc state :found-token false)]
+           (cond
+             (empty? tokens)
+             [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
+              (dissoc cur-state :found-token)]
 
-           (:found-token cur-state)
-           (if (= (first tokens) separator)
-             (let [[new-buf new-state]
-                   (if (identical? transformer identity)
-                     ;; Skip the buf->string->buf conversions in the common
-                     ;; case.
-                     [buf cur-state]
-                     (let [[s new-state] (transformer (string/join buf) cur-state)]
-                       [(seq s) new-state]))]
-               (recur (vec (concat out (seq open) new-buf (seq close)))
-                      []
+             (:found-token cur-state)
+             (if (= (first tokens) separator)
+               (let [[new-buf new-state]
+                     (if (identical? transformer identity)
+                       ;; Skip the buf->string->buf conversions in the common
+                       ;; case.
+                       [buf cur-state]
+                       (let [[s new-state] (transformer (string/join buf) cur-state)]
+                         [(seq s) new-state]))]
+                 (recur (vec (concat out (seq open) new-buf (seq close)))
+                        []
+                        (rest tokens)
+                        (assoc new-state :found-token false)))
+               (recur out
+                      (into buf (first tokens))
                       (rest tokens)
-                      (assoc new-state :found-token false)))
-             (recur out
-                    (into buf (first tokens))
-                    (rest tokens)
-                    cur-state))
+                      cur-state))
 
-           (= (first tokens) separator)
-           (recur out buf (rest tokens) (assoc cur-state :found-token true))
+             (= (first tokens) separator)
+             (recur out buf (rest tokens) (assoc cur-state :found-token true))
 
-           :default
-           (recur (into out (first tokens)) buf (rest tokens) cur-state)))))))
+             :default
+             (recur (into out (first tokens)) buf (rest tokens) cur-state))))))))
 
 (defn escape-code-transformer [text state]
   [(escape-code text) state])
@@ -128,15 +129,17 @@
   ((make-separator separator open close (if escape? escape-code-transformer identity))
    text state))
 
-(def strong (make-separator [\* \*] "<strong>" "</strong>"))
+(def strong (make-separator "**" "<strong>" "</strong>"))
 
-(def bold (make-separator [\_ \_] "<b>" "</b>"))
+(def bold (make-separator "__" "<b>" "</b>"))
 
-(def em (make-separator [\*] "<em>" "</em>"))
+(def em (make-separator "*" "<em>" "</em>"))
 
-(def italics (make-separator [\_] "<i>" "</i>"))
+(def italics (make-separator "_" "<i>" "</i>"))
 
-(def strikethrough (make-separator [\~ \~] "<del>" "</del>"))
+(def strikethrough (make-separator "~~" "<del>" "</del>"))
+
+(def inline-code (make-separator "`" "<code>" "</code>" escape-code-transformer))
 
 (def inline-code (make-separator [\`] "<code>" "</code>" escape-code-transformer))
 
