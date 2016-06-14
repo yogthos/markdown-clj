@@ -40,8 +40,8 @@
 
 (defn escape-code [s]
   (-> s
-      (string/replace #"\$" "&#36;")
       (string/replace #"&" "&amp;")
+      (string/replace #"\$" "&#36;")
       (string/replace #"\*" "&#42;")
       (string/replace #"\^" "&#94;")
       (string/replace #"\_" "&#95;")
