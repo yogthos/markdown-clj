@@ -123,6 +123,38 @@ Date: October 31, 2015
  :html "<h1>Hello!</h1>"}
 ``` 
 
+### Selectively inhibiting the Parser
+
+If you pass `:inhibit-separator "some-string"`, then any text within occurrences of `some-string` will be output verbatim, eg:
+
+```clojure
+(md-to-html-string "For all %$a_0, a_1, ..., a_n in R$% there is _at least one_ %$b_n in R$% such that..."
+                   :inhibit-separator "%")
+```
+```xml
+For all $a_0, a_1, ..., a_n in R$ there is <i>at least one</i> $b_n in R$ such that...
+```
+
+This may be useful to use `markdown-clj` along with other parsers of languages with conflicting syntax (e.g. asciimath2jax).
+
+If you need to output the separator itself, enter it twice without any text inside.  Eg:
+
+```clojure
+(md-to-html-string "This is one of those 20%% vs 80%% cases."
+                   :inhibit-separator "%")
+```
+```xml
+This is one of those 20% vs 80% cases.
+```
+
+Some caveats:
+
+- Like other tags, this only works within a single line.
+
+- If you remove the default transformers with `:replacement-transformers` (which see below), inhibiting will stop working.
+
+- Currently, dashes (`--` and `---`) can't be suppressed this way.
+
 ## Customizing the Parser
 
 Additional transformers can be specified using the `:custom-transformers` key.
