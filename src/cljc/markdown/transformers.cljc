@@ -21,6 +21,8 @@
               italics
               strikethrough
               inline-code
+              escape-inhibit-separator
+              inhibit
               make-heading
               dashes]]))
 
@@ -293,6 +295,8 @@
 (def transformer-vector
   [set-line-state
    empty-line
+   inhibit
+   escape-inhibit-separator
    codeblock
    code
    escaped-chars

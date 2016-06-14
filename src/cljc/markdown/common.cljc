@@ -3,6 +3,8 @@
 
 (declare ^{:dynamic true} *substring*)
 
+(def ^:dynamic *inhibit-separator* nil)
+
 (def escape-delimiter (str (char 254) (char 491)))
 
 (defn gen-token [n]
@@ -141,7 +143,19 @@
 
 (def inline-code (make-separator "`" "<code>" "</code>" escape-code-transformer))
 
-(def inline-code (make-separator [\`] "<code>" "</code>" escape-code-transformer))
+(defn inhibit [text state]
+  (if *inhibit-separator*
+    ((make-separator *inhibit-separator* "" "" freeze-string)
+     text state)
+    [text state]))
+
+(defn escape-inhibit-separator [text state]
+  [(if *inhibit-separator*
+     (string/replace text
+                     (string/join (concat *inhibit-separator* *inhibit-separator*))
+                     (string/join *inhibit-separator*))
+     text)
+   state])
 
 (defn heading-text [text]
   (-> (clojure.string/replace text #"^([ ]+)?[#]+" "")
