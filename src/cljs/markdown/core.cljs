@@ -1,14 +1,16 @@
 (ns markdown.core
   (:require [markdown.common
-             :refer [*substring*]]
+             :refer [*substring* *inhibit-separator*]]
             [markdown.links
              :refer [parse-reference parse-reference-link parse-footnote-link]]
             [markdown.transformers
              :refer [*next-line*  transformer-vector footer parse-metadata-headers]]))
 
-(defn- init-transformer [{:keys [replacement-transformers custom-transformers]}]
+
+(defn- init-transformer [{:keys [replacement-transformers custom-transformers inhibit-separator]}]
   (fn [html line next-line state]
-    (binding [*next-line* next-line]
+    (binding [*next-line* next-line
+              *inhibit-separator* inhibit-separator]
       (let [[text new-state]
             (reduce
               (fn [[text state] transformer]

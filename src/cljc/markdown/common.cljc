@@ -3,6 +3,8 @@
 
 (declare ^{:dynamic true} *substring*)
 
+(def ^:dynamic *inhibit-separator* nil)
+
 (def escape-delimiter (str (char 254) (char 491)))
 
 (defn gen-token [n]
@@ -75,57 +77,85 @@
          (string/replace #"\\!" "&#33;")))
    state])
 
+(defn make-separator
+  "Return a transformer to
+   - find all the chunks of the string delimited by the `separator',
+   - wrap the output with the `open' and `close' markers, and
+   - apply the `transformer' to the text inside the chunk."
+  ([separator open close]
+   (make-separator separator open close identity))
+  ([separator open close transformer]
+   (let [separator (seq separator)]  ;; allow char seq or string
+     (fn [text state]
+       (if (:code state)
+         [text state]
+         (loop [out       []
+                buf       []
+                tokens    (partition-by (partial = (first separator)) (seq text))
+                cur-state (assoc state :found-token false)]
+           (cond
+             (empty? tokens)
+             [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
+              (dissoc cur-state :found-token)]
+
+             (:found-token cur-state)
+             (if (= (first tokens) separator)
+               (let [[new-buf new-state]
+                     (if (identical? transformer identity)
+                       ;; Skip the buf->string->buf conversions in the common
+                       ;; case.
+                       [buf cur-state]
+                       (let [[s new-state] (transformer (string/join buf) cur-state)]
+                         [(seq s) new-state]))]
+                 (recur (vec (concat out (seq open) new-buf (seq close)))
+                        []
+                        (rest tokens)
+                        (assoc new-state :found-token false)))
+               (recur out
+                      (into buf (first tokens))
+                      (rest tokens)
+                      cur-state))
+
+             (= (first tokens) separator)
+             (recur out buf (rest tokens) (assoc cur-state :found-token true))
+
+             :default
+             (recur (into out (first tokens)) buf (rest tokens) cur-state))))))))
+
+(defn escape-code-transformer [text state]
+  [(escape-code text) state])
+
+;; Not used any more internally; kept around just in case third party code
+;; depends on this.
 (defn separator [escape? text open close separator state]
-  (if (:code state)
-    [text state]
-    (loop [out       []
-           buf       []
-           tokens    (partition-by (partial = (first separator)) (seq text))
-           cur-state (assoc state :found-token false)]
-      (cond
-        (empty? tokens)
-        [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
-         (dissoc cur-state :found-token)]
+  ((make-separator separator open close (if escape? escape-code-transformer identity))
+   text state))
 
-        (:found-token cur-state)
-        (if (= (first tokens) separator)
-          (recur (vec
-                   (concat
-                     out
-                     (seq open)
-                     (if escape? (seq (escape-code (string/join buf))) buf)
-                     (seq close)))
-                 []
-                 (rest tokens)
-                 (assoc cur-state :found-token false))
-          (recur out
-                 (into buf (first tokens))
-                 (rest tokens)
-                 cur-state))
+(def strong (make-separator "**" "<strong>" "</strong>"))
 
-        (= (first tokens) separator)
-        (recur out buf (rest tokens) (assoc cur-state :found-token true))
+(def bold (make-separator "__" "<b>" "</b>"))
 
-        :default
-        (recur (into out (first tokens)) buf (rest tokens) cur-state)))))
+(def em (make-separator "*" "<em>" "</em>"))
 
-(defn strong [text state]
-  (separator false text "<strong>" "</strong>" [\* \*] state))
+(def italics (make-separator "_" "<i>" "</i>"))
 
-(defn bold [text state]
-  (separator false text "<b>" "</b>" [\_ \_] state))
+(def strikethrough (make-separator "~~" "<del>" "</del>"))
 
-(defn em [text state]
-  (separator false text "<em>" "</em>" [\*] state))
+(def inline-code (make-separator "`" "<code>" "</code>" escape-code-transformer))
 
-(defn italics [text state]
-  (separator false text "<i>" "</i>" [\_] state))
+(defn inhibit [text state]
+  (if *inhibit-separator*
+    ((make-separator *inhibit-separator* "" "" freeze-string)
+     text state)
+    [text state]))
 
-(defn strikethrough [text state]
-  (separator false text "<del>" "</del>" [\~ \~] state))
-
-(defn inline-code [text state]
-  (separator true text "<code>" "</code>" [\`] state))
+(defn escape-inhibit-separator [text state]
+  [(if *inhibit-separator*
+     (string/replace text
+                     (string/join (concat *inhibit-separator* *inhibit-separator*))
+                     (string/join *inhibit-separator*))
+     text)
+   state])
 
 (defn heading-text [text]
   (-> (clojure.string/replace text #"^([ ]+)?[#]+" "")

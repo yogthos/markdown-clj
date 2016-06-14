@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
             [markdown.common
-             :refer [*substring*]]
+             :refer [*substring* *inhibit-separator*]]
             [markdown.links
              :refer [parse-reference parse-reference-link parse-footnote-link]]
             [markdown.transformers
@@ -16,9 +16,10 @@
 (defn- write [^Writer writer ^String text]
   (doseq [c text] (.write writer (int c))))
 
-(defn- init-transformer [writer {:keys [replacement-transformers custom-transformers]}]
+(defn- init-transformer [writer {:keys [replacement-transformers custom-transformers inhibit-separator]}]
   (fn [line next-line state]
-    (binding [*next-line* next-line]
+    (binding [*next-line* next-line
+              *inhibit-separator* inhibit-separator]
       (let [[text new-state]
             (reduce
               (fn [[text, state] transformer]
