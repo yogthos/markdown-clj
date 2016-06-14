@@ -40,6 +40,7 @@
 
 (defn escape-code [s]
   (-> s
+      (string/replace #"\$" "&#36;")
       (string/replace #"&" "&amp;")
       (string/replace #"\*" "&#42;")
       (string/replace #"\^" "&#94;")
@@ -58,6 +59,7 @@
   [(if (or (:code state) (:codeblock state))
      text
      (-> text
+         (string/replace #"\\\$" "&#36;")
          (string/replace #"\\\\" "&#92;")
          (string/replace #"\\`" "&#8216;")
          (string/replace #"\\\*" "&#42;")
@@ -75,39 +77,59 @@
          (string/replace #"\\!" "&#33;")))
    state])
 
-(defn separator [escape? text open close separator state]
-  (if (:code state)
-    [text state]
-    (loop [out       []
-           buf       []
-           tokens    (partition-by (partial = (first separator)) (seq text))
-           cur-state (assoc state :found-token false)]
-      (cond
-        (empty? tokens)
-        [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
-         (dissoc cur-state :found-token)]
+(defn separator
+  ([escape? text open close sep state]
+   (separator escape? text open close sep state false))
+  ([escape? text open close separator state freeze?]
+   (if (:code state)
+     [text state]
+     (loop [out       []
+            buf       []
+            tokens    (partition-by (partial = (first separator)) (seq text))
+            cur-state (assoc state :found-token false)]
+       (cond
+         (empty? tokens)
+         [(string/join (into
+                        (if (:found-token cur-state)
+                          (into out separator)
+                          out)
+                        buf))
+          (dissoc cur-state :found-token)]
 
-        (:found-token cur-state)
-        (if (= (first tokens) separator)
-          (recur (vec
-                   (concat
-                     out
-                     (seq open)
-                     (if escape? (seq (escape-code (string/join buf))) buf)
-                     (seq close)))
-                 []
-                 (rest tokens)
-                 (assoc cur-state :found-token false))
-          (recur out
-                 (into buf (first tokens))
-                 (rest tokens)
-                 cur-state))
+         (:found-token cur-state)
+         (if (= (first tokens) separator)
+           (let [[new-buf new-state]
+                 (cond
+                   escape?
+                   [(seq (escape-code (string/join buf))) cur-state]
+                   freeze?
+                   (let [[new-text new-state]
+                         (freeze-string (string/join buf) cur-state)]
+                     [(seq new-text) new-state])
+                   :default
+                   [buf cur-state])]
+             (recur (vec
+                     (concat
+                      out
+                      (seq open)
+                      new-buf
+                      (seq close)))
+                    []
+                    (rest tokens)
+                    (assoc new-state :found-token false)))
+           (recur out
+                  (into buf (first tokens))
+                  (rest tokens)
+                  cur-state))
 
-        (= (first tokens) separator)
-        (recur out buf (rest tokens) (assoc cur-state :found-token true))
+         (= (first tokens) separator)
+         (recur out buf (rest tokens) (assoc cur-state :found-token true))
 
-        :default
-        (recur (into out (first tokens)) buf (rest tokens) cur-state)))))
+         :default
+         (recur (into out (first tokens)) buf (rest tokens) cur-state))))))
+
+(defn literal [text state]
+  (separator false text "" "" [\$] state true))
 
 (defn strong [text state]
   (separator false text "<strong>" "</strong>" [\* \*] state))
