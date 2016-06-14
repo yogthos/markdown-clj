@@ -162,7 +162,7 @@
 ```
 "))))
 
-(deftest stirkethrough
+(deftest strikethrough
   (is (= "<p><del>foo</del></p>"
          (entry-function "~~foo~~"))))
 
@@ -329,3 +329,30 @@
 
 (deftest m-dash
   (is (= "<p>boo &mdash; bar</p>" (entry-function "boo --- bar"))))
+
+(deftest inhibit-simple
+  (is (= "<p>_abc_</p>" (entry-function "$_abc_$" :inhibit-separator "$"))))
+
+(deftest inhibit-simple-seq
+  (is (= "<p>_abc_</p>" (entry-function "$_abc_$" :inhibit-separator [\$]))))
+
+(deftest inhibit-inline-code
+  (is (= "<p>`abc`</p>" (entry-function "$`abc`$" :inhibit-separator [\$]))))
+
+(deftest inhibit-inside-code
+  (is (= "<p><code>a*b* & dc</code></p>" (entry-function "`a$*b* & d$c`" :inhibit-separator "$"))))
+
+(deftest inhibit-across-backticks
+  (is (= "<p><code>one` `two</code></p>" (entry-function "`one$` `$two`" :inhibit-separator "$"))))
+
+(deftest inhibit-escape
+  (is (= "<p>$</p>" (entry-function "$$" :inhibit-separator [\$]))))
+
+(deftest inhibit-escape-twice
+  (is (= "<p>$$</p>") (entry-function "$$$$" :inhibit-separator "$")))
+
+(deftest dont-inhibit-text-within-escapes
+  (is (= "<p>$<em>abc</em>$</p>" (entry-function "$$*abc*$$" :inhibit-separator "$"))))
+
+(deftest inhibit-escape-inside-code
+  (is (= "<p><code>$</code></p>" (entry-function "`$$`" :inhibit-separator "$"))))
