@@ -213,7 +213,7 @@ Another example would be to escape HTML tags:
 
 ```clojure
 (require '[markdown.core :as md])
-(require '[markdown.transformer :as mdtrans])
+(require '[markdown.transformers :as mdtrans])
 
 (defn escape-html [text state]
                 (let [sanitized-text (clojure.string/escape text
