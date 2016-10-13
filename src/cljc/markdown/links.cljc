@@ -77,7 +77,7 @@
 (def image (make-link true))
 
 (defn reference [text]
-  (re-find #"^\[[a-zA-Z0-9 ]+\]:" text))
+  (re-find #"^\[[a-zA-Z0-9 \-_\.]+\]:" text))
 
 (defn parse-reference [reference start]
   (-> reference
@@ -113,7 +113,7 @@
 (defn freeze-links [references text state]
   (let [links
         (re-seq
-          #"\[[^\]]+\]\s*\[[a-zA-Z0-9 ]+\]"
+          #"\[[^\]]+\]\s*\[[a-zA-Z0-9 \-_\.]+\]"
           text)
         encoded-links
         (encode-links links ((fnil count []) (:frozen-strings state)))]

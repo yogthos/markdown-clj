@@ -19,7 +19,7 @@ This is an implicit reference-style link to [id1][].
 
 Then, anywhere in the document, you define your link label like this, on a line by itself:
 
-This is [an example][id2] reference-style link.
+This is [an example][id-2] reference-style link.
 
 This is [an example][id3] reference-style link.
 
@@ -27,7 +27,7 @@ A link with [an underscore][underscore].
 
 [id1]: http://example.com/  'Optional Title Here'
 
-[id2]: http://example.com/  (Optional Title Here)
+[id-2]: http://example.com/  (Optional Title Here)
 
 [id3]: http://example.com/
 
