@@ -349,7 +349,11 @@
   (is (= "<p>$</p>" (entry-function "$$" :inhibit-separator [\$]))))
 
 (deftest inhibit-escape-twice
-  (is (= "<p>$$</p>") (entry-function "$$$$" :inhibit-separator "$")))
+  (is (= "<p>$$</p>" (entry-function "$$$$" :inhibit-separator "$"))))
+
+(deftest img-reprocess
+  (is (= "<p><img src=\"img.jpg\" alt=\"Text\" /> and <a href='#'>Edit</a></p>"
+         (entry-function "![Text](img.jpg) and [Edit](#)"))))
 
 (deftest dont-inhibit-text-within-escapes
   (is (= "<p>$<em>abc</em>$</p>" (entry-function "$$*abc*$$" :inhibit-separator "$"))))

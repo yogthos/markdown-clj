@@ -70,8 +70,8 @@
                       title (process-link-title (string/join (rest title)) loop-state)
                       ;; Now process / generate the img data
                       [img-text new-loop-state] (img alt url loop-state title)]
-                  (recur (concat (butlast head) img-text) (rest tail) new-loop-state))
-                :else [text state]))))))))
+                  (recur (concat out (butlast head) img-text) (rest tail) new-loop-state))
+                :else [(string/join (concat out tokens)) loop-state]))))))))
 
 (def link (make-link false))
 (def image (make-link true))
