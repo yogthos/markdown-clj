@@ -349,7 +349,7 @@
   (is (= "<p>$</p>" (entry-function "$$" :inhibit-separator [\$]))))
 
 (deftest inhibit-escape-twice
-  (is (= "<p>$$</p>") (entry-function "$$$$" :inhibit-separator "$")))
+  (is (= "<p>$$</p>" (entry-function "$$$$" :inhibit-separator "$"))))
 
 (deftest dont-inhibit-text-within-escapes
   (is (= "<p>$<em>abc</em>$</p>" (entry-function "$$*abc*$$" :inhibit-separator "$"))))
