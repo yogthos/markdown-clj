@@ -59,6 +59,10 @@
 (deftest strong-inside-em
   (is (= "<p><em>foo<strong>bar</strong>baz</em></p>" (entry-function "*foo**bar**baz*"))))
 
+(deftest bold-inside-a-list
+  (is (= "<ol><li>chickens.</li></ol><p> <strong>See more: <a href='http://cluck.cluck.com'>Cluck Cluck</a></strong> </p>"
+      (entry-function "1. chickens. \n\n **See more: [Cluck Cluck](http://cluck.cluck.com)** \n\n"))))
+
 (deftest em-inside-strong
   (is (= "<p><strong>foo<em>bar</em>baz</strong></p>" (entry-function "**foo*bar*baz**"))))
 
