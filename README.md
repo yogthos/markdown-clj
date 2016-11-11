@@ -209,33 +209,6 @@ This can also be used to add preprocessor transformers. For example, if we wante
 ```xml
 "<p>foo  bar <a href='http://test'>text</a></p>"
 ```
-Another example would be to escape HTML tags:
-
-```clojure
-(require '[markdown.core :as md])
-(require '[markdown.transformers :as mdtrans])
-
-(defn escape-html [text state]
-                (let [sanitized-text (clojure.string/escape text
-                                       {\& "&amp;"
-                                        \< "&lt;"
-                                        \> "&gt;"
-                                        \" "&quot;"
-                                        \' "&#39;"})]
-                [sanitized-text state]))
-
-(def markdown-with-html
-                 "## I am a title <h1></h1> with HTML tags !\n<script src=\"http://bad-url\">")
-
-(md/md-to-html-string markdown-with-html
-                                  :replacement-transformers
-                                  (cons escape-html mdtrans/transformer-vector))
-```
-
-```xml
-<h2>I am a title &lt;h1&gt;&lt;/h1&gt; with HTML tags !</h2>&lt;script src=&quot;http://bad-url&quot;&gt;
-```
-
 
 ## Usage ClojureScript
 
