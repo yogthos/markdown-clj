@@ -211,23 +211,23 @@
 
       (:blockquote state)
       (cond (or eof (empty? trimmed))
-            ["</p></blockquote>" (assoc state :blockquote false)]
+            [(str (when (:blockquote-paragraph state) "</p>") "</blockquote>") (assoc state :blockquote false :blockquote-paragraph false)]
 
             (= ">" trimmed)
-            ["</p><p>" state]
+            [(str (when (:blockquote-paragraph state) "</p>") "<p>") (assoc state :blockquote-paragraph true)]
 
-            (= ">-" (subs trimmed 0 2))
-            [(str "</p><footer>" (subs text 2) "</footer><p>") state]
+            (and (>= (count trimmed) 2) (= ">-" (subs trimmed 0 2)))
+            [(str (when (:blockquote-paragraph state) "</p>")"<footer>" (subs text 2) "</footer>") (assoc state :blockquote-paragraph false)]
 
             (= ">" (subs trimmed 0 1))
-            [(str (subs text 1) " ") state]
+            [(str (when-not (:blockquote-paragraph state) "<p>") (subs text 1) " ") (assoc state :blockquote-paragraph true)]
 
             :default
-            [(str text " ") state])
+            [(str (when-not (:blockquote-paragraph state) "<p>") text " ") (assoc state :blockquote-paragraph true)])
 
       :default
       (if (= \> (first text))
-        [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true)]
+        [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true :blockquote-paragraph true)]
         [text state]))))
 
 (defn footer [footnotes]

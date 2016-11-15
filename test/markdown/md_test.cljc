@@ -227,11 +227,11 @@
          (entry-function ">Foo bar baz"))))
 
 (deftest blockquote-footer
-  (is (= "<blockquote><p> Foo bar baz </p><footer> Leo Tolstoy</footer><p></p></blockquote>"
+  (is (= "<blockquote><p> Foo bar baz </p><footer> Leo Tolstoy</footer></blockquote>"
          (entry-function "> Foo bar baz\n>- Leo Tolstoy"))))
 
 (deftest blockquote-empty-footer
-  (is (= "<blockquote><p> Foo bar baz </p><footer></footer><p></p></blockquote>"
+  (is (= "<blockquote><p> Foo bar baz </p><footer></footer></blockquote>"
          (entry-function "> Foo bar baz\n>-"))))
 
 (deftest blockquote-multiline-without-leading-angle-bracket
