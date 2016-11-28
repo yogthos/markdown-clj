@@ -3,7 +3,7 @@
   :url "https://github.com/yogthos/markdown-clj"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.7.0"]]
+  :dependencies [[org.clojure/clojure "1.8.0"]]
   :clojurescript? true
   :jar-exclusions [#"\.swp|\.swo|\.DS_Store"]
   :test-selectors {:default   (complement :benchmark)
@@ -42,7 +42,7 @@
    {:jvm-opts ["-XX:-TieredCompilation"]
     :dependencies [[criterium "0.4.4" :scope "test"]
                    [commons-lang "2.6" :scope "test"]
-                   [org.clojure/clojurescript "1.8.51"]
+                   [org.clojure/clojurescript "1.9.293"]
                    [org.mozilla/rhino "1.7.7"]]
     :plugins      [[lein-cljsbuild "1.1.3"]
                    [lein-doo "0.1.6"]]}}
