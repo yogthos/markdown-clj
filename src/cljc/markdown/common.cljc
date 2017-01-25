@@ -169,8 +169,9 @@
 (defn make-heading [text heading-anchors]
   (when-let [heading (heading-level text)]
     (let [text (heading-text text)]
-      (str "<h" heading ">"
-           (if heading-anchors (str "<a name=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"></a>"))
+      ;; We do not need to process the id string, HTML5 ids can contain anything except the space character.
+      ;; (https://www.w3.org/TR/html5/dom.html#the-id-attribute)
+      (str "<h" heading (when heading-anchors (str " id=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"")) ">"
            text "</h" heading ">"))))
 
 (defn dashes [text state]
