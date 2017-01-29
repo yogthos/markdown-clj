@@ -125,9 +125,9 @@
     (str " " text) text))
 
 (defn paragraph
-  [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty?] :as state}]
+  [text {:keys [eof heading inline-heading temp hr code codeblock lists blockquote paragraph last-line-empty? end-codeblock?] :as state}]
   (cond
-    (and paragraph lists)
+    (or (and paragraph lists) (and paragraph codeblock))
     [(str "</p>" text) (assoc state :paragraph false)]
 
     (or heading inline-heading hr code lists blockquote)
@@ -138,11 +138,11 @@
       [(str (paragraph-text last-line-empty? text) "</p>") (assoc state :paragraph false)]
       [(paragraph-text last-line-empty? text) state])
 
-    (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty?))
-    [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
+    (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty? (= end-codeblock? "now")))
+    [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false :end-codeblock? false)]
 
     :default
-    [text state]))
+    (if (= end-codeblock? "next") [text (assoc state :end-codeblock? "now")] [text state])))
 
 (defn code [text {:keys [eof lists code codeblock] :as state}]
   (cond
@@ -169,10 +169,10 @@
   (let [trimmed (string/trim text)]
     (cond
       (and (= [\` \` \`] (take 3 trimmed)) (:codeblock state))
-      [(str "</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false :end-codeblock? "next")]
 
       (and (= [\` \` \`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str "</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false :end-codeblock? "next")]
 
       (= [\` \` \`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
