@@ -172,7 +172,7 @@
       [(str "</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (and (= [\` \` \`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      [(str (string/join (drop-last 3 trimmed)) "</code></pre>") (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (= [\` \` \`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
