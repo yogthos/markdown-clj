@@ -70,6 +70,10 @@
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"
          (entry-function "\nLorem ipsum dolor\nsit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
 
+(deftest paragraph-after-codeblock
+  (is (= "<pre><code>foo</code></pre><p>bar baz</p>"
+         (entry-function "```\nfoo\n```\nbar\nbaz"))))
+
 (deftest mulitple-paragraphs
   (is (= "<p>foo bar baz</p><p>foo bar baz</p>"
          (entry-function "\nfoo bar baz\n\n\nfoo bar baz"))))
