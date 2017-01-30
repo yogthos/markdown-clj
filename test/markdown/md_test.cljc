@@ -1,6 +1,5 @@
 (ns markdown.md-test
   (:require [markdown.core :as markdown]
-            [markdown.transformers :as transformers]
             [markdown.tables :as tables]
             #?(:clj  [clojure.test :refer :all]
                :cljs [cljs.test :refer-macros [deftest is testing]])

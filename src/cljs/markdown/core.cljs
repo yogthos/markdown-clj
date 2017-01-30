@@ -64,12 +64,12 @@
                              (:buf state)
                              (first more)
                              (-> state
-                                 (dissoc :buf :lists :skip-next-line?)
+                                 (dissoc :buf :lists)
                                  (assoc :last-line-empty? true)))
                 state)]
           (if (not-empty more)
             (recur more
-                   (assoc (transformer html line (first more) state)
+                   (assoc (transformer html line (first more) (dissoc state :skip-next-line?))
                      :last-line-empty? (empty? line)))
             (transformer (.append html (footer (:footnotes state))) line "" (assoc state :eof true)))))
       {:metadata metadata :html (.toString html)})))
