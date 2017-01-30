@@ -57,17 +57,20 @@
                            :footnotes        footnotes
                            :last-line-empty? true}
                           params)]
-        (let [state
+        (let [line  (if (:skip-next-line? state) "" line)
+              state
               (if (:buf state)
                 (transformer html
                              (:buf state)
                              (first more)
-                             (-> state (dissoc :buf :lists) (assoc :last-line-empty? true)))
+                             (-> state
+                                 (dissoc :buf :lists :skip-next-line?)
+                                 (assoc :last-line-empty? true)))
                 state)]
           (if (not-empty more)
             (recur more
                    (assoc (transformer html line (first more) state)
-                     :last-line-empty? (or (:last-line-empty? state) (empty? line))))
+                     :last-line-empty? (empty? line)))
             (transformer (.append html (footer (:footnotes state))) line "" (assoc state :eof true)))))
       {:metadata metadata :html (.toString html)})))
 

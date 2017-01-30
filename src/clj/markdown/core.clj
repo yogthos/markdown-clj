@@ -87,20 +87,17 @@
                                            :references       references
                                            :footnotes        footnotes}
                                           params)]
-            #_(println "read line" line "next line" next-line "\nskip line?" (:skip-next-line? state))
-
             (let [line  (if (:skip-next-line? state) "" line)
                   state (if (:buf state)
                           (transformer (:buf state)
                                        next-line
-                                       (-> state (dissoc :buf :lists)
+                                       (-> state (dissoc :buf :lists :skip-next-line?)
                                            (assoc :last-line-empty? true)))
                           state)]
-              #_(println "updated line" line "\nupdated next-line" next-line "\n")
               (if line
                 (recur next-line
                        (.readLine rdr)
-                       (assoc (transformer line next-line (dissoc state :skip-next-line?))
+                       (assoc (transformer line next-line state)
                          :last-line-empty? (empty? (.trim line))))
                 (transformer (footer (:footnotes state)) nil (assoc state :eof true))))))
         (.flush wrt)
@@ -121,5 +118,3 @@
 
 (defn md-to-html-string-with-meta [text & params]
   (md-to-html-string* text (into [:parse-meta? true] params)))
-
-(md-to-html-string "```\nfoo\n```\nbar\nbaz")

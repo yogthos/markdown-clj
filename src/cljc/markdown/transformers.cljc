@@ -163,20 +163,16 @@
          (assoc state :code true)]
         [text state]))))
 
-
 (defn codeblock [text {:keys [codeblock codeblock-end next-line] :as state}]
-  (let [trimmed (string/trim text)]
+  (let [trimmed   (string/trim text)]
     (cond
       codeblock-end
       [text (-> state
                 (assoc :last-line-empty? true)
                 (dissoc :code :codeblock :codeblock-end))]
-      #_(and (= [\` \` \`] (take-last 3 trimmed)) codeblock)
-      #_[(str "</code></pre>" (string/join (drop 3 trimmed)))
-         (assoc state :code false :codeblock false :last-line-empty? false)]
 
       (and (= [\` \` \`] (take-last 3 (some-> next-line string/trim))) codeblock)
-      [(str text "\n" (apply str (drop-last 3 (string/trim next-line))) "</code></pre>")
+      [(str (escape-code (str text "\n" (apply str (drop-last 3 next-line)))) "</code></pre>")
        (assoc state :skip-next-line? true :codeblock-end true :last-line-empty? true)]
 
       (= [\` \` \`] (take 3 trimmed))

@@ -36,7 +36,7 @@
 
 (deftest br
   (is (= "<p>foo<br /></p>" (entry-function "foo  ")))
-  (is (= "<pre><code>foo  \n</code></pre>bar" (entry-function "```\nfoo  \nbar```"))))
+  (is (= "<pre><code>foo  \nbar</code></pre>" (entry-function "```\nfoo  \nbar```"))))
 
 (deftest hr
   (is (= "<hr/>" (entry-function "***")))
@@ -71,7 +71,7 @@
          (entry-function "\nLorem ipsum dolor\nsit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
 
 (deftest paragraph-after-codeblock
-  (is (= "<pre><code>foo</code></pre><p>bar baz</p>"
+  (is (= "<pre><code>foo\n</code></pre><p>bar baz</p>"
          (entry-function "```\nfoo\n```\nbar\nbaz"))))
 
 (deftest mulitple-paragraphs
