@@ -26,9 +26,7 @@
               make-heading
               dashes]]))
 
-(declare ^{:dynamic true} formatter)
-
-(declare ^:dynamic *next-line*)
+(declare ^:dynamic *formatter*)
 
 (defn heading? [text type]
   (when-not (every? #{\space} (take 4 text))
@@ -41,8 +39,8 @@
 (defn h2? [text]
   (heading? text \-))
 
-(defn empty-line [text state]
-  (if (or (:code state) (:codeblock state))
+(defn empty-line [text {:keys [code codeblock] :as state}]
+  (if (or code codeblock)
     [text state]
     [(if (or (h1? text) (h2? text)) "" text)
      (if (string/blank? text) (dissoc state :hr :heading) state)]))
@@ -64,19 +62,19 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
-(defn heading [text state]
+(defn heading [text {:keys [next-line code codeblock heading-anchors] :as state}]
   (cond
-    (or (:codeblock state) (:code state))
+    (or codeblock code)
     [text state]
 
-    (h1? *next-line*)
+    (h1? next-line)
     [(str "<h1>" text "</h1>") (assoc state :heading true)]
 
-    (h2? *next-line*)
+    (h2? next-line)
     [(str "<h2>" text "</h2>") (assoc state :heading true)]
 
     :else
-    (if-let [heading (make-heading text (:heading-anchors state))]
+    (if-let [heading (make-heading text heading-anchors)]
       [heading (assoc state :inline-heading true)]
       [text state])))
 
@@ -94,7 +92,7 @@
        text
        #"<https?://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]>"
        #(let [url (subs % 1 (dec (count %)))]
-         (str "<a href=\"" url "\">" url "</a>"))))
+          (str "<a href=\"" url "\">" url "</a>"))))
    state])
 
 (defn autoemail-transformer [text state]
@@ -106,9 +104,9 @@
        #(let [encoded (if (:clojurescript state)
                         (subs % 1 (dec (count %)))
                         (->> (subs % 1 (dec (count %)))
-                             (map (fn [c] (if (> (rand) 0.5) (formatter "&#x%02x;" (int c)) c)))
+                             (map (fn [c] (if (> (rand) 0.5) (*formatter* "&#x%02x;" (int c)) c)))
                              (apply str)))]
-         (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
+          (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
    state])
 
 (defn set-line-state [text {:keys [inline-heading] :as state}]
@@ -122,7 +120,8 @@
 
 (defn paragraph-text [last-line-empty? text]
   (if (and (not last-line-empty?) (not-empty text))
-    (str " " text) text))
+    (str " " text)
+    text))
 
 (defn paragraph
   [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty?] :as state}]
@@ -164,15 +163,17 @@
          (assoc state :code true)]
         [text state]))))
 
-
-(defn codeblock [text state]
-  (let [trimmed (string/trim text)]
+(defn codeblock [text {:keys [codeblock codeblock-end next-line] :as state}]
+  (let [trimmed   (string/trim text)]
     (cond
-      (and (= [\` \` \`] (take 3 trimmed)) (:codeblock state))
-      [(str "</code></pre>" (string/join (drop 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      codeblock-end
+      [text (-> state
+                (assoc :last-line-empty? true)
+                (dissoc :code :codeblock :codeblock-end))]
 
-      (and (= [\` \` \`] (take-last 3 trimmed)) (:codeblock state))
-      [(str "</code></pre>" (string/join (drop-last 3 trimmed))) (assoc state :code false :codeblock false :last-line-empty? false)]
+      (and (= [\` \` \`] (take-last 3 (some-> next-line string/trim))) codeblock)
+      [(str (escape-code (str text "\n" (apply str (drop-last 3 next-line)))) "</code></pre>")
+       (assoc state :skip-next-line? true :codeblock-end true :last-line-empty? true)]
 
       (= [\` \` \`] (take 3 trimmed))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
@@ -186,7 +187,7 @@
               (escape-code (if (empty? s) s (str s "\n"))))
          (assoc state :code true :codeblock true)])
 
-      (:codeblock state)
+      codeblock
       [(str (escape-code text) "\n") state]
 
       :default
@@ -217,7 +218,7 @@
             [(str (when (:blockquote-paragraph state) "</p>") "<p>") (assoc state :blockquote-paragraph true)]
 
             (and (>= (count trimmed) 2) (= ">-" (subs trimmed 0 2)))
-            [(str (when (:blockquote-paragraph state) "</p>")"<footer>" (subs text 2) "</footer>") (assoc state :blockquote-paragraph false)]
+            [(str (when (:blockquote-paragraph state) "</p>") "<footer>" (subs text 2) "</footer>") (assoc state :blockquote-paragraph false)]
 
             (= ">" (subs trimmed 0 1))
             [(str (when-not (:blockquote-paragraph state) "<p>") (subs text 1) " ") (assoc state :blockquote-paragraph true)]

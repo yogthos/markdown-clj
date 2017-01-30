@@ -4,17 +4,16 @@
             [markdown.links
              :refer [parse-reference parse-reference-link parse-footnote-link]]
             [markdown.transformers
-             :refer [*next-line*  transformer-vector footer parse-metadata-headers]]))
+             :refer [transformer-vector footer parse-metadata-headers]]))
 
 
 (defn- init-transformer [{:keys [replacement-transformers custom-transformers inhibit-separator]}]
   (fn [html line next-line state]
-    (binding [*next-line* next-line
-              *inhibit-separator* inhibit-separator]
+    (binding [*inhibit-separator* inhibit-separator]
       (let [[text new-state]
             (reduce
               (fn [[text state] transformer]
-                (transformer text state))
+                (transformer text (assoc state :next-line next-line)))
               [line state]
               (or replacement-transformers
                   (into transformer-vector custom-transformers)))]
@@ -44,7 +43,7 @@
   "processes input text line by line and outputs an HTML string"
   [text params]
   (binding [markdown.common/*substring* (fn [s n] (apply str (drop n s)))
-            markdown.transformers/formatter format]
+            markdown.transformers/*formatter* format]
     (let [params      (when params (apply (partial assoc {}) params))
           lines       (.split (str text "\n") "\n")
           html        (goog.string.StringBuffer. "")
@@ -58,16 +57,19 @@
                            :footnotes        footnotes
                            :last-line-empty? true}
                           params)]
-        (let [state
+        (let [line  (if (:skip-next-line? state) "" line)
+              state
               (if (:buf state)
                 (transformer html
                              (:buf state)
                              (first more)
-                             (-> state (dissoc :buf :lists) (assoc :last-line-empty? true)))
+                             (-> state
+                                 (dissoc :buf :lists)
+                                 (assoc :last-line-empty? true)))
                 state)]
           (if (not-empty more)
             (recur more
-                   (assoc (transformer html line (first more) state)
+                   (assoc (transformer html line (first more) (dissoc state :skip-next-line?))
                      :last-line-empty? (empty? line)))
             (transformer (.append html (footer (:footnotes state))) line "" (assoc state :eof true)))))
       {:metadata metadata :html (.toString html)})))

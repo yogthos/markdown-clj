@@ -6,7 +6,7 @@
             [markdown.links
              :refer [parse-reference parse-reference-link parse-footnote-link]]
             [markdown.transformers
-             :refer [*next-line* transformer-vector footer parse-metadata-headers]])
+             :refer [transformer-vector footer parse-metadata-headers]])
   (:import [java.io BufferedReader
                     BufferedWriter
                     StringReader
@@ -18,12 +18,11 @@
 
 (defn- init-transformer [writer {:keys [replacement-transformers custom-transformers inhibit-separator]}]
   (fn [line next-line state]
-    (binding [*next-line* next-line
-              *inhibit-separator* inhibit-separator]
+    (binding [*inhibit-separator* inhibit-separator]
       (let [[text new-state]
             (reduce
               (fn [[text, state] transformer]
-                (transformer text state))
+                (transformer text (assoc state :next-line next-line)))
               [line state]
               (or replacement-transformers
                   (into transformer-vector custom-transformers)))]
@@ -72,7 +71,7 @@
   nil is returned."
   [in out & params]
   (binding [markdown.common/*substring* (fn [^String s n] (.substring s n))
-            markdown.transformers/formatter clojure.core/format]
+            markdown.transformers/*formatter* clojure.core/format]
     (let [params     (parse-params params)
           references (when (:reference-links? params) (parse-references in))
           footnotes  (when (:footnotes? params) (parse-footnotes in))
@@ -82,22 +81,24 @@
         (when (and metadata (:parse-meta? params))
           (while (not= "" (string/trim (.readLine rdr)))))
         (let [transformer (init-transformer wrt params)]
-          (loop [^String line (.readLine rdr)
-                 next-line    (.readLine rdr)
-                 state        (merge {:last-line-empty? true
-                                      :references       references
-                                      :footnotes        footnotes}
-                                     params)]
-            (let [state (if (:buf state)
+          (loop [^String line      (.readLine rdr)
+                 ^String next-line (.readLine rdr)
+                 state             (merge {:last-line-empty? true
+                                           :references       references
+                                           :footnotes        footnotes}
+                                          params)]
+            (let [line  (if (:skip-next-line? state) "" line)
+                  state (if (:buf state)
                           (transformer (:buf state)
                                        next-line
-                                       (-> state (dissoc :buf :lists)
+                                       (-> state
+                                           (dissoc :buf :lists)
                                            (assoc :last-line-empty? true)))
                           state)]
               (if line
                 (recur next-line
                        (.readLine rdr)
-                       (assoc (transformer line next-line state)
+                       (assoc (transformer line next-line (dissoc state :skip-next-line?))
                          :last-line-empty? (empty? (.trim line))))
                 (transformer (footer (:footnotes state)) nil (assoc state :eof true))))))
         (.flush wrt)

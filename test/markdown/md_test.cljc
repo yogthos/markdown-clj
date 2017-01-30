@@ -1,6 +1,5 @@
 (ns markdown.md-test
   (:require [markdown.core :as markdown]
-            [markdown.transformers :as transformers]
             [markdown.tables :as tables]
             #?(:clj  [clojure.test :refer :all]
                :cljs [cljs.test :refer-macros [deftest is testing]])
@@ -36,7 +35,7 @@
 
 (deftest br
   (is (= "<p>foo<br /></p>" (entry-function "foo  ")))
-  (is (= "<pre><code>foo  \n</code></pre>bar" (entry-function "```\nfoo  \nbar```"))))
+  (is (= "<pre><code>foo  \nbar</code></pre>" (entry-function "```\nfoo  \nbar```"))))
 
 (deftest hr
   (is (= "<hr/>" (entry-function "***")))
@@ -73,6 +72,10 @@
 (deftest paragraph-multiline
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"
          (entry-function "\nLorem ipsum dolor\nsit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
+
+(deftest paragraph-after-codeblock
+  (is (= "<pre><code>foo\n</code></pre><p>bar baz</p>"
+         (entry-function "```\nfoo\n```\nbar\nbaz"))))
 
 (deftest mulitple-paragraphs
   (is (= "<p>foo bar baz</p><p>foo bar baz</p>"
