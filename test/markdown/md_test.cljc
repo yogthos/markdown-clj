@@ -73,6 +73,10 @@
   (is (= "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore</p>"
          (entry-function "\nLorem ipsum dolor\nsit amet, consectetur adipisicing elit,\nsed do eiusmod tempor incididunt ut labore"))))
 
+(deftest paragraph-before-codeblock
+  (is (= "<p>foo</p><pre><code>bar\n</code></pre><p>baz</p>"
+         (entry-function "foo\n```\nbar\n```\nbaz"))))
+
 (deftest paragraph-after-codeblock
   (is (= "<pre><code>foo\n</code></pre><p>bar baz</p>"
          (entry-function "```\nfoo\n```\nbar\nbaz"))))
@@ -141,7 +145,9 @@
   (is (= "<p><code>&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;channel&gt;&lt;/channel&gt;</code></p>"
          (entry-function "`<?xml version='1.0' encoding='UTF-8'?><channel></channel>`")))
   (is (= "<p>foo bar baz <code>&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x:&quot; x&#41;&#41;</code> foo</p>"
-         (entry-function "foo bar baz `(fn [x & xs] (str \"x:\" x))` foo"))))
+         (entry-function "foo bar baz `(fn [x & xs] (str \"x:\" x))` foo")))
+  (is (= "<pre><code>```\nfoo\n```</code></pre>"
+         (entry-function "    ```\n    foo\n    ```"))))
 
 (deftest multiline-code
   (is (= "<pre><code>x = 5\ny = 6\nz = x + y</code></pre>"

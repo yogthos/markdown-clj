@@ -123,18 +123,18 @@
     (str " " text)
     text))
 
-(defn paragraph
+(defn open-paragraph
   [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty?] :as state}]
   (cond
     (and paragraph lists)
-    [(str "</p>" text) (assoc state :paragraph false)]
+    [(str "</p>" text) (dissoc state :paragraph)]
 
     (or heading inline-heading hr code lists blockquote)
     [text state]
 
     paragraph
     (if (or eof (empty? (string/trim text)))
-      [(str (paragraph-text last-line-empty? text) "</p>") (assoc state :paragraph false)]
+      [(str (paragraph-text last-line-empty? text) "</p>") (dissoc state :paragraph)]
       [(paragraph-text last-line-empty? text) state])
 
     (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty?))
@@ -143,6 +143,14 @@
     :default
     [text state]))
 
+(defn close-paragraph [text {:keys [next-line paragraph] :as state}]
+  (if (and paragraph (= [\` \` \`] (take 3 next-line)))
+    [(str text "</p>") (dissoc state :paragraph)]
+    [text state]))
+
+(defn paragraph [text state]
+  (apply close-paragraph (open-paragraph text state)))
+
 (defn code [text {:keys [eof lists code codeblock] :as state}]
   (cond
     (or lists codeblock)
@@ -150,7 +158,7 @@
 
     code
     (if (or eof (not= "    " (string/join (take 4 text))))
-      [(str "</code></pre>" text) (assoc state :code false :last-line-empty? false)]
+      [(str "</code></pre>" text) (dissoc state :indented-code :code :last-line-empty?)]
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
 
     (empty? (string/trim text))
@@ -160,10 +168,10 @@
     (let [num-spaces (count (take-while (partial = \space) text))]
       (if (> num-spaces 3)
         [(str "<pre><code>" (escape-code (string/replace-first text #"    " "")))
-         (assoc state :code true)]
+         (assoc state :code true :indented-code true)]
         [text state]))))
 
-(defn codeblock [text {:keys [codeblock codeblock-end next-line] :as state}]
+(defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line] :as state}]
   (let [trimmed   (string/trim text)]
     (cond
       codeblock-end
@@ -175,7 +183,9 @@
       [(str (escape-code (str text "\n" (apply str (drop-last 3 next-line)))) "</code></pre>")
        (assoc state :skip-next-line? true :codeblock-end true :last-line-empty? true)]
 
-      (= [\` \` \`] (take 3 trimmed))
+      (and
+        (not indented-code)
+        (= [\` \` \`] (take 3 trimmed)))
       (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
             s         (apply str (rest code))
             formatter (:code-style state)]
@@ -298,8 +308,8 @@
    empty-line
    inhibit
    escape-inhibit-separator
-   codeblock
    code
+   codeblock
    escaped-chars
    inline-code
    autoemail-transformer
