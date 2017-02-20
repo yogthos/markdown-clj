@@ -272,6 +272,9 @@
   (is (= "<p><a href=\"http://example.com/\">http://example.com/</a></p>"
          (entry-function "<http://example.com/>")))
 
+  (is (= "<p>Some content with a <a href=\"http://www.google.com/abc__123__efg\">http://www.google.com/abc__123__efg</a> link it in</p>"
+         (entry-function "Some content with a <http://www.google.com/abc__123__efg> link it in")))
+
   (is (= "<p><a href=\"http://foo\">http://foo</a> <a href=\"https://bar/baz\">https://bar/baz</a> <a href=\"http://foo/bar\">foo bar</a></p>"
          (entry-function "<http://foo> <https://bar/baz> <a href=\"http://foo/bar\">foo bar</a>")))
 

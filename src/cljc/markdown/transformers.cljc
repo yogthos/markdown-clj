@@ -13,6 +13,7 @@
              :refer
              [escape-code
               escaped-chars
+              freeze-string
               separator
               thaw-strings
               strong
@@ -85,15 +86,17 @@
      text)
    state])
 
-(defn autourl-transformer [text state]
-  [(if (:code state)
-     text
-     (string/replace
-       text
-       #"<https?://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]>"
-       #(let [url (subs % 1 (dec (count %)))]
-          (str "<a href=\"" url "\">" url "</a>"))))
-   state])
+(defn autourl-transformer [text {:keys [code frozen-strings] :as state}]
+  (if code
+    [text state]
+    (let [currently-frozen (volatile! {:frozen-strings frozen-strings})]
+      [(string/replace
+         text
+         #"<https?://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]>"
+         #(let [[url frozen-strings] (freeze-string (subs % 1 (dec (count %))) @currently-frozen)]
+            (vreset! currently-frozen frozen-strings)
+            (str "<a href=\"" url "\">" url "</a>")))
+       (merge state @currently-frozen)])))
 
 (defn autoemail-transformer [text state]
   [(if (or (:code state) (:codeblock state))
@@ -172,7 +175,7 @@
         [text state]))))
 
 (defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line] :as state}]
-  (let [trimmed   (string/trim text)]
+  (let [trimmed (string/trim text)]
     (cond
       codeblock-end
       [text (-> state
