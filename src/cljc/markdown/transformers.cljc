@@ -64,15 +64,15 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
-(defn heading [text {:keys [next-line code codeblock heading-anchors] :as state}]
+(defn heading [text {:keys [buf next-line code codeblock heading-anchors] :as state}]
   (cond
     (or codeblock code)
     [text state]
 
-    (h1? next-line)
+    (h1? (or buf next-line))
     [(str "<h1>" text "</h1>") (assoc state :heading true)]
 
-    (h2? next-line)
+    (h2? (or buf next-line))
     [(str "<h2>" text "</h2>") (assoc state :heading true)]
 
     :else

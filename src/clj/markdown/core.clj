@@ -88,11 +88,12 @@
                                            :footnotes        footnotes}
                                           params)]
             (let [line  (if (:skip-next-line? state) "" line)
-                  state (if (:buf state)
-                          (transformer (:buf state)
-                                       next-line
+                  buf   (:buf state)
+                  state (if buf
+                          (transformer buf
+                                       (:next-line state)
                                        (-> state
-                                           (dissoc :buf :lists)
+                                           (dissoc :buf :lists :next-line)
                                            (assoc :last-line-empty? true)))
                           state)]
               (if line

@@ -62,9 +62,9 @@
               (if (:buf state)
                 (transformer html
                              (:buf state)
-                             (first more)
+                             (:next-line state)
                              (-> state
-                                 (dissoc :buf :lists)
+                                 (dissoc :buf :lists :next-line)
                                  (assoc :last-line-empty? true)))
                 state)]
           (if (not-empty more)
