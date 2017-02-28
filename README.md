@@ -97,7 +97,7 @@ To enable footnotes, pass the `:footnotes? true` option:
 ### Metadata
 
 The metadata encoded using the syntax described by [MultiMarkdown](https://github.com/fletcher/MultiMarkdown/wiki/MultiMarkdown-Syntax-Guide#metadata) can be optionally extracted from the document.
- 
+
 The `md-to-html` function will attempt to parse the metadata when passed the `:parse-meta? true` option and return it as its output.
 Additionally, `md-to-html-string-with-meta` function can be used to parse string input. The function returns a map with two keys, `:html` containing the parsed HTML, and `:metadata` containing a map with the metadata included at the top of the document.
 
@@ -112,16 +112,16 @@ The value of each key in the metadata map will be a list of either 0, 1 or many 
 
 (md-to-html-string-with-meta
   "Author: Rexella van Imp
-    Kim Jong-un    
+    Kim Jong-un
 Date: October 31, 2015
-   
+
    # Hello!")
 
 {:metadata {:author ["Rexella van Imp"
-                     "Kim Jong-un"], 
-            :date ["October 31, 2015"]}, 
+                     "Kim Jong-un"],
+            :date ["October 31, 2015"]},
  :html "<h1>Hello!</h1>"}
-``` 
+```
 
 ### Selectively inhibiting the Parser
 
@@ -225,8 +225,8 @@ a string followed by the options as its input, and returns the resulting HTML st
 (.log js/console
   (md->html "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
                :code-style #(str "class=\"" % "\"")))
-               
-(md->html-with-meta "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```")               
+
+(md->html-with-meta "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```")
 ```
 
 ## Usage JavaScript
@@ -260,6 +260,7 @@ Control characters can be escaped using \
 [Blockquote](#blockquote),
 [Strong](#strong),
 [Bold](#bold),
+[Bold-Italic](#bold-italic),
 [Emphasis](#emphasis),
 [Italics](#italics),
 [Heading](#heading),
@@ -370,6 +371,11 @@ _foo_
 
 ```
 __foo__
+```
+
+### Bold-Italic
+```
+***bold italic***
 ```
 
 ### Blockquote
