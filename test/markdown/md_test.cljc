@@ -52,6 +52,9 @@
 (deftest strong
   (is (= "<p><strong>foo</strong></p>" (entry-function "**foo**"))))
 
+(deftest bold-italics
+  (is (= "<p><b><i>foo</i></b></p>" (entry-function "***foo***"))))
+
 (deftest bold
   (is (= "<p><b>foo</b></p>" (entry-function "__foo__"))))
 

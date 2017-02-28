@@ -18,6 +18,7 @@
               thaw-strings
               strong
               bold
+              bold-italic
               em
               italics
               strikethrough
@@ -327,6 +328,7 @@
    li
    heading
    italics
+   bold-italic
    em
    strong
    bold

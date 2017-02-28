@@ -133,6 +133,8 @@
 
 (def strong (make-separator "**" "<strong>" "</strong>"))
 
+(def bold-italic (make-separator "***" "<b><i>" "</i></b>"))
+
 (def bold (make-separator "__" "<b>" "</b>"))
 
 (def em (make-separator "*" "<em>" "</em>"))
