@@ -301,8 +301,12 @@
          (entry-function "##With a link [the contents of the_link](http://a.com/under_score_in_the_link/)"))))
 
 (deftest two-links-tests-link-processing
-  (is (= "<h2>When you have a pair of links <a href='http://123.com/1'>link1</a> and you want both <a href='That's crazy'>Wow</a></h2>"
-         (entry-function "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That's crazy)"))))
+  (is (= "<h2>When you have a pair of links <a href='http://123.com/1'>link1</a> and you want both <a href='That%27s%20crazy'>Wow</a></h2>"
+         (entry-function "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That%27s%20crazy)"))))
+
+(deftest link-with-optional-title
+  (is (= "<p><a href='https://github.com/cryogen-project/cryogen' title=\"Cryogen Github\">Cryogens site</a></p>"
+         (entry-function "[Cryogens site](https://github.com/cryogen-project/cryogen \"Cryogen Github\")"))))
 
 (deftest parse-table-row
   (is (= (tables/parse-table-row "| table cell contents |") [{:text "table cell contents"}]))
