@@ -10,8 +10,14 @@
               italics
               strikethrough]]))
 
-(defn href [title link state]
-  (freeze-string (seq "<a href='") link (seq "'>") title (seq "</a>") state))
+(defn href [text link state]
+  (let [[link title] (split-with (partial not= \space) link)]
+    (freeze-string
+     (seq "<a href='") link (seq "'")
+     (if (not-empty title)
+       (seq (apply str " title=" (string/join (rest title)) ">"))
+       (seq ">"))
+     text (seq "</a>") state)))
 
 (defn img [alt url state & [title]]
   (freeze-string
