@@ -228,7 +228,7 @@
 
       (:blockquote state)
       (cond (or eof (empty? trimmed))
-            [text (assoc state :blockquote-end true)]
+            [text (assoc state :blockquote-end true :blockquote false)]
 
             (= ">" trimmed)
             [(str (when (:blockquote-paragraph state) "</p>") "<p>") (assoc state :blockquote-paragraph true)]
@@ -250,18 +250,19 @@
 (defn blockquote-end [text {:keys [blockquote-end blockquote-paragraph lists] :as state}]
   (println "in blockquote-end with:" text)
   (println state)
-  (cond (not blockquote-end)
-        [text state]
-
-        (and lists blockquote-paragraph)
-        ["</p>" (dissoc state :blockquote-paragraph)]
-
-        (not lists)
-        ["</blockquote>"
-         (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
-
-        :default
-        [text state]))
+  (let [list-end (or (not lists) (empty? lists))]
+    (cond (not blockquote-end)
+          [text state]
+          
+          (and (not list-end) blockquote-paragraph)
+          [(str text "</p>") (dissoc state :blockquote-paragraph)]
+          
+          list-end
+          [(str text "</blockquote>")
+           (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
+          
+          :default
+          [text state])))
 
 (defn footer [footnotes]
   (if (empty? (:processed footnotes))
