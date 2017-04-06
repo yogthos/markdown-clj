@@ -219,8 +219,8 @@
       [text state])))
 
 (defn blockquote-start [text {:keys [eof code codeblock lists] :as state}]
-  (println "\nin blockquote-start with:" text)
-  (println state)
+  ;;(println "\nin blockquote-start with:" text)
+  ;;(println state)
   (let [trimmed (string/trim text)]
     (cond
       (or code codeblock)
@@ -248,8 +248,8 @@
         [text state]))))
 
 (defn blockquote-end [text {:keys [blockquote-end blockquote-paragraph lists] :as state}]
-  (println "in blockquote-end with:" text)
-  (println state)
+  ;;(println "in blockquote-end with:" text)
+  ;;(println state)
   (let [list-end (or (not lists) (empty? lists))]
     (cond (not blockquote-end)
           [text state]
