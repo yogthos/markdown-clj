@@ -254,11 +254,8 @@
     (cond (not blockquote-end)
           [text state]
           
-          (and (not list-end) blockquote-paragraph)
-          [(str text "</p>") (dissoc state :blockquote-paragraph)]
-          
           list-end
-          [(str text "</blockquote>")
+          [(str text (when blockquote-paragraph "</p>") "</blockquote>")
            (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
           
           :default
