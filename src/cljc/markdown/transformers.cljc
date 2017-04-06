@@ -218,15 +218,17 @@
       [(str "<hr/>") (assoc state :hr true)]
       [text state])))
 
-(defn blockquote [text {:keys [eof code codeblock lists] :as state}]
+(defn blockquote-start [text {:keys [eof code codeblock lists] :as state}]
+  (println "\nin blockquote-start with:" text)
+  (println state)
   (let [trimmed (string/trim text)]
     (cond
-      (or code codeblock lists)
+      (or code codeblock)
       [text state]
 
       (:blockquote state)
       (cond (or eof (empty? trimmed))
-            [(str (when (:blockquote-paragraph state) "</p>") "</blockquote>") (assoc state :blockquote false :blockquote-paragraph false)]
+            [text (assoc state :blockquote-end true)]
 
             (= ">" trimmed)
             [(str (when (:blockquote-paragraph state) "</p>") "<p>") (assoc state :blockquote-paragraph true)]
@@ -244,6 +246,22 @@
       (if (= \> (first text))
         [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true :blockquote-paragraph true)]
         [text state]))))
+
+(defn blockquote-end [text {:keys [blockquote-end blockquote-paragraph lists] :as state}]
+  (println "in blockquote-end with:" text)
+  (println state)
+  (cond (not blockquote-end)
+        [text state]
+
+        (and lists blockquote-paragraph)
+        ["</p>" (dissoc state :blockquote-paragraph)]
+
+        (not lists)
+        ["</blockquote>"
+         (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
+
+        :default
+        [text state]))
 
 (defn footer [footnotes]
   (if (empty? (:processed footnotes))
@@ -325,7 +343,9 @@
    reference-link
    footnote-link
    hr
+   blockquote-start
    li
+   blockquote-end
    heading
    italics
    bold-italic
@@ -334,7 +354,6 @@
    bold
    strikethrough
    superscript
-   blockquote
    table
    paragraph
    br

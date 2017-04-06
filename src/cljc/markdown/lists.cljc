@@ -42,6 +42,8 @@
     (add-row :ol list-type num-indents indents (or (make-heading content false) content) state)))
 
 (defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]
+  (println "in li with:" text)
+  (println state)
   (cond
 
     (and last-line-empty? (string/blank? text))
