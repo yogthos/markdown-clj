@@ -246,7 +246,7 @@
 
       :default
       (if (= \> (first text))
-        [(string/join (rest text))
+        [(str (string/join (rest text)) " ")
          (assoc state :blockquote-start true :blockquote true :blockquote-paragraph true)]
         [text state]))))
 
@@ -255,7 +255,7 @@
   [text {:keys [blockquote-start blockquote-end blockquote-paragraph lists] :as state}]
   (let [list-end (or (not lists) (empty? lists))]
     (cond blockquote-start
-          [(str "<blockquote><p>" text " ")
+          [(str "<blockquote><p>" text)
            (dissoc state :blockquote-start)]
           
           (and blockquote-end list-end)
