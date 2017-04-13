@@ -218,9 +218,11 @@
       [(str "<hr/>") (assoc state :hr true)]
       [text state])))
 
-(defn blockquote-start [text {:keys [eof code codeblock lists] :as state}]
-  ;;(println "\nin blockquote-start with:" text)
-  ;;(println state)
+(defn blockquote-1
+  "Check for blockquotes and signal to blockquote-2 function with
+  states blockquote-start and blockquote-end so that tags can be added.
+  This approach enables lists to be included in blockquotes."
+  [text {:keys [eof code codeblock lists] :as state}]
   (let [trimmed (string/trim text)]
     (cond
       (or code codeblock)
@@ -244,17 +246,19 @@
 
       :default
       (if (= \> (first text))
-        [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true :blockquote-paragraph true)]
+        [(string/join (rest text))
+         (assoc state :blockquote-start true :blockquote true :blockquote-paragraph true)]
         [text state]))))
 
-(defn blockquote-end [text {:keys [blockquote-end blockquote-paragraph lists] :as state}]
-  ;;(println "in blockquote-end with:" text)
-  ;;(println state)
+(defn blockquote-2
+  "Check for change in blockquote states and add start or end tags"
+  [text {:keys [blockquote-start blockquote-end blockquote-paragraph lists] :as state}]
   (let [list-end (or (not lists) (empty? lists))]
-    (cond (not blockquote-end)
-          [text state]
+    (cond blockquote-start
+          [(str "<blockquote><p>" text " ")
+           (dissoc state :blockquote-start)]
           
-          list-end
+          (and blockquote-end list-end)
           [(str text (when blockquote-paragraph "</p>") "</blockquote>")
            (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
           
@@ -341,9 +345,9 @@
    reference-link
    footnote-link
    hr
-   blockquote-start
+   blockquote-1
    li
-   blockquote-end
+   blockquote-2
    heading
    italics
    bold-italic

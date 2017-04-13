@@ -261,8 +261,10 @@
          (entry-function "> Foo bar\n>\n> baz"))))
 
 (deftest blockquote-bullets
+  (is (= "<blockquote><p> list: <ul><li>foo</li><li>bar</li></ul></p></blockquote><p>end.</p>"
+         (entry-function "> list:\n>* foo\n>* bar\n\nend.")))
   (is (= "<blockquote><ul><li>foo</li><li>bar</li><li>baz</li></blockquote>"
-         (entry-function "> * foo\n> * bar\n> * baz"))))
+         (entry-function ">* foo\n>* bar\n>* baz"))))
 
 (deftest escaped-characters
   (is
