@@ -251,14 +251,16 @@
         [text state]))))
 
 (defn blockquote-2
-  "Check for change in blockquote states and add start or end tags"
+  "Check for change in blockquote states and add start or end tags.
+  Closing a blockquote with a list in it is a bit more complex, 
+  as the list is not closed until the following blank line."
   [text {:keys [blockquote-start blockquote-end blockquote-paragraph lists] :as state}]
-  (let [list-end (or (not lists) (empty? lists))]
+  (let [not-in-list (or (not lists) (empty? lists))]
     (cond blockquote-start
           [(str "<blockquote><p>" text)
            (dissoc state :blockquote-start)]
           
-          (and blockquote-end list-end)
+          (and blockquote-end not-in-list)
           [(str text (when blockquote-paragraph "</p>") "</blockquote>")
            (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
           
