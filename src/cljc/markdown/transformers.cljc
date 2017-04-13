@@ -218,15 +218,19 @@
       [(str "<hr/>") (assoc state :hr true)]
       [text state])))
 
-(defn blockquote [text {:keys [eof code codeblock lists] :as state}]
+(defn blockquote-1
+  "Check for blockquotes and signal to blockquote-2 function with
+  states blockquote-start and blockquote-end so that tags can be added.
+  This approach enables lists to be included in blockquotes."
+  [text {:keys [eof code codeblock lists] :as state}]
   (let [trimmed (string/trim text)]
     (cond
-      (or code codeblock lists)
+      (or code codeblock)
       [text state]
 
       (:blockquote state)
       (cond (or eof (empty? trimmed))
-            [(str (when (:blockquote-paragraph state) "</p>") "</blockquote>") (assoc state :blockquote false :blockquote-paragraph false)]
+            [text (assoc state :blockquote-end true :blockquote false)]
 
             (= ">" trimmed)
             [(str (when (:blockquote-paragraph state) "</p>") "<p>") (assoc state :blockquote-paragraph true)]
@@ -242,8 +246,26 @@
 
       :default
       (if (= \> (first text))
-        [(str "<blockquote><p>" (string/join (rest text)) " ") (assoc state :blockquote true :blockquote-paragraph true)]
+        [(str (string/join (rest text)) " ")
+         (assoc state :blockquote-start true :blockquote true :blockquote-paragraph true)]
         [text state]))))
+
+(defn blockquote-2
+  "Check for change in blockquote states and add start or end tags.
+  Closing a blockquote with a list in it is a bit more complex, 
+  as the list is not closed until the following blank line."
+  [text {:keys [blockquote-start blockquote-end blockquote-paragraph lists] :as state}]
+  (let [not-in-list (or (not lists) (empty? lists))]
+    (cond blockquote-start
+          [(str "<blockquote><p>" text)
+           (dissoc state :blockquote-start)]
+          
+          (and blockquote-end not-in-list)
+          [(str text (when blockquote-paragraph "</p>") "</blockquote>")
+           (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
+          
+          :default
+          [text state])))
 
 (defn footer [footnotes]
   (if (empty? (:processed footnotes))
@@ -325,8 +347,10 @@
    reference-link
    footnote-link
    hr
+   blockquote-1
    li
    heading
+   blockquote-2
    italics
    bold-italic
    em
@@ -334,7 +358,6 @@
    bold
    strikethrough
    superscript
-   blockquote
    table
    paragraph
    br
