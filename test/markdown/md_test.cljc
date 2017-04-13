@@ -266,6 +266,12 @@
   (is (= "<blockquote><p><ul><li>foo</li><li>bar</li><li>baz</li></ul></p></blockquote>"
          (entry-function ">* foo\n>* bar\n>* baz"))))
 
+(deftest blockquote-headings
+  (is (= "<blockquote><p><h2>Foo</h2>bar baz </p></blockquote>"
+         (entry-function "> ## Foo\n>bar baz")))
+  (is (= "<blockquote><p> Foo <h2>bar</h2> baz </p></blockquote>"
+         (entry-function "> Foo\n>## bar\n> baz"))))  
+
 (deftest escaped-characters
   (is
     (= "<p>&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"

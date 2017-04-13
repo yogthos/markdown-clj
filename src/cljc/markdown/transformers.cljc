@@ -349,8 +349,8 @@
    hr
    blockquote-1
    li
-   blockquote-2
    heading
+   blockquote-2
    italics
    bold-italic
    em
