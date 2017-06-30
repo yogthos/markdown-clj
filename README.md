@@ -1,4 +1,4 @@
-#Markdown parser written in Clojure/Script
+# Markdown parser written in Clojure/Script
 
 [![Continuous Integration status](https://api.travis-ci.org/yogthos/markdown-clj.png)](http://travis-ci.org/yogthos/markdown-clj) [![Downloads](https://jarkeeper.com/yogthos/markdown-clj/downloads.svg)](https://jarkeeper.com/yogthos/markdown-clj)
 
