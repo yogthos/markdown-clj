@@ -125,7 +125,6 @@ Date: October 31, 2015
 
 ### Selectively inhibiting the Parser
 
-*** `:inhibit-separator` will be available in the upcoming release ***
 If you pass `:inhibit-separator "some-string"`, then any text within occurrences of `some-string` will be output verbatim, eg:
 
 ```clojure
