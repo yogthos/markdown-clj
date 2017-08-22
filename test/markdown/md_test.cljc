@@ -37,7 +37,8 @@
 
 (deftest br
   (is (= "<p>foo<br /></p>" (entry-function "foo  ")))
-  (is (= "<pre><code>foo  \nbar</code></pre>" (entry-function "```\nfoo  \nbar```"))))
+  (is (= "<pre><code>foo  \nbar</code></pre>" (entry-function "```\nfoo  \nbar```")))
+  (is (= "<pre><code>&lt;html&gt;\n&lt;/html&gt;\n</code></pre>" (entry-function "```\n<html>\n</html>\n```  "))))
 
 (deftest hr
   (is (= "<hr/>" (entry-function "***")))

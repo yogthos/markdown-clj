@@ -184,7 +184,7 @@
                 (dissoc :code :codeblock :codeblock-end))]
 
       (and (= [\` \` \`] (take-last 3 (some-> next-line string/trim))) codeblock)
-      [(str (escape-code (str text "\n" (apply str (drop-last 3 next-line)))) "</code></pre>")
+      [(str (escape-code (str text "\n" (apply str (first (string/split next-line #"```"))))) "</code></pre>")
        (assoc state :skip-next-line? true :codeblock-end true :last-line-empty? true)]
 
       (and
