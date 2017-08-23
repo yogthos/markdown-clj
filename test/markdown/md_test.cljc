@@ -36,9 +36,7 @@
         (entry-function "###foo bar BAz##\nsome text" :heading-anchors true))))
 
 (deftest br
-  (is (= "<p>foo<br /></p>" (entry-function "foo  ")))
-  (is (= "<pre><code>foo  \nbar</code></pre>" (entry-function "```\nfoo  \nbar```")))
-  (is (= "<pre><code>&lt;html&gt;\n&lt;/html&gt;\n</code></pre>" (entry-function "```\n<html>\n</html>\n```  "))))
+  (is (= "<p>foo<br /></p>" (entry-function "foo  "))))
 
 (deftest hr
   (is (= "<hr/>" (entry-function "***")))
@@ -81,7 +79,11 @@
 
 (deftest paragraph-before-codeblock
   (is (= "<p>foo</p><pre><code>bar\n</code></pre><p>baz</p>"
-         (entry-function "foo\n```\nbar\n```\nbaz"))))
+         (entry-function "foo\n```\nbar\n```\nbaz")))
+  (is (= "<pre><code>foo  \nbar</code></pre>" (entry-function "```\nfoo  \nbar```")))
+  (is (= "<p><pre><code></code></pre></p>" (entry-function "```\n```")))
+  (is (= "<p><pre><code class=\"go\"></code></pre></p>" (entry-function "```go\n```")))
+  (is (= "<pre><code>&lt;html&gt;\n&lt;/html&gt;\n</code></pre>" (entry-function "```\n<html>\n</html>\n```  "))))
 
 (deftest paragraph-after-codeblock
   (is (= "<pre><code>foo\n</code></pre><p>bar baz</p>"
@@ -271,7 +273,7 @@
   (is (= "<blockquote><p><h2>Foo</h2>bar baz </p></blockquote>"
          (entry-function "> ## Foo\n>bar baz")))
   (is (= "<blockquote><p> Foo <h2>bar</h2> baz </p></blockquote>"
-         (entry-function "> Foo\n>## bar\n> baz"))))  
+         (entry-function "> Foo\n>## bar\n> baz"))))
 
 (deftest escaped-characters
   (is

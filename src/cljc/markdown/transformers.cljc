@@ -148,7 +148,7 @@
     [text state]))
 
 (defn close-paragraph [text {:keys [next-line paragraph] :as state}]
-  (if (and paragraph (= [\` \` \`] (take 3 next-line)))
+  (if (and paragraph (= [\` \` \`] (take-last 3 (some-> next-line string/trim))))
     [(str text "</p>") (dissoc state :paragraph)]
     [text state]))
 
@@ -176,14 +176,15 @@
         [text state]))))
 
 (defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line] :as state}]
-  (let [trimmed (string/trim text)]
+  (let [trimmed (string/trim text)
+        next-line-closes? (= [\` \` \`] (take-last 3 (some-> next-line string/trim)))]
     (cond
       codeblock-end
       [text (-> state
                 (assoc :last-line-empty? true)
                 (dissoc :code :codeblock :codeblock-end))]
 
-      (and (= [\` \` \`] (take-last 3 (some-> next-line string/trim))) codeblock)
+      (and next-line-closes? codeblock)
       [(str (escape-code (str text "\n" (apply str (first (string/split next-line #"```"))))) "</code></pre>")
        (assoc state :skip-next-line? true :codeblock-end true :last-line-empty? true)]
 
@@ -198,8 +199,11 @@
                                   (if formatter
                                     (formatter (string/join lang))
                                     (str "class=\"" (string/join lang) "\"")))) ">"
-              (escape-code (if (empty? s) s (str s "\n"))))
-         (assoc state :code true :codeblock true)])
+              (escape-code (if (empty? s) s (str s "\n")))
+              (when next-line-closes? "</code></pre>"))
+         (if next-line-closes?
+           (assoc state :codeblock-end true :skip-next-line? true)
+           (assoc state :code true :codeblock true))])
 
       codeblock
       [(str (escape-code text) "\n") state]
@@ -252,18 +256,18 @@
 
 (defn blockquote-2
   "Check for change in blockquote states and add start or end tags.
-  Closing a blockquote with a list in it is a bit more complex, 
+  Closing a blockquote with a list in it is a bit more complex,
   as the list is not closed until the following blank line."
   [text {:keys [blockquote-start blockquote-end blockquote-paragraph lists] :as state}]
   (let [not-in-list (or (not lists) (empty? lists))]
     (cond blockquote-start
           [(str "<blockquote><p>" text)
            (dissoc state :blockquote-start)]
-          
+
           (and blockquote-end not-in-list)
           [(str text (when blockquote-paragraph "</p>") "</blockquote>")
            (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
-          
+
           :default
           [text state])))
 
