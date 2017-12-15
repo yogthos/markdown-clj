@@ -50,7 +50,7 @@ Specifying `:heading-anchors` will create anchors for the heading tags, eg:
 
 ```
 ```xml
-<h3><a name=\"heading\" class=\"anchor\" href=\"#foo&#95;bar&#95;baz\"></a>foo bar BAz</h3>
+<h3 id=\"foo&#95;bar&#95;baz\">foo bar BAz</h3>
 ```
 
 The code blocks default to a [highlight.js](https://highlightjs.org/) compatible format of:
