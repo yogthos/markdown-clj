@@ -175,18 +175,20 @@
          (assoc state :code true :indented-code true)]
         [text state]))))
 
-(defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line] :as state}]
+(defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line lists] :as state}]
   (let [trimmed (string/trim text)
         next-line-closes? (= [\` \` \`] (take-last 3 (some-> next-line string/trim)))]
     (cond
       codeblock-end
       [text (-> state
-                (assoc :last-line-empty? true)
+                (assoc :last-line-empty? (not lists))
                 (dissoc :code :codeblock :codeblock-end))]
 
       (and next-line-closes? codeblock)
       [(str (escape-code (str text "\n" (apply str (first (string/split next-line #"```"))))) "</code></pre>")
-       (assoc state :skip-next-line? true :codeblock-end true :last-line-empty? true)]
+       (assoc state :skip-next-line? true
+                    :codeblock-end true
+                    :last-line-empty? (not lists))]
 
       (and
         (not indented-code)

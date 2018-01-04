@@ -41,23 +41,20 @@
         content     (string/trim (string/join (drop-while (partial not= \space) (string/trim text))))]
     (add-row :ol list-type num-indents indents (or (make-heading content false) content) state)))
 
-(defn li [text {:keys [code codeblock last-line-empty? eof lists] :as state}]
+(defn li [text {:keys [codeblock last-line-empty? eof lists] :as state}]
   (cond
 
     (and last-line-empty? (string/blank? text))
     [(str (close-lists (reverse lists)) text)
      (-> state (dissoc :lists) (assoc :last-line-empty? false))]
 
-    (or code codeblock)
-    (if (and lists (or last-line-empty? eof))
-      [(str (close-lists (reverse lists)) text)
-       (-> state (dissoc :lists) (assoc :last-line-empty? false))]
-      [text state])
+    (and lists codeblock)
+    [text state]
 
     (and (not eof)
          lists
          (string/blank? text))
-    [text (assoc state :last-line-empty? true)]
+    [text (assoc state :last-line-empty? false :eof false)]
 
     :else
     (let [indents  (if last-line-empty? 0 (count (take-while (partial = \space) text)))
