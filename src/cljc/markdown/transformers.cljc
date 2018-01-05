@@ -179,14 +179,17 @@
   (let [trimmed (string/trim text)
         next-line-closes? (= [\` \` \`] (take-last 3 (some-> next-line string/trim)))]
     (cond
+      (and lists codeblock-end)
+      ["" (dissoc state :code :codeblock :codeblock-end)]
+
       codeblock-end
       [text (-> state
-                (assoc :last-line-empty? (not lists))
+                (assoc :last-line-empty? true)
                 (dissoc :code :codeblock :codeblock-end))]
 
       (and next-line-closes? codeblock)
       [(str (escape-code (str text "\n" (apply str (first (string/split next-line #"```"))))) "</code></pre>")
-       (assoc state :skip-next-line? true
+       (assoc state :skip-next-line? (not lists)
                     :codeblock-end true
                     :last-line-empty? (not lists))]
 

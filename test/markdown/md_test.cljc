@@ -108,7 +108,10 @@
 (deftest ul-with-codeblock
   (is (= "<ul><li>foo</li><li>bar<pre><code>  &#40;defn foo &#91;&#93;\n  bar&#41;\n  </code></pre></li><li>baz</li><li>more text</li></ul>"
         (entry-function
-          "\n* foo\n* bar\n  ```\n  (defn foo []\n  bar)\n  ```\n*  baz\n*  more text\n"))))
+          "\n* foo\n* bar\n  ```\n  (defn foo []\n  bar)\n  ```\n*  baz\n*  more text\n")))
+  (is (= "<ul><li>foo</li><li>bar<pre><code>  &#40;defn foo &#91;&#93;\n  bar&#41;\n  </code></pre>  text</li><li>baz</li><li>more text</li></ul>"
+         (entry-function
+           "\n* foo\n* bar\n  ```\n  (defn foo []\n  bar)\n  ```\n  text\n*  baz\n*  more text\n"))))
 
 (deftest ul-followed-by-multiline-paragraph
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph</p>"
