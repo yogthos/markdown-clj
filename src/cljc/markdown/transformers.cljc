@@ -100,18 +100,22 @@
        (merge state @currently-frozen)])))
 
 (defn autoemail-transformer [text state]
-  [(if (or (:code state) (:codeblock state))
-     text
-     (string/replace
+  (let [left-pad (fn [s]
+                   (cond->> s
+                     (= 1 (count s)) (str "0")))
+        encoder (if (:clojurescript state)
+                  (fn [c] (str "&#x" (-> c (.charCodeAt 0) (.toString 16) left-pad) ";"))
+                  (fn [c] (*formatter* "&#x%02x;" (int c))))]
+    [(if (or (:code state) (:codeblock state))
        text
-       #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
-       #(let [encoded (if (:clojurescript state)
-                        (subs % 1 (dec (count %)))
-                        (->> (subs % 1 (dec (count %)))
-                             (map (fn [c] (if (> (rand) 0.5) (*formatter* "&#x%02x;" (int c)) c)))
-                             (apply str)))]
-          (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
-   state])
+       (string/replace
+        text
+        #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
+        #(let [encoded (->> (subs % 1 (dec (count %)))
+                            (map encoder)
+                            (apply str))]
+           (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
+     state]))
 
 (defn set-line-state [text {:keys [inline-heading] :as state}]
   [text

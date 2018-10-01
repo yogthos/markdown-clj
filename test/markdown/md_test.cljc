@@ -309,7 +309,12 @@
   (is (= "<p><a href=\"mailto:abc@google.com\">abc@google.com</a></p>"
          (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
              :cljs goog.string/unescapeEntities)
-           (entry-function "<abc@google.com>")))))
+          (entry-function "<abc@google.com>"))))
+
+  (is (= "<p><a href=\"mailto:abc_def_ghi@google.com\">abc_def_ghi@google.com</a></p>"
+         (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
+             :cljs goog.string/unescapeEntities)
+          (entry-function "<abc_def_ghi@google.com>")))))
 
 (deftest not-a-list
   (is (= "<p>The fish was 192.8 lbs and was amazing to see.</p>"
