@@ -43,7 +43,7 @@
     :dependencies [[criterium "0.4.4" :scope "test"]
                    [commons-lang "2.6" :scope "test"]
                    [org.clojure/clojurescript "1.9.293"]
-                   [org.mozilla/rhino "1.7.7"]]
-    :plugins      [[lein-cljsbuild "1.1.3"]
-                   [lein-doo "0.1.6"]]}}
+                   [org.mozilla/rhino "1.7.9"]]
+    :plugins      [[lein-cljsbuild "1.1.7"]
+                   [lein-doo "0.1.10"]]}}
   :doo {:paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}})
