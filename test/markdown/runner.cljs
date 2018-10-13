@@ -1,4 +1,4 @@
-(ns markdown.mdrunner-test
+(ns markdown.runner
   (:require [doo.runner :refer-macros [doo-tests]]
             [markdown.md-test]))
 

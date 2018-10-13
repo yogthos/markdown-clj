@@ -33,7 +33,7 @@
             {:source-paths ["src/cljc" "src/cljs" "test"]
              :compiler {:output-to "target/unit-test.js"
                         :output-dir "target"
-                        :main mdrunner.test
+                        :main markdown.runner
                         :optimizations :whitespace}}}}
   :profiles
   {:demo
@@ -46,4 +46,5 @@
                    [org.mozilla/rhino "1.7.10"]]
     :plugins      [[lein-cljsbuild "1.1.7"]
                    [lein-doo "0.1.10"]]}}
-  :doo {:paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}})
+  :doo {:build "test"
+        :paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}})
