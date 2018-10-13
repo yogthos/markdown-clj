@@ -15,12 +15,10 @@
   (reduce
     (fn [row col]
       (let [alignment-str (when (:alignment col)
-                            (str " align='" (name (:alignment col)) "'"))]
+                            (str " style='text-align:" (name (:alignment col)) "'"))]
         (if is-header?
-          (str row
-               "<th" alignment-str ">" (:text col) "</th>")
-          (str row
-               "<td" alignment-str ">" (:text col) "</td>"))))
+          (str row "<th" alignment-str ">" (:text col) "</th>")
+          (str row "<td" alignment-str ">" (:text col) "</td>"))))
     ""
     row-data))
 

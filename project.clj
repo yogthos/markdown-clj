@@ -1,9 +1,9 @@
-(defproject markdown-clj "1.0.3"
+(defproject markdown-clj "1.0.4"
   :description "Markdown parser"
   :url "https://github.com/yogthos/markdown-clj"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]]
+  :dependencies [[org.clojure/clojure "1.9.0"]]
   :clojurescript? true
   :jar-exclusions [#"\.swp|\.swo|\.DS_Store"]
   :test-selectors {:default   (complement :benchmark)
@@ -42,8 +42,8 @@
    {:jvm-opts ["-XX:-TieredCompilation"]
     :dependencies [[criterium "0.4.4" :scope "test"]
                    [commons-lang "2.6" :scope "test"]
-                   [org.clojure/clojurescript "1.9.293"]
-                   [org.mozilla/rhino "1.7.9"]]
+                   [org.clojure/clojurescript "1.10.339"]
+                   [org.mozilla/rhino "1.7.10"]]
     :plugins      [[lein-cljsbuild "1.1.7"]
                    [lein-doo "0.1.10"]]}}
   :doo {:paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}})

@@ -356,7 +356,7 @@
             {:text "contents 3" :alignment :right}
             {:text "contents 4"}]
            false)
-         "<td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td>")))
+         "<td style='text-align:left'>contents 1</td><td style='text-align:center'>contents 2</td><td style='text-align:right'>contents 3</td><td>contents 4</td>")))
 
 (deftest table->str
   (is (= (tables/table->str
@@ -370,7 +370,7 @@
                     {:text "contents 2"}
                     {:text "contents 3"}
                     {:text "contents 4"}]]})
-         "<table><thead><tr><th align='left'>Header 1</th><th align='center'>Header 2</th><th align='right'>Header 3</th><th>Header 4</th></tr></thead><tbody><tr><td align='left'>contents 1</td><td align='center'>contents 2</td><td align='right'>contents 3</td><td>contents 4</td></tr></tbody></table>")))
+         "<table><thead><tr><th style='text-align:left'>Header 1</th><th style='text-align:center'>Header 2</th><th style='text-align:right'>Header 3</th><th>Header 4</th></tr></thead><tbody><tr><td style='text-align:left'>contents 1</td><td style='text-align:center'>contents 2</td><td style='text-align:right'>contents 3</td><td>contents 4</td></tr></tbody></table>")))
 
 (deftest divider-seq->alignment
   (is (= (tables/divider-seq->alignment
