@@ -413,3 +413,6 @@
 
 (deftest inhibit-escape-inside-code
   (is (= "<p><code>$</code></p>" (entry-function "`$$`" :inhibit-separator "$"))))
+
+(deftest whitespace-paragraphs
+  (is (= "<p>foo  </p><p>bar</p>" (entry-function "foo\n \nbar"))))
