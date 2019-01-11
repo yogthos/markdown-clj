@@ -158,6 +158,8 @@
 (deftest code
   (is (= "<p>foo bar baz <code>x = y + z;</code> foo</p>"
          (entry-function "foo bar baz `x = y + z;` foo")))
+  (is (= "<p>bar <code>foo --- -- bar</code> foo</p>"
+         (entry-function "bar `foo --- -- bar` foo")))
   (is (= "<p><code>&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;channel&gt;&lt;/channel&gt;</code></p>"
          (entry-function "`<?xml version='1.0' encoding='UTF-8'?><channel></channel>`")))
   (is (= "<p>foo bar baz <code>&#40;fn &#91;x &amp; xs&#93; &#40;str &quot;x:&quot; x&#41;&#41;</code> foo</p>"

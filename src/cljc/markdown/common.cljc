@@ -181,5 +181,9 @@
      text
      (-> text
          (string/replace #"\-\-\-" "&mdash;")
-         (string/replace #"\-\-" "&ndash;")))
+         (string/replace #"\-\-" "&ndash;")
+         (string/replace #"<code>.*</code>"
+                         (fn [s](-> s
+                                    (string/replace #"&mdash;" "---")
+                                    (string/replace #"&ndash;" "--"))))))
    state])
