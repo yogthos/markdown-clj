@@ -175,13 +175,13 @@
 
 (deftest codeblock
   (is (= "<pre><code>&#40;defn- write &#91;writer text&#93;\n  &#40;doseq &#91;c text&#93;\n    &#40;.write writer &#40;int c&#41;&#41;&#41;&#41;\n</code></pre>"
-         (entry-function "``` (defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```")))
+         (entry-function "```\n(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```")))
   (is (= "<pre><code>&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
-         (entry-function "``` (fn [x & xs]\n  (str \"x\"))\n```")))
+         (entry-function "```\n(fn [x & xs]\n  (str \"x\"))\n```")))
   (is (= "<pre><code>&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
          (entry-function "```\n(fn [x & xs]\n  (str \"x\"))\n```")))
   (is (= "<pre><code class=\"clojure\">&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
-         (entry-function "```clojure (fn [x & xs]\n  (str \"x\"))\n```")))
+         (entry-function "```clojure\n(fn [x & xs]\n  (str \"x\"))\n```")))
   (is (= "<pre><code class=\"nohighlight\">------------\n============\n    ------------\n    ============\n</code></pre>"
          (entry-function
            "
