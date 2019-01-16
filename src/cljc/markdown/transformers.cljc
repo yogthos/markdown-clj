@@ -200,13 +200,14 @@
       (and
         (not indented-code)
         (= [\` \` \`] (take 3 trimmed)))
-      (let [[lang code] (split-with (partial not= \space) (drop 3 trimmed))
+      (let [[lang code] (split-with (partial not= \newline) (drop 3 trimmed))
+            lang      (string/trim (string/join lang))
             s         (apply str (rest code))
             formatter (:code-style state)]
         [(str "<pre><code" (if (not-empty lang)
                              (str " "
                                   (if formatter
-                                    (formatter (string/join lang))
+                                    (formatter lang)
                                     (str "class=\"" (string/join lang) "\"")))) ">"
               (escape-code (if (empty? s) s (str s "\n")))
               (when next-line-closes? "</code></pre>"))
