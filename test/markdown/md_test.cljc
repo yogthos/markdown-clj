@@ -202,6 +202,8 @@
          (entry-function "foo^bar baz"))))
 
 (deftest link
+  (is (= "<p><a href='http://underscores_are_fine.com'>underscores<i>are</i>fine</a></p>"
+         (entry-function "<a href='http://underscores_are_fine.com'>underscores_are_fine</a>")))
   (is (= "<p><a href='http://github.com'>github</a></p>"
          (entry-function "[github](http://github.com)")))
   (is (= "<p><a href='http://github.com/~'>github</a></p>"
