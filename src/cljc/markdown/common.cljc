@@ -77,6 +77,15 @@
          (string/replace #"\\!" "&#33;")))
    state])
 
+(defn open-html-tags [open? token-seq]
+  (= :open (reduce (fn [state token]
+                     (case token
+                       \< :open
+                       \> :closed
+                       state))
+                   (if open? :open :closed)
+                   token-seq)))
+
 (defn make-separator
   "Return a transformer to
    - find all the chunks of the string delimited by the `separator',
@@ -92,7 +101,7 @@
          (loop [out       []
                 buf       []
                 tokens    (partition-by (partial = (first separator)) (seq text))
-                cur-state (assoc state :found-token false)]
+                cur-state (assoc state :found-token false :in-tag? false)]
            (cond
              (empty? tokens)
              [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
@@ -116,11 +125,11 @@
                       (rest tokens)
                       cur-state))
 
-             (= (first tokens) separator)
+             (and (= (first tokens) separator) (not (:in-tag? cur-state)))
              (recur out buf (rest tokens) (assoc cur-state :found-token true))
 
              :default
-             (recur (into out (first tokens)) buf (rest tokens) cur-state))))))))
+             (recur (into out (first tokens)) buf (rest tokens) (assoc cur-state :in-tag? (open-html-tags (:in-tag? cur-state) (first tokens)))))))))))
 
 (defn escape-code-transformer [text state]
   [(escape-code text) state])
