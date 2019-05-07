@@ -90,7 +90,7 @@
 (def link (make-link false))
 (def image (make-link true))
 
-(defn- reference [text]
+(defn reference [text]
   (re-find #"^\[[a-zA-Z0-9 \-_\.]+\]:" text))
 
 (defn parse-reference [reference start]
