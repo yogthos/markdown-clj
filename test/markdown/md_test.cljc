@@ -336,6 +336,14 @@
   (is (= "<h2>When you have a pair of links <a href='http://123.com/1'>link1</a> and you want both <a href='That%27s%20crazy'>Wow</a></h2>"
          (entry-function "## When you have a pair of links [link1](http://123.com/1) and you want both [Wow](That%27s%20crazy)"))))
 
+(deftest link-then-image-processing
+  (is (= "<p>You can have a <a href='github.com'>link</a> followed by an image <img src=\"img.png\" alt=\"\" /></p>"
+         (entry-function "You can have a [link](github.com) followed by an image ![](img.png)"))))
+
+(deftest image-then-link-processing
+  (is (= "<p>You can have an image <img src=\"img.png\" alt=\"\" /> followed by a <a href='github.com'>link</a></p>"
+         (entry-function "You can have an image ![](img.png) followed by a [link](github.com)"))))
+
 (deftest link-with-optional-title
   (is (= "<p><a href='https://github.com/cryogen-project/cryogen' title=\"Cryogen Github\">Cryogens site</a></p>"
          (entry-function "[Cryogens site](https://github.com/cryogen-project/cryogen \"Cryogen Github\")"))))
