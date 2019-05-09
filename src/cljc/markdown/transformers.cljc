@@ -1,5 +1,6 @@
 (ns markdown.transformers
   (:require [clojure.string :as string]
+            [clojure.edn :as edn]
             [markdown.links
              :refer [link
                      image
@@ -26,7 +27,8 @@
               escape-inhibit-separator
               inhibit
               make-heading
-              dashes]]))
+              dashes]]
+            [yaml.core :as yaml]))
 
 (declare ^:dynamic *formatter*)
 
@@ -330,18 +332,52 @@
           (recur (merge acc {key new-val}) (rest remain) key))
         acc))))
 
-(defn parse-metadata-headers
-  "Given a sequence of lines from a markdown document, attempt to parse a
-  metadata header if it exists."
+
+(defn parse-wiki-metadata-headers
   [lines-seq]
-  {:pre [(sequential? lines-seq)
-         (every? string? lines-seq)]}
   (reduce
     (fn [acc line]
       (if-let [parsed (parse-metadata-line line)]
         (conj acc parsed)
         (reduced (flatten-metadata acc))))
     [] lines-seq))
+
+(defn parse-yaml-metadata-headers
+  [lines-seq]
+  (->> lines-seq
+       ;; leave off opening ---
+       (drop 1)
+       ;; take lines until we see the closing ---
+       (take-while (comp not (partial re-matches #"---\s*")))
+       ;; join together and parse
+       (string/join "\n")
+       yaml/parse-string))
+
+(defn parse-edn-metadata-headers
+  [lines-seq]
+  (->> lines-seq
+       ;; take sequences until you hit an empty line
+       (take-while (comp not (partial re-matches #"\s*")))
+       ;; join together and parse
+       (string/join "\n")
+       edn/read-string))
+
+(defn parse-metadata-headers
+  "Given a sequence of lines from a markdown document, attempt to parse a
+  metadata header if it exists. Accepts wiki, yaml, and edn formats."
+  [lines-seq]
+  {:pre [(sequential? lines-seq)
+         (every? string? lines-seq)]}
+  (cond
+    ;; Treat as yaml
+    (re-matches #"--- *" (first lines-seq))
+    (parse-yaml-metadata-headers lines-seq)
+    ;; Treat as wiki
+    (re-matches #"\w+: .*" (first lines-seq))
+    (parse-wiki-metadata-headers lines-seq)
+    ;; Treat as edn
+    (re-matches #"\{.*" (first lines-seq))
+    (parse-edn-metadata-headers lines-seq)))
 
 (def transformer-vector
   [set-line-state
