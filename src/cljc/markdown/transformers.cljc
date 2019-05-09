@@ -1,6 +1,7 @@
 (ns markdown.transformers
   (:require [clojure.string :as string]
-            [clojure.edn :as edn]
+            #?(:clj  [clojure.edn :as edn]
+               :cljs [cljs.reader :as edn])
             [markdown.links
              :refer [link
                      image
@@ -28,7 +29,7 @@
               inhibit
               make-heading
               dashes]]
-            [yaml.core :as yaml]))
+            #?(:clj [clj-yaml.core :as yaml])))
 
 (declare ^:dynamic *formatter*)
 
@@ -104,19 +105,19 @@
 (defn autoemail-transformer [text state]
   (let [left-pad (fn [s]
                    (cond->> s
-                     (= 1 (count s)) (str "0")))
-        encoder (if (:clojurescript state)
-                  (fn [c] (str "&#x" (-> c (.charCodeAt 0) (.toString 16) left-pad) ";"))
-                  (fn [c] (*formatter* "&#x%02x;" (int c))))]
+                            (= 1 (count s)) (str "0")))
+        encoder  (if (:clojurescript state)
+                   (fn [c] (str "&#x" (-> c (.charCodeAt 0) (.toString 16) left-pad) ";"))
+                   (fn [c] (*formatter* "&#x%02x;" (int c))))]
     [(if (or (:code state) (:codeblock state))
        text
        (string/replace
-        text
-        #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
-        #(let [encoded (->> (subs % 1 (dec (count %)))
-                            (map encoder)
-                            (apply str))]
-           (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
+         text
+         #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
+         #(let [encoded (->> (subs % 1 (dec (count %)))
+                             (map encoder)
+                             (apply str))]
+            (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
      state]))
 
 (defn set-line-state [text {:keys [inline-heading] :as state}]
@@ -182,7 +183,7 @@
         [text state]))))
 
 (defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line lists] :as state}]
-  (let [trimmed (string/trim text)
+  (let [trimmed           (string/trim text)
         next-line-closes? (= [\` \` \`] (take-last 3 (some-> next-line string/trim)))]
     (cond
       (and lists codeblock-end)
@@ -278,7 +279,7 @@
 
           (and blockquote-end not-in-list)
           [(str text (when blockquote-paragraph "</p>") "</blockquote>")
-           (dissoc state :blockquote :blockquote-paragraph :blockquote-end )]
+           (dissoc state :blockquote :blockquote-paragraph :blockquote-end)]
 
           :default
           [text state])))
@@ -344,14 +345,17 @@
 
 (defn parse-yaml-metadata-headers
   [lines-seq]
-  (->> lines-seq
-       ;; leave off opening ---
-       (drop 1)
-       ;; take lines until we see the closing ---
-       (take-while (comp not (partial re-matches #"---\s*")))
-       ;; join together and parse
-       (string/join "\n")
-       yaml/parse-string))
+  #?(:clj
+     (->> lines-seq
+          ;; leave off opening ---
+          (drop 1)
+          ;; take lines until we see the closing ---
+          (take-while (comp not (partial re-matches #"---\s*")))
+          ;; join together and parse
+          (string/join "\n")
+          yaml/parse-string)
+     :cljs
+     (throw (js/Error. "YAML is unsupported in ClojureScript mode"))))
 
 (defn parse-edn-metadata-headers
   [lines-seq]
