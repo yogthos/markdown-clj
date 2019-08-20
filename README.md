@@ -192,7 +192,7 @@ Alternatively, you could provide a custom set of transformers to replace the def
 (markdown/md-to-html-string "#foo" :replacement-transformers [capitalize])
 ```
 
-This can also be used to add preprocessor transformers. For example, if we wanted to sanitize any image links we could do the following:
+This can also be used to add preprocessor transformers. For example, if we wanted to sanitize any image links and escape HTML we could do the following:
 
 ```clojure
 (use 'markdown.transformers 'markdown.core)
@@ -200,14 +200,28 @@ This can also be used to add preprocessor transformers. For example, if we wante
 (defn escape-images [text state]
   [(clojure.string/replace text #"(!\[.*?\]\()(.+?)(\))" "") state])
 
+(defn escape-html
+    "Change special characters into HTML character entities."
+    [text state]
+    [(if-not (or (:code state) (:codeblock state))
+       (clojure.string/escape
+         text
+         {\& "&amp;"
+          \< "&lt;"
+          \> "&gt;"
+          \" "&quot;"
+          \' "&#39;"})
+       text) state])
+       
 (markdown/md-to-html-string
-  "foo ![Alt text](/path/to/img.jpg \"Optional Title\") bar [text](http://test)"
-  :replacement-transformers (cons escape-images transformer-vector))
+  "<h1>escaped</h1>foo ![Alt text](/path/to/img.jpg \"Optional Title\") bar [text](http://test)"
+  :replacement-transformers (into [escape-images escape-html] transformer-vector))
 ```
 
 ```xml
-"<p>foo  bar <a href='http://test'>text</a></p>"
+"<p>&lt;h1&gt;escaped&lt;/h1&gt;foo  bar <a href='http://test'>text</a></p>"
 ```
+
 
 ## Usage ClojureScript
 
