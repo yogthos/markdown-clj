@@ -162,7 +162,7 @@
 (defn paragraph [text state]
   (apply close-paragraph (open-paragraph text state)))
 
-(defn code [text {:keys [eof lists code codeblock] :as state}]
+(defn code [text {:keys [eof lists code codeblock paragraph] :as state}]
   (cond
     (or lists codeblock)
     [text state]
@@ -171,6 +171,9 @@
     (if (or eof (not= "    " (string/join (take 4 text))))
       [(str "</code></pre>" text) (dissoc state :indented-code :code :last-line-empty?)]
       [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
+
+    paragraph
+    [text state]
 
     (empty? (string/trim text))
     [text state]

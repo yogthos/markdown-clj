@@ -193,6 +193,18 @@
 ```
 "))))
 
+(deftest indented-codeblock
+  (is (= "<pre><code>foo</code></pre>"
+         (entry-function "    foo")))
+  (is (= "<pre><code>foo</code></pre><p>bar</p>"
+         (entry-function "    foo\n\nbar")))
+  (is (= "<pre><code>foo</code></pre>bar"
+         (entry-function "    foo\nbar")))
+  (is (= "<p>baz     foo</p><p>bar</p>"
+         (entry-function "baz\n    foo\n\nbar")))
+  (is (= "<p><div class=\"grid-container\">   <div class=\"child1\">     <p>Element #1</p>   </div> </div></p>"
+         (entry-function "<div class=\"grid-container\">\n  <div class=\"child1\">\n    <p>Element #1</p>\n  </div>\n</div>"))))
+
 (deftest strikethrough
   (is (= "<p><del>foo</del></p>"
          (entry-function "~~foo~~"))))
