@@ -74,7 +74,8 @@
          (string/replace #"\\\+" "&#43;")
          (string/replace #"\\-" "&#45;")
          (string/replace #"\\\." "&#46;")
-         (string/replace #"\\!" "&#33;")))
+         (string/replace #"\\!" "&#33;")
+         (string/replace #"\\\^" "&#94;")))
    state])
 
 (defn open-html-tags [open? token-seq]

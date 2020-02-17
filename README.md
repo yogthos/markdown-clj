@@ -269,6 +269,7 @@ Control characters can be escaped using \
 \- minus sign (hyphen)
 \. dot
 \! exclamation mark
+\^ caret / circumflex accent
 ```
 
 #### Basic Elements

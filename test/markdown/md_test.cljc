@@ -174,8 +174,8 @@
          (entry-function "    x = 5\n    y = 6\n    z = x + y\n    (fn [x & xs] (str \"x\"))"))))
 
 (deftest codeblock
-  (is (= "<pre><code>&#40;defn- write &#91;writer text&#93;\n  &#40;doseq &#91;c text&#93;\n    &#40;.write writer &#40;int c&#41;&#41;&#41;&#41;\n</code></pre>"
-         (entry-function "```\n(defn- write [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```")))
+  (is (= "<pre><code>&#40;defn- write&#94; &#91;writer text&#93;\n  &#40;doseq &#91;c text&#93;\n    &#40;.write writer &#40;int c&#41;&#41;&#41;&#41;\n</code></pre>"
+         (entry-function "```\n(defn- write^ [writer text]\n  (doseq [c text]\n    (.write writer (int c))))\n```")))
   (is (= "<pre><code>&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
          (entry-function "```\n(fn [x & xs]\n  (str \"x\"))\n```")))
   (is (= "<pre><code>&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
@@ -301,8 +301,8 @@
 
 (deftest escaped-characters
   (is
-    (= "<p>&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
-       (entry-function "\\*\\`\\_\\{\\}\\[\\]*foo*`test`_bar_{x}[y]"))))
+    (= "<p>&#94;&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
+       (entry-function "\\^\\*\\`\\_\\{\\}\\[\\]*foo*`test`_bar_{x}[y]"))))
 
 (deftest paragraph-after-list
   (is (= "<ol><li>a</li><li>b</li></ol><p>test <strong>bold</strong> and <em>italic</em></p>"
