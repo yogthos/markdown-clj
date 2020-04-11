@@ -44,6 +44,20 @@
               :base_url    ["http://example.com"]}
              metadata)))))
 
+(deftest md-metadata-only
+  (testing "Finds all metadata, without parsing the rest of the file."
+    (let [md (slurp (str "test/files/metadata.md"))
+          metadata (markdown/md-to-meta md)]
+      (is (= {:title       ["My Document"]
+              :summary     ["A brief description of my document."]
+              :authors     ["Justin May"
+                            "Spooky Mulder"
+                            "End Line At End\n"]
+              :date        ["October 31, 2015"]
+              :blank-value []
+              :base_url    ["http://example.com"]}
+             metadata)))))
+
 (deftest md-yaml-metadata
   (testing "Finds all yaml metadata and correctly parses rest of file."
     (let [md (slurp (str "test/files/metadata-yaml.md"))
