@@ -103,6 +103,8 @@ The metadata encoded using the syntax described by [MultiMarkdown](https://githu
 The `md-to-html` function will attempt to parse the metadata when passed the `:parse-meta? true` option and return it as its output.
 Additionally, `md-to-html-string-with-meta` function can be used to parse string input. The function returns a map with two keys, `:html` containing the parsed HTML, and `:metadata` containing a map with the metadata included at the top of the document.
 
+To parse *only* the metadata, use `md-to-meta`.  This function returns a metadata map for the given input, but does not otherwise parse the Markdown or return HTML. It can run more quickly than either of the functions that return HTML and can be useful in scenarios where the metadata can be useful by itself.
+
 The value of each key in the metadata map will be a list of either 0, 1 or many strings. If a metadata value ends in two spaces then the string will end in a newline. If a line does not contain a header and has at least 4 spaces in front of it then it will be considered to be a member of the last key that was found.
 
 ```clojure
