@@ -115,6 +115,13 @@
           html     (.toString output)]
       {:metadata metadata :html html})))
 
+(defn md-to-meta
+  "converts a markdown formatted string to a metadata map"
+  [text]
+  (when text
+    (let [input (new StringReader text)]
+      (parse-metadata input))))
+
 (defn md-to-html-string [text & params]
   (:html (md-to-html-string* text params)))
 
