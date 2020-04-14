@@ -8,6 +8,13 @@ Make a table with default alignment
 | aaa | bbb | ccc | ddd |
 | om | nom | nom | nom |
 
+Less spaces syntax
+
+| a | b |
+|---|---|
+| 1 | 2 |
+
+
 Make a table with all columns left aligned
 
 | Header One | Header Two | Header Three | Header Four |

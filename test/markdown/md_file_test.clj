@@ -29,6 +29,11 @@
     (markdown/md-to-html (str "test/files" java.io.File/separator "tables.md") wrt)
     (is (= (slurp (str "test/files" java.io.File/separator "tables.html")) (.toString wrt)))))
 
+(deftest tables
+  (let [wrt (java.io.StringWriter.)]
+    (markdown/md-to-html (str "test/files" java.io.File/separator "tables.md") wrt)
+    (is (= (slurp (str "test/files" java.io.File/separator "tables.html")) (.toString wrt)))))
+
 (deftest md-metadata
   (testing "Finds all metadata and correctly parses rest of file."
     (let [md (slurp (str "test/files/metadata.md"))
