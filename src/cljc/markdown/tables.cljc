@@ -73,7 +73,7 @@
 
 (defn table [text state]
   (let [table-row-re (re-find #"\|(?: [\S ]+ \|)+" text)
-        table-divider-re (re-find #"\|(?: :?-+:? \|)+" text)
+        table-divider-re (re-find #"\|(?: ?:?-+:? ?\|)+" text)
         is-table-row? (= table-row-re text)
         is-table-header?
         (and is-table-row?
