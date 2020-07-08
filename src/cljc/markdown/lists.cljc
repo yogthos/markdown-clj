@@ -44,6 +44,9 @@
 (defn li [text {:keys [codeblock last-line-empty? eof lists] :as state}]
   (cond
 
+    codeblock
+    [text state]
+
     (and last-line-empty? (string/blank? text))
     [(str (close-lists (reverse lists)) text)
      (-> state (dissoc :lists) (assoc :last-line-empty? false))]

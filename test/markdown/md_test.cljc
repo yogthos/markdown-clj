@@ -101,6 +101,11 @@
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul>"
          (entry-function "+ foo\n+ bar\n+ baz"))))
 
+(deftest list-in-a-codeblock
+  (is
+   (= "<pre><code class=\"yaml\">list:\n- 1\n- 2\n</code></pre>"
+      (entry-function "```yaml\nlist:\n- 1\n- 2\n```"))))
+
 (deftest ul-followed-by-paragraph
   (is (= "<ul><li>foo</li><li>bar</li><li>baz</li></ul><p>paragraph next line</p>"
          (entry-function "* foo\n* bar\n* baz\n\nparagraph\nnext line"))))
