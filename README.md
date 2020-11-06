@@ -14,7 +14,7 @@ A markdown parser that compiles to both Clojure and ClojureScript.
 
 Note: `markdown-clj` versions prior to `0.9.68` requires Clojure 1.2+ to run, versions `0.9.68+` require Clojure 1.7.
 
-[NPM module](https://www.npmjs.com/package/markdown-clj) 
+[![NPM](https://nodei.co/npm/markdown-clj.png?mini=true)](https://www.npmjs.com/package/markdown-clj)
 
 ## Usage Clojure
 
