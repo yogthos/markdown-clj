@@ -1,7 +1,6 @@
 (ns markdown.transformers
   (:require [clojure.string :as string]
-            #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
+            [clojure.edn :as edn]
             [markdown.links
              :refer [link
                      image
