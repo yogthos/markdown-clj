@@ -9,6 +9,12 @@ jobs:
           keys:
             - v1-dependency-jars-{{ checksum "project.clj" }}
             - v1-dependency-jars
+      - run:
+          name: Install Babashka
+          command: |
+            curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install
+            chmod +x install
+            sudo install
       - run: lein test
       - save_cache:
           key: v1-dependency-jars-{{ checksum "project.clj" }}
