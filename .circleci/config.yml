@@ -1,8 +1,8 @@
 jobs:
   build:
     docker:
-      - image: clojure:lein-2.8.1
-    working_directory: /root/markdown-clj
+      - image: circleci/clojure:openjdk-11-lein-2.9.3-buster-node
+    working_directory: /home/circleci/markdown-clj
     steps:
       - checkout
       - restore_cache:
@@ -14,12 +14,12 @@ jobs:
           command: |
             curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install
             chmod +x install
-            sudo install
+            sudo ./install
       - run: lein test
       - save_cache:
           key: v1-dependency-jars-{{ checksum "project.clj" }}
           paths:
-            - /root/.m2
+            - /circleci/.m2
 
 workflows:
   version: 2
