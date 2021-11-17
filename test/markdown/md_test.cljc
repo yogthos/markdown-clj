@@ -327,15 +327,19 @@
   (is (= "<p><a href=\"http://foo\">http://foo</a> <a href=\"https://bar/baz\">https://bar/baz</a> <a href=\"http://foo/bar\">foo bar</a></p>"
          (entry-function "<http://foo> <https://bar/baz> <a href=\"http://foo/bar\">foo bar</a>")))
 
-  (is (= "<p><a href=\"mailto:abc@google.com\">abc@google.com</a></p>"
-         (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
-             :cljs goog.string/unescapeEntities)
-          (entry-function "<abc@google.com>"))))
+  #?(:bb nil
+     :default
+     (is (= "<p><a href=\"mailto:abc@google.com\">abc@google.com</a></p>"
+            (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
+                :cljs goog.string/unescapeEntities)
+             (entry-function "<abc@google.com>")))))
 
-  (is (= "<p><a href=\"mailto:abc_def_ghi@google.com\">abc_def_ghi@google.com</a></p>"
-         (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
-             :cljs goog.string/unescapeEntities)
-          (entry-function "<abc_def_ghi@google.com>")))))
+  #?(:bb nil
+     :default
+     (is (= "<p><a href=\"mailto:abc_def_ghi@google.com\">abc_def_ghi@google.com</a></p>"
+            (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
+                :cljs goog.string/unescapeEntities)
+             (entry-function "<abc_def_ghi@google.com>"))))))
 
 (deftest not-a-list
   (is (= "<p>The fish was 192.8 lbs and was amazing to see.</p>"

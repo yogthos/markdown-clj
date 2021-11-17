@@ -1,7 +1,7 @@
 (ns markdown.common
   (:require [clojure.string :as string]))
 
-(declare ^{:dynamic true} *substring*)
+(def ^{:dynamic true} *substring*)
 
 (def ^:dynamic *inhibit-separator* nil)
 

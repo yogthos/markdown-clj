@@ -31,7 +31,7 @@
               dashes]]
             #?(:clj [clj-yaml.core :as yaml])))
 
-(declare ^:dynamic *formatter*)
+(def ^:dynamic *formatter*)
 
 (defn heading? [text type]
   (when-not (every? #{\space} (take 4 text))

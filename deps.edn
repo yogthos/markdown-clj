@@ -1,0 +1,17 @@
+{:paths ["src/clj" "src/cljs" "src/cljc"]
+ :deps {clj-commons/clj-yaml {:mvn/version "0.7.107"}}
+ :aliases
+ {:test
+  {:extra-paths ["test"]
+   :extra-deps {io.github.cognitect-labs/test-runner
+                {:git/tag "v0.5.0" :git/sha "b3fd0d2"}
+                criterium/criterium {:mvn/version "0.4.4"}
+                commons-lang/commons-lang {:mvn/version "2.6"}}
+   :main-opts ["-m" "cognitect.test-runner"]
+   :exec-fn cognitect.test-runner.api/test}
+  :cljs-test
+  {:extra-paths ["test"]
+   :extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}
+                org.clojure/clojure {:mvn/version "1.10.1"}
+                org.clojure/clojurescript {:mvn/version "1.10.520"}}
+   :main-opts ["-m" "cljs-test-runner.main"]}}}

@@ -4,3 +4,6 @@ target
 .idea/*
 *.iml
 .nrepl-port
+.cache
+.cpcache
+cljs-test-runner-out
