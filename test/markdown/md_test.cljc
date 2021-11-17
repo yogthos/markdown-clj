@@ -1,9 +1,8 @@
 (ns markdown.md-test
-  (:require [markdown.core :as markdown]
-            [markdown.tables :as tables]
-            #?(:clj  [clojure.test :refer :all]
-               :cljs [cljs.test :refer-macros [deftest is testing]])
-            #?(:cljs [goog.string])))
+  (:require #?(:cljs [goog.string])
+            [clojure.test :refer [deftest is]]
+            [markdown.core :as markdown]
+            [markdown.tables :as tables]))
 
 (def entry-function
   #?(:clj markdown/md-to-html-string
@@ -327,14 +326,14 @@
   (is (= "<p><a href=\"http://foo\">http://foo</a> <a href=\"https://bar/baz\">https://bar/baz</a> <a href=\"http://foo/bar\">foo bar</a></p>"
          (entry-function "<http://foo> <https://bar/baz> <a href=\"http://foo/bar\">foo bar</a>")))
 
-  #?(:bb nil
+  #?(:bb nil :org.babashka/nbb nil
      :default
      (is (= "<p><a href=\"mailto:abc@google.com\">abc@google.com</a></p>"
             (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
                 :cljs goog.string/unescapeEntities)
              (entry-function "<abc@google.com>")))))
 
-  #?(:bb nil
+  #?(:bb nil :org.babashka/nbb nil
      :default
      (is (= "<p><a href=\"mailto:abc_def_ghi@google.com\">abc_def_ghi@google.com</a></p>"
             (#?(:clj  org.apache.commons.lang.StringEscapeUtils/unescapeHtml
