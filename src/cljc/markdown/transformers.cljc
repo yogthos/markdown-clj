@@ -342,41 +342,48 @@
     (fn [acc line]
       (if-let [parsed (parse-metadata-line line)]
         (conj acc parsed)
-        (reduced (flatten-metadata acc))))
+        (reduced [(flatten-metadata acc) (count acc)])))
     [] lines-seq))
 
 (defn parse-yaml-metadata-headers
   [lines-seq]
   #?(:clj
-     (->> lines-seq
-          ;; leave off opening ---
-          (drop 1)
-          ;; take lines until we see the closing ---
-          (take-while (comp not (partial re-matches #"---\s*")))
-          ;; join together and parse
-          (string/join "\n")
-          yaml/parse-string)
+     (let [yaml-lines (->> lines-seq
+                           ;; leave off opening ---
+                           (drop 1)
+                           ;; take lines until we see the closing ---
+                           (take-while (comp not (partial re-matches #"---\s*"))))]
+       [(->> yaml-lines
+             ;; join together and parse
+             (string/join "\n")
+             yaml/parse-string)
+        ;; number of lines consumed must consider opening and closing ---
+        (+ (count yaml-lines) 2)])
      :cljs
      (throw (js/Error. "YAML is unsupported in ClojureScript mode"))))
 
 (defn parse-edn-metadata-headers
   [lines-seq]
-  (->> lines-seq
-       ;; take sequences until you hit an empty line
-       (take-while (comp not (partial re-matches #"\s*")))
-       ;; join together and parse
-       (string/join "\n")
-       edn/read-string))
+  ;; take sequences until you hit an empty line
+  (let [meta-lines (take-while (comp not (partial re-matches #"\s*"))
+                               lines-seq)]
+    [(->> meta-lines
+          ;; join together and parse
+          (string/join "\n")
+          edn/read-string) 
+     (count meta-lines)]))
 
 (defn parse-metadata-headers
   "Given a sequence of lines from a markdown document, attempt to parse a
-  metadata header if it exists. Accepts wiki, yaml, and edn formats."
+  metadata header if it exists. Accepts wiki, yaml, and edn formats.
+   
+  Returns the parsed headers number of lines the metadata spans"
   [lines-seq]
   {:pre [(sequential? lines-seq)
          (every? string? lines-seq)]}
   (cond
     ;; Treat as yaml
-    (re-matches #"--- *" (first lines-seq))
+    (re-matches #"---\s*" (first lines-seq))
     (parse-yaml-metadata-headers lines-seq)
     ;; Treat as wiki
     (re-matches #"\w+: .*" (first lines-seq))
