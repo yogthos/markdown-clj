@@ -370,8 +370,9 @@
     [(->> meta-lines
           ;; join together and parse
           (string/join "\n")
-          edn/read-string) 
-     (count meta-lines)]))
+          edn/read-string)
+     ;; count the trailing empty line
+     (inc (count meta-lines))]))
 
 (defn parse-metadata-headers
   "Given a sequence of lines from a markdown document, attempt to parse a
