@@ -36,8 +36,8 @@
     @footnotes))
 
 (defn parse-metadata [lines]
-  (let [[metadata lines] (split-with #(not-empty (.trim %)) lines)]
-    [(parse-metadata-headers metadata) lines]))
+  (let [[metadata num-lines] (parse-metadata-headers lines)]
+    [metadata (drop num-lines lines)]))
 
 (defn md-to-html-string*
   "processes input text line by line and outputs an HTML string"

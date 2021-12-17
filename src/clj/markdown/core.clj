@@ -53,10 +53,10 @@
 
 (defn parse-metadata [in]
   (let [lines    (line-seq (io/reader in))
-        metadata (parse-metadata-headers lines)]
+        metadata-and-lines (parse-metadata-headers lines)]
     (when (instance? StringReader in)
       (.reset in))
-    metadata))
+    metadata-and-lines))
 
 (defn parse-params
   [params]
@@ -75,11 +75,12 @@
     (let [params     (parse-params params)
           references (when (:reference-links? params) (parse-references in))
           footnotes  (when (:footnotes? params) (parse-footnotes in))
-          metadata   (when (:parse-meta? params) (parse-metadata in))]
+          [metadata num-lines] (when (:parse-meta? params) (parse-metadata in))]
       (with-open [^BufferedReader rdr (io/reader in)
                   ^BufferedWriter wrt (io/writer out)]
         (when (and metadata (:parse-meta? params))
-          (while (not= "" (string/trim (.readLine rdr)))))
+          (dotimes [_ num-lines]
+            (.readLine rdr)))
         (let [transformer (init-transformer wrt params)]
           (loop [^String line      (.readLine rdr)
                  ^String next-line (.readLine rdr)
@@ -120,7 +121,7 @@
   [text]
   (when text
     (let [input (new StringReader text)]
-      (parse-metadata input))))
+      (first (parse-metadata input)))))
 
 (defn md-to-html-string [text & params]
   (:html (md-to-html-string* text params)))

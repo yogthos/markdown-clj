@@ -1,5 +1,7 @@
 (ns markdown.md-file-test
   (:require [markdown.core :as markdown]
+            [markdown.transformers :as transformers]
+            [clojure.string :as string]
             [clojure.test :refer :all]))
 
 (deftest references
@@ -37,7 +39,8 @@
 (deftest md-metadata
   (testing "Finds all metadata and correctly parses rest of file."
     (let [md (slurp (str "test/files/metadata.md"))
-          {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)]
+          {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)
+          [_ line-count] (transformers/parse-metadata-headers (string/split-lines md))]
       (is (= "<h1>The Document</h1>" html))
       (is (= {:title       ["My Document"]
               :summary     ["A brief description of my document."]
@@ -47,7 +50,8 @@
               :date        ["October 31, 2015"]
               :blank-value []
               :base_url    ["http://example.com"]}
-             metadata)))))
+             metadata))
+      (is (= 8 line-count) "Metadata-parser provides correct line count"))))
 
 (deftest md-metadata-only
   (testing "Finds all metadata, without parsing the rest of the file."
@@ -66,7 +70,8 @@
 (deftest md-yaml-metadata
   (testing "Finds all yaml metadata and correctly parses rest of file."
     (let [md (slurp (str "test/files/metadata-yaml.md"))
-          {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)]
+          {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)
+          [_ line-count] (transformers/parse-metadata-headers (string/split-lines md))]
       (is (= "<h1>The Document</h1>" html))
       (is (= {:title       "My Document"
               :summary     "A brief description of my document."
@@ -75,12 +80,14 @@
                             "End Line At End"]
               :date        "October 31, 2015"
               :base_url    "http://example.com"}
-             metadata)))))
+             metadata))
+      (is (= 12 line-count) "Metadata-parser provides correct line count"))))
 
 (deftest md-edn-metadata
   (testing "Finds edn map metadata and correctly parses rest of file."
     (let [md (slurp (str "test/files/metadata-edn.md"))
-          {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)]
+          {:keys [metadata html]} (markdown/md-to-html-string-with-meta md)
+          [_ line-count] (transformers/parse-metadata-headers (string/split-lines md))]
       (is (= "<h1>The Document</h1>" html))
       (is (= {:title       "My Document"
               :summary     "A brief description of my document."
@@ -89,5 +96,6 @@
                             "End Line At End"]
               :date        "October 31, 2015"
               :base_url    "http://example.com"}
-             metadata)))))
+             metadata))
+      (is (= 6 line-count) "Metadata-parser provides correct line count"))))
 
