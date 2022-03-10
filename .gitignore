@@ -8,3 +8,5 @@ target
 .cpcache
 cljs-test-runner-out
 node_modules
+.clj-kondo/
+.calva/

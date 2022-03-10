@@ -176,7 +176,7 @@
 
 (defn heading-level [text]
   (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
-    (if (pos? num-hashes) num-hashes)))
+    (when (pos? num-hashes) num-hashes)))
 
 (defn make-heading [text heading-anchors]
   (when-let [heading (heading-level text)]
