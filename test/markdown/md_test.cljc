@@ -202,12 +202,22 @@
          (entry-function "    foo")))
   (is (= "<pre><code>foo</code></pre><p>bar</p>"
          (entry-function "    foo\n\nbar")))
-  (is (= "<pre><code>foo</code></pre>bar"
+  (is (= "<pre><code>foo</code></pre><p>bar</p>"
          (entry-function "    foo\nbar")))
   (is (= "<p>baz     foo</p><p>bar</p>"
          (entry-function "baz\n    foo\n\nbar")))
   (is (= "<p><div class=\"grid-container\">   <div class=\"child1\">     <p>Element #1</p>   </div> </div></p>"
-         (entry-function "<div class=\"grid-container\">\n  <div class=\"child1\">\n    <p>Element #1</p>\n  </div>\n</div>"))))
+         (entry-function "<div class=\"grid-container\">\n  <div class=\"child1\">\n    <p>Element #1</p>\n  </div>\n</div>")))
+  (is (= "<p>Random text. Random text.</p>"
+         (entry-function "Random text.\nRandom text.\n"))
+      "A single newline is interpreted as space in the same paragraph")
+  (is (= "<p>Random text.</p><pre><code>code block</code></pre><p>Random text. Random text.</p>"
+         (entry-function "Random text.\n\n    code block\n\nRandom text.\nRandom text.\n"))
+      "Two newlines after a code block is interpreted as starting a new paragraph")
+  (is (= "<p>Random text.</p><pre><code>code block\n \nwith spaces\n </code></pre><p>Random text. Random text.</p>"
+         (entry-function
+          "Random text.\n\n    code block\n     \n    with spaces\n     \nRandom text.\nRandom text.\n"))
+      "Two newlines after a indented code block where one contains spaces is still interpreted as a new paragraph"))
 
 (deftest strikethrough
   (is (= "<p><del>foo</del></p>"

@@ -1,17 +1,16 @@
 (ns markdown.core
   (:require [clojure.java.io :as io]
-            [clojure.string :as string]
             [markdown.common
-             :refer [*substring* *inhibit-separator*]]
+             :refer [*inhibit-separator*]]
             [markdown.links
-             :refer [parse-reference parse-reference-link parse-footnote-link]]
+             :refer [parse-reference-link parse-footnote-link]]
             [markdown.transformers
              :refer [transformer-vector footer parse-metadata-headers]])
   (:import [java.io BufferedReader
-                    BufferedWriter
-                    StringReader
-                    StringWriter
-                    Writer]))
+            BufferedWriter
+            StringReader
+            StringWriter
+            Writer]))
 
 (defn- write [^Writer writer ^String text]
   (doseq [c text] (.write writer (int c))))

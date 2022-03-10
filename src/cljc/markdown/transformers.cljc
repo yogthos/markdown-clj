@@ -15,7 +15,6 @@
              [escape-code
               escaped-chars
               freeze-string
-              separator
               thaw-strings
               strong
               bold
@@ -34,7 +33,7 @@
 
 (defn heading? [text type]
   (when-not (every? #{\space} (take 4 text))
-    (let [trimmed (if text (string/trim text))]
+    (let [trimmed (some-> text string/trim)]
       (and (not-empty trimmed) (every? #{type} trimmed)))))
 
 (defn h1? [text]
@@ -154,39 +153,51 @@
     [text state]))
 
 (defn close-paragraph [text {:keys [next-line paragraph] :as state}]
-  (if (and paragraph (= [\` \` \`] (take-last 3 (some-> next-line string/trim))))
+  (if (and paragraph (some-> next-line string/trim (string/ends-with? "```")))
     [(str text "</p>") (dissoc state :paragraph)]
     [text state]))
 
 (defn paragraph [text state]
   (apply close-paragraph (open-paragraph text state)))
 
-(defn code [text {:keys [eof lists code codeblock paragraph] :as state}]
-  (cond
-    (or lists codeblock)
-    [text state]
+(defn code [text {:keys [eof indent-code-end next-line lists code codeblock paragraph] :as state}]
+  (let [should-close? (or eof
+                          (not (or (string/blank? next-line)
+                                   (string/starts-with? next-line "    "))))]
+    (cond
+      (or lists codeblock)
+      [text state]
 
-    code
-    (if (or eof (not= "    " (string/join (take 4 text))))
-      [(str "</code></pre>" text) (dissoc state :indented-code :code :last-line-empty?)]
-      [(str "\n" (escape-code (string/replace-first text #"    " ""))) state])
+      indent-code-end
+      [text (-> state
+                (dissoc :code :indent-code-end :indented-code)
+                (assoc :last-line-empty? true))]
 
-    paragraph
-    [text state]
+      code
+      [(str (escape-code (string/replace-first text #"    " "\n"))
+            (when should-close? "</code></pre>"))
+       (cond-> state
+         should-close? (assoc :indent-code-end true))]
 
-    (empty? (string/trim text))
-    [text state]
+      paragraph
+      [text state]
 
-    :default
-    (let [num-spaces (count (take-while (partial = \space) text))]
-      (if (> num-spaces 3)
-        [(str "<pre><code>" (escape-code (string/replace-first text #"    " "")))
-         (assoc state :code true :indented-code true)]
-        [text state]))))
+      (empty? (string/trim text))
+      [text state]
+
+      :default
+      (let [num-spaces (count (take-while (partial = \space) text))]
+        (if (>= num-spaces 4)
+          [(str "<pre><code>"
+                (escape-code (string/replace-first text #"    " ""))
+                (when should-close? "</code></pre>"))
+           (cond-> (assoc state :code true :indented-code true)
+             should-close? (assoc :indent-code-end true))]
+          [text state])))))
 
 (defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line lists] :as state}]
   (let [trimmed           (string/trim text)
-        next-line-closes? (= [\` \` \`] (take-last 3 (some-> next-line string/trim)))]
+        next-line-closes? (some-> next-line string/trim (string/ends-with? "```"))]
     (cond
       (and lists codeblock-end)
       ["" (dissoc state :code :codeblock :codeblock-end)]
@@ -197,19 +208,19 @@
                 (dissoc :code :codeblock :codeblock-end))]
 
       (and next-line-closes? codeblock)
-      [(str (escape-code (str text "\n" (apply str (first (string/split next-line #"```"))))) "</code></pre>")
+      [(str (escape-code (str text \newline (apply str (first (string/split next-line #"```"))))) "</code></pre>")
        (assoc state :skip-next-line? (not lists)
                     :codeblock-end true
                     :last-line-empty? (not lists))]
 
       (and
         (not indented-code)
-        (= [\` \` \`] (take 3 trimmed)))
+        (string/starts-with? trimmed "```"))
       (let [[lang code] (split-with (partial not= \newline) (drop 3 trimmed))
             lang      (string/trim (string/join lang))
             s         (apply str (rest code))
             formatter (:code-style state)]
-        [(str "<pre><code" (if (not-empty lang)
+        [(str "<pre><code" (when (seq lang)
                              (str " "
                                   (if formatter
                                     (formatter lang)
@@ -241,7 +252,7 @@
   "Check for blockquotes and signal to blockquote-2 function with
   states blockquote-start and blockquote-end so that tags can be added.
   This approach enables lists to be included in blockquotes."
-  [text {:keys [eof code codeblock lists] :as state}]
+  [text {:keys [eof code codeblock] :as state}]
   (let [trimmed (string/trim text)]
     (cond
       (or code codeblock)
@@ -323,7 +334,7 @@
     (loop [acc      {}
            remain   metadata
            prev-key nil]
-      (if (not (empty? remain))
+      (if (seq remain)
         (let [data     (first remain)
               [key val] (if (sequential? data) data [prev-key data])
               prev-val (get acc key [])
