@@ -177,7 +177,7 @@
       [(str (escape-code (string/replace-first text #"    " "\n"))
             (when should-close? "</code></pre>"))
        (cond-> state
-         should-close? (assoc  :indent-code-end true))]
+         should-close? (assoc :indent-code-end true))]
 
       paragraph
       [text state]
@@ -192,7 +192,7 @@
                 (escape-code (string/replace-first text #"    " ""))
                 (when should-close? "</code></pre>"))
            (cond-> (assoc state :code true :indented-code true)
-             should-close? (assoc :indent-code-end true :last-line-empty? true))]
+             should-close? (assoc :indent-code-end true))]
           [text state])))))
 
 (defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line lists] :as state}]

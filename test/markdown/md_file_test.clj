@@ -98,3 +98,4 @@
               :base_url    "http://example.com"}
              metadata))
       (is (= 6 line-count) "Metadata-parser provides correct line count"))))
+
