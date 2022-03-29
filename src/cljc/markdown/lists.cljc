@@ -65,10 +65,10 @@
           in-list? (:lists state)]
       (cond
         (re-find #"^[\*\+-] " trimmed)
-        (ul (if in-list? text trimmed) state)
+        (ul text state)
 
         (re-find #"^[0-9]+\. " trimmed)
-        (ol (if in-list? text trimmed) state)
+        (ol text state)
 
         (pos? indents)
         [text state]
