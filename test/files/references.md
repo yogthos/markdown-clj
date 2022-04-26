@@ -25,6 +25,8 @@ This is [an example][id3] reference-style link.
 
 A link with [an underscore][underscore].
 
+A link with a [complex reference][\refs:complex/1].
+
 [id1]: http://example.com/  'Optional Title Here'
 
 [id-2]: http://example.com/  (Optional Title Here)
@@ -32,3 +34,5 @@ A link with [an underscore][underscore].
 [id3]: http://example.com/
 
 [underscore]: http://example.com/#_a_b
+
+[\refs:complex/1]: http://example.com/
