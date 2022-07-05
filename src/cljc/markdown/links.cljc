@@ -153,7 +153,7 @@
     [replacement-text state]))
 
 (defn footnote [text]
-  (re-find #"^\[\^[a-zA-Z0-9_-]+\]:" text))
+  (re-find #"^\[\^[a-zA-Z:0-9_-]+\]:" text))
 
 (defn parse-footnote-link [line footnotes]
   (let [trimmed (string/trim line)]
@@ -167,7 +167,7 @@
     (str "<a href='" link "' id='fnref" next-fn-id "'><sup>" next-fn-id "</sup></a>")))
 
 (defn replace-all-footnote-links [text {:keys [footnotes] :as state}]
-  (let [matcher #"\[\^[a-zA-Z0-9_-]+\]"
+  (let [matcher #"\[\^[a-zA-Z:0-9_-]+\]"
         match (re-find matcher text)]
     (if (nil? match)
       [text state]
