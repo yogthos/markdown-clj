@@ -172,7 +172,17 @@
 (defn heading-text [text]
   (-> (clojure.string/replace text #"^([ ]+)?[#]+" "")
       (clojure.string/replace #"[#]+$" "")
+      ;; Strip out Hugo style anchor links
+      (clojure.string/replace #"\{(#|id=)?.*\}$" "")
       string/trim))
+
+(defn hugo-anchor
+  "Extract Hugo markdown anchor links from the `text`.
+
+  See: https://gohugo.io/content-management/cross-references/#heading-ids"
+  [text]
+  (when-let [groups (seq (re-find #"\{(#|id=)?(.*)\}$" text))]
+    (last groups)))
 
 (defn heading-level [text]
   (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
@@ -180,11 +190,14 @@
 
 (defn make-heading [text heading-anchors]
   (when-let [heading (heading-level text)]
-    (let [text (heading-text text)]
+    (let [htext (heading-text text)
+          anchor (when heading-anchors
+                   (or (hugo-anchor text)
+                       (-> htext string/lower-case (string/replace " " "&#95;"))))]
       ;; We do not need to process the id string, HTML5 ids can contain anything except the space character.
       ;; (https://www.w3.org/TR/html5/dom.html#the-id-attribute)
-      (str "<h" heading (when heading-anchors (str " id=\"" (-> text string/lower-case (string/replace " " "&#95;")) "\"")) ">"
-           text "</h" heading ">"))))
+      (str "<h" heading (when anchor (str " id=\"" anchor "\"")) ">"
+           htext "</h" heading ">"))))
 
 (defn dashes [text state]
   [(if (or (:code state) (:codeblock state))
