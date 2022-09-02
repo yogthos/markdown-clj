@@ -1,5 +1,5 @@
 {:paths ["src/clj" "src/cljs" "src/cljc"]
- :deps {clj-commons/clj-yaml {:mvn/version "0.7.107"}}
+ :deps {clj-commons/clj-yaml {:mvn/version "0.7.109"}}
  :aliases
  {:test
   {:extra-paths ["test"]
