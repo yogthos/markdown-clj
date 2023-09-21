@@ -237,8 +237,7 @@
                         :codeblock-buf ""))])
 
       codeblock
-      (let [text (str text "\n")]
-        ["" (assoc state :codeblock-buf (str codeblock-buf text))])
+      ["" (assoc state :codeblock-buf (str codeblock-buf text \newline))] 
 
       :default
       [text state])))
