@@ -195,23 +195,24 @@
              should-close? (assoc :indent-code-end true))]
           [text state])))))
 
-(defn codeblock [text {:keys [codeblock codeblock-end indented-code next-line lists] :as state}]
+(defn codeblock [text {:keys [codeblock-buf codeblock-lang codeblock-callback codeblock codeblock-end indented-code next-line lists] :as state}]
   (let [trimmed           (string/trim text)
         next-line-closes? (some-> next-line string/trim (string/ends-with? "```"))]
     (cond
       (and lists codeblock-end)
-      ["" (dissoc state :code :codeblock :codeblock-end)]
+      ["" (dissoc state :code :codeblock :codeblock-end :codeblock-lang :codeblock-buf)]
 
       codeblock-end
       [text (-> state
                 (assoc :last-line-empty? true)
-                (dissoc :code :codeblock :codeblock-end))]
+                (dissoc :code :codeblock :codeblock-end :codeblock-lang :codeblock-buf))]
 
       (and next-line-closes? codeblock)
-      [(str (escape-code (str text \newline (apply str (first (string/split next-line #"```"))))) "</code></pre>")
-       (assoc state :skip-next-line? (not lists)
-                    :codeblock-end true
-                    :last-line-empty? (not lists))]
+      (let [buffered-code (str codeblock-buf text)]
+        [(str (escape-code (str (if codeblock-callback (codeblock-callback buffered-code codeblock-lang) buffered-code) \newline (apply str (first (string/split next-line #"```"))))) "</code></pre>")
+         (assoc state :skip-next-line? (not lists)
+                      :codeblock-end true
+                      :last-line-empty? (not lists))])
 
       (and
         (not indented-code)
@@ -229,10 +230,15 @@
               (when next-line-closes? "</code></pre>"))
          (if next-line-closes?
            (assoc state :codeblock-end true :skip-next-line? true)
-           (assoc state :code true :codeblock true))])
+           (assoc state :code true
+                        :codeblock true
+                        :codeblock-lang (if (not-empty lang)
+                                          lang "")
+                        :codeblock-buf ""))])
 
       codeblock
-      [(str (escape-code text) "\n") state]
+      (let [text (str text "\n")]
+        ["" (assoc state :codeblock-buf (str codeblock-buf text))])
 
       :default
       [text state])))
