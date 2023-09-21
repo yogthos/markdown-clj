@@ -226,6 +226,17 @@ This can also be used to add preprocessor transformers. For example, if we wante
 "<p>&lt;h1&gt;escaped&lt;/h1&gt;foo  bar <a href='http://test'>text</a></p>"
 ```
 
+### Codeblock callbacks
+
+It's possible to pass a `:codeblock-callback` function to the parser that will
+postprocess the code as follows: 
+
+```clojure
+(markdown/md-to-html-string "```python\ndef f(x):\n    return x * 2\n```"
+                       :codeblock-callback (fn
+                                             [code language]
+                                             (trim (clygments/highlight code language :html))))
+```
 
 ## Usage ClojureScript
 
