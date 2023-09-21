@@ -232,8 +232,7 @@
            (assoc state :codeblock-end true :skip-next-line? true)
            (assoc state :code true
                         :codeblock true
-                        :codeblock-lang (if (not-empty lang)
-                                          lang "")
+                        :codeblock-lang lang
                         :codeblock-buf ""))])
 
       codeblock
