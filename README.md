@@ -72,7 +72,7 @@ Specifying `:code-style` will override the default code class formatting for cod
 </code></pre>
 ```
 
-### reference style links
+### Reference style links
 
 The parser defaults to using inline reference for performance reasons, to enable reference style links pass in the `:reference-links? true` option:
 
@@ -84,7 +84,7 @@ The parser defaults to using inline reference for performance reasons, to enable
    :reference-links? true)
 ```
 
-### footnotes
+### Footnotes
 
 To enable footnotes, pass the `:footnotes? true` option:
 
@@ -126,6 +126,23 @@ Date: October 31, 2015
             :date ["October 31, 2015"]},
  :html "<h1>Hello!</h1>"}
 ```
+
+### Syntax Highlighting
+
+By default markdown-clj will set a class corresponding to the specified language (if any),
+you can then use libraries like [highlight.js](https://highlightjs.org/), [Prism](https://prismjs.com/), etc.
+
+You can pass `:codeblock-callback f` where f is a function that takes 2 arguments, `code` and `language` and should return a string.
+
+With the callback you can pass a function that processes the code, in this case upper-casing it.
+
+```clojure
+(markdown/md-to-html-string 
+  "Code:\n```clojure\n(defn double\n  [x]\n  (* x 2))\n```"
+  :codeblock-callback (fn [code lang] (upper-case code)))
+```
+
+If you need a syntax highlighter, use libraries like [Pygments](https://pygments.org/) with a wrapper like [Clygments](https://github.com/bfontaine/clygments).
 
 ### Selectively inhibiting the Parser
 
