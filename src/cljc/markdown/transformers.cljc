@@ -208,8 +208,8 @@
                 (dissoc :code :codeblock :codeblock-end :codeblock-lang :codeblock-buf))]
 
       (and next-line-closes? codeblock)
-      (let [buffered-code (str codeblock-buf text)]
-        [(str (escape-code (str (if codeblock-callback (codeblock-callback buffered-code codeblock-lang) buffered-code) \newline (apply str (first (string/split next-line #"```"))))) "</code></pre>")
+      (let [buffered-code (str codeblock-buf text \newline (apply str (first (string/split next-line #"```"))))]
+        [(str (escape-code (str (if codeblock-callback (codeblock-callback buffered-code codeblock-lang) buffered-code))) "</code></pre>")
          (assoc state :skip-next-line? (not lists)
                       :codeblock-end true
                       :last-line-empty? (not lists))])
