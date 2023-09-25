@@ -195,7 +195,7 @@
              should-close? (assoc :indent-code-end true))]
           [text state])))))
 
-(defn codeblock [text {:keys [codeblock-buf codeblock-lang codeblock-callback codeblock codeblock-end indented-code next-line lists] :as state}]
+(defn codeblock [text {:keys [codeblock-no-escape? codeblock-buf codeblock-lang codeblock-callback codeblock codeblock-end indented-code next-line lists] :as state}]
   (let [trimmed           (string/trim text)
         next-line-closes? (some-> next-line string/trim (string/ends-with? "```"))]
     (cond
@@ -208,8 +208,13 @@
                 (dissoc :code :codeblock :codeblock-end :codeblock-lang :codeblock-buf))]
 
       (and next-line-closes? codeblock)
-      (let [buffered-code (str codeblock-buf text \newline (apply str (first (string/split next-line #"```"))))]
-        [(str (escape-code (str (if codeblock-callback (codeblock-callback buffered-code codeblock-lang) buffered-code))) "</code></pre>")
+      (let [buffered-code (str codeblock-buf text \newline (apply str (first (string/split next-line #"```"))))
+            code (if codeblock-callback (codeblock-callback buffered-code codeblock-lang) buffered-code)]
+        [(str
+           (if codeblock-no-escape?
+             code
+             (escape-code code))
+           "</code></pre>")
          (assoc state :skip-next-line? (not lists)
                       :codeblock-end true
                       :last-line-empty? (not lists))])
