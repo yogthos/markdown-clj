@@ -1,5 +1,7 @@
 (ns markdown.common
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as str]
+            [clojure.string :as string])
+  #?(:clj (:import (java.net URLEncoder))))
 
 (def ^{:dynamic true} *substring*)
 
@@ -184,6 +186,17 @@
   (when-let [groups (seq (re-find #"\{(#|id=)?(.*)\}$" text))]
     (last groups)))
 
+(defn default-anchor
+  "Build a default anchor based on a heading's text content"
+  [text]
+  (-> text
+    heading-text
+    (string/replace #"\s+" "_")
+    string/lower-case
+    (as-> $
+      #?(:clj  (URLEncoder/encode ^String $ "UTF-8")
+         :cljs (js/encodeURIComponent $)))))
+
 (defn heading-level [text]
   (let [num-hashes (count (filter #(not= \space %) (take-while #(or (= \# %) (= \space %)) (seq text))))]
     (when (pos? num-hashes) num-hashes)))
@@ -193,7 +206,7 @@
     (let [htext (heading-text text)
           anchor (when heading-anchors
                    (or (hugo-anchor text)
-                       (-> htext string/lower-case (string/replace " " "&#95;"))))]
+                     (default-anchor text)))]
       ;; We do not need to process the id string, HTML5 ids can contain anything except the space character.
       ;; (https://www.w3.org/TR/html5/dom.html#the-id-attribute)
       (str "<h" heading (when anchor (str " id=\"" anchor "\"")) ">"
