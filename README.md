@@ -268,6 +268,10 @@ a string followed by the options as its input, and returns the resulting HTML st
 
 ```javascript
 console.log(markdown.core.mdToHtml("##This is a heading\nwith a paragraph following it"));
+
+// With keyword arguments
+console.log(markdown.core.mdToHtml("##This is a heading\nwith a paragraph following it", "heading-anchors", true));
+
 ```
 
 ## Supported syntax

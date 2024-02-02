@@ -44,7 +44,9 @@
   [text params]
   (binding [markdown.common/*substring* (fn [s n] (apply str (drop n s)))
             markdown.transformers/*formatter* format]
-    (let [params      (when params (apply (partial assoc {}) params))
+    (let [params      (some->> params
+                               (partition 2)
+                               (reduce (fn [m [k v]] (assoc m (keyword k) v)) {}))
           lines       (.split (str text "\n") "\n")
           html        (goog.string.StringBuffer. "")
           references  (when (:reference-links? params) (parse-references lines))
