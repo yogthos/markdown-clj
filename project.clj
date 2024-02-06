@@ -21,9 +21,23 @@
              "deploy"    ["do" "clean," "deploy" "clojars"]}
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
+   
   :profiles
   {:dev
    {:jvm-opts ["-XX:-TieredCompilation"]
     :plugins [[lein-shell "0.4.1"]]
     :dependencies [[criterium "0.4.6" :scope "test"]
-                   [commons-lang "2.6" :scope "test"]]}})
+                   [commons-lang "2.6" :scope "test"]]}
+   :js
+   {:plugins [[lein-cljsbuild "1.1.8"]]
+    :dependencies [[org.clojure/clojurescript "1.11.132"]]
+    :cljsbuild
+    {:builds {:main
+              {:source-paths ["src/cljc" "src/cljs"]
+               :jar          true
+               :compiler     {:output-to     "js/markdown.js"
+                              :optimizations :advanced
+                              :pretty-print  false}}
+              :dev
+              {:compiler {:optimizations :whitespace
+                          :pretty-print  true}}}}}})

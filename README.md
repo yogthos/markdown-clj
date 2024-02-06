@@ -6,6 +6,10 @@
 
 You can try out the parser [here](https://rawgit.com/yogthos/markdown-clj/master/demo/markdown.html).
 
+## Building Js artifact
+
+run `lein with-profile js cljsbuild once` this will create a standalone `js/markdown.js` artifact.
+
 ## Installation
 
 A markdown parser that compiles to both Clojure and ClojureScript.
