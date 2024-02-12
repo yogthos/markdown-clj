@@ -30,9 +30,10 @@
   (is (=
         "<h3 id=\"foo_bar_baz\">foo bar BAz</h3><p>some text</p>"
         (entry-function "###foo bar BAz\nsome text" :heading-anchors true)))
-  (is (=
-        "<h3 id=\"foo_bar_baz\">foo bar BAz</h3><p>some text</p>"
-        (entry-function "###foo bar BAz##\nsome text" :heading-anchors true))))
+  #?(:cljs
+      ; Testing that keywords args can be passed as strings, for javascript compatibility
+      (is (= "<h3 id=\"foo_bar_baz\">foo bar BAz</h3><p>some text</p>"
+             (entry-function "###foo bar BAz##\nsome text" "heading-anchors" true)))))
 
 (deftest br
   (is (= "<p>foo<br /></p>" (entry-function "foo  "))))
