@@ -1,4 +1,4 @@
-(defproject markdown-clj "1.11.8"
+(defproject markdown-clj "1.11.9"
   :description "Markdown parser"
   :url "https://github.com/yogthos/markdown-clj"
   :license {:name "Eclipse Public License"
