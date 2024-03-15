@@ -225,12 +225,19 @@
       (let [[lang code] (split-with (partial not= \newline) (drop 3 trimmed))
             lang      (string/trim (string/join lang))
             s         (apply str (rest code))
-            formatter (:code-style state)]
-        [(str "<pre><code" (when (seq lang)
-                             (str " "
-                                  (if formatter
-                                    (formatter lang)
-                                    (str "class=\"" (string/join lang) "\"")))) ">"
+            code-formatter (:code-style state)
+            pre-formatter (:pre-style state)]
+        [(str "<pre" 
+              (when (seq lang)
+                 (if pre-formatter
+                   (str " " (pre-formatter lang))
+                   ""))
+              "><code" 
+              (when (seq lang)
+                (str " "
+                     (if code-formatter
+                       (code-formatter lang)
+                       (str "class=\"" (string/join lang) "\"")))) ">"
               (escape-code (if (empty? s) s (str s "\n")))
               (when next-line-closes? "</code></pre>"))
          (if next-line-closes?

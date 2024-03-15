@@ -64,7 +64,7 @@
 
 (deftest bold-inside-a-list
   (is (= "<ol><li>chickens.</li></ol><p> <strong>See more: <a href='http://cluck.cluck.com'>Cluck Cluck</a></strong> </p>"
-      (entry-function "1. chickens. \n\n **See more: [Cluck Cluck](http://cluck.cluck.com)** \n\n"))))
+       (entry-function "1. chickens. \n\n **See more: [Cluck Cluck](http://cluck.cluck.com)** \n\n"))))
 
 (deftest em-inside-strong
   (is (= "<p><strong>foo<em>bar</em>baz</strong></p>" (entry-function "**foo*bar*baz**"))))
@@ -197,6 +197,12 @@
     ============
 ```
 "))))
+
+(deftest codebock-styling
+  (is (= "<pre class=\"language-clojure\"><code class=\"language-clojure\">&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
+         (entry-function "```clojure\n(fn [x & xs]\n  (str \"x\"))\n```" 
+                         :code-style #(str "class=\"language-" % "\"")
+                         :pre-style #(str "class=\"language-" % "\"")))))
 
 (deftest indented-codeblock
   (is (= "<pre><code>foo</code></pre>"
