@@ -76,6 +76,18 @@ Specifying `:code-style` will override the default code class formatting for cod
 </code></pre>
 ```
 
+Specifying `:pre-style` will override the default pre class formatting.
+
+```clojure
+(md-to-html-string "# This is a test\nsome code follows\n```clojure\n(defn foo [])\n```"
+                   :pre-style #(str "class=\"brush: " % "\""))
+```
+```xml
+<h1> This is a test</h1>some code follows<pre class="brush: clojure"><code>
+&#40;defn foo &#91;&#93;&#41;
+</code></pre>
+```
+
 ### Reference style links
 
 The parser defaults to using inline reference for performance reasons, to enable reference style links pass in the `:reference-links? true` option:
