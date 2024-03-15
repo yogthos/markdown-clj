@@ -10,3 +10,5 @@ cljs-test-runner-out
 node_modules
 .clj-kondo/
 .calva/
+.envrc
+.direnv
