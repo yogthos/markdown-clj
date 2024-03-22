@@ -79,6 +79,8 @@
 (defn md->html [text & params]
   (:html (md-to-html-string* text params)))
 
+(def md-to-html-string md->html)
+
 (defn md->html-with-meta [text & params]
   (md-to-html-string* text (into [:parse-meta? true] params)))
 
