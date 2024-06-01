@@ -3,7 +3,7 @@
             [markdown.common
              :refer [*inhibit-separator*]]
             [markdown.links
-             :refer [parse-reference-link parse-footnote-link]]
+             :refer [parse-references parse-footnotes]]
             [markdown.transformers
              :refer [transformer-vector footer parse-metadata-headers]])
   (:import [java.io BufferedReader
@@ -28,33 +28,18 @@
         (write writer text)
         new-state))))
 
-(defn- after-reset [in result]
-  (if (instance? StringReader in) (.reset in))
-  result)
-
-(defn parse-references [in]
-  (after-reset in
-               (into {} (map parse-reference-link (line-seq (io/reader in))))))
-
-(defn parse-footnotes [in]
-  (after-reset in
-               (reduce (fn [footnotes line]
-                         (if-let [footnote (parse-footnote-link line)]
-                           (apply assoc-in footnotes footnote)
-                           footnotes))
-                       {:next-fn-id 1 :processed {} :unprocessed {}}
-                       (line-seq (io/reader in)))))
-
-(defn parse-metadata [in]
-  (after-reset in
-               (parse-metadata-headers (line-seq (io/reader in)))))
-
 (defn parse-params
   [params]
   (when (not= 0 (mod (count params) 2))
     (throw (IllegalArgumentException.
              "Must supply an even number of parameters")))
   (when params (apply assoc {} params)))
+
+(defn- reset-reader [rdr in]
+  (if (instance? StringReader in)
+    (do (.reset in)
+        rdr)
+    (io/reader in)))
 
 (defn md-to-html
   "reads markdown content from the input stream and writes HTML to the provided
@@ -64,10 +49,11 @@
   (binding [markdown.common/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/*formatter* clojure.core/format]
     (let [params     (parse-params params)
-          references (when (:reference-links? params) (parse-references in))
-          footnotes  (when (:footnotes? params) (parse-footnotes in))
-          [metadata num-lines] (when (:parse-meta? params) (parse-metadata in))]
-      (with-open [^BufferedReader rdr (io/reader in)
+          rdr        (io/reader in)
+          references (when (:reference-links? params) (parse-references (line-seq rdr))) 
+          footnotes  (when (:footnotes? params) (parse-footnotes (line-seq (reset-reader rdr in)))) 
+          [metadata num-lines] (when (:parse-meta? params) (parse-metadata-headers (line-seq (reset-reader rdr in))))]
+      (with-open [^BufferedReader rdr (reset-reader rdr in)
                   ^BufferedWriter wrt (io/writer out)]
         (when (and metadata (:parse-meta? params))
           (dotimes [_ num-lines]
@@ -112,7 +98,7 @@
   [text]
   (when text
     (let [input (new StringReader text)]
-      (first (parse-metadata input)))))
+      (first (parse-metadata-headers (line-seq (io/reader input)))))))
 
 (defn md-to-html-string [text & params]
   (:html (md-to-html-string* text params)))

@@ -2,10 +2,9 @@
   (:require [markdown.common
              :refer [*substring* *inhibit-separator*]]
             [markdown.links
-             :refer [parse-reference parse-reference-link parse-footnote-link]]
+             :refer [parse-references parse-footnotes]]
             [markdown.transformers
              :refer [transformer-vector footer parse-metadata-headers]]))
-
 
 (defn- init-transformer [{:keys [replacement-transformers custom-transformers inhibit-separator]}]
   (fn [html line next-line state]
@@ -22,17 +21,6 @@
 
 (defn format "Removed from cljs.core 0.0-1885, Ref. http://goo.gl/su7Xkj"
   [fmt & args] (apply goog.string/format fmt args))
-
-(defn parse-references [lines]
-  (into {} (map parse-reference-link lines)))
-
-(defn parse-footnotes [lines]
-  (reduce (fn [footnotes line]
-            (if-let [footnote (parse-footnote-link line)]
-              (apply assoc-in footnotes footnote)
-              footnotes))
-          {:next-fn-id 1 :processed {} :unprocessed {}}
-          lines))
 
 (defn parse-metadata [lines]
   (let [[metadata num-lines] (parse-metadata-headers lines)]
