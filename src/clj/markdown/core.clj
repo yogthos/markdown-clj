@@ -28,34 +28,26 @@
         (write writer text)
         new-state))))
 
+(defn- after-reset [in result]
+  (if (instance? StringReader in) (.reset in))
+  result)
+
 (defn parse-references [in]
-  (let [references (atom {})]
-    (if (instance? StringReader in)
-      (do
-        (doseq [line (line-seq (io/reader in))]
-          (parse-reference-link line references))
-        (.reset in))
-      (doseq [line (line-seq (io/reader in))]
-        (parse-reference-link line references)))
-    @references))
+  (after-reset in
+               (into {} (map parse-reference-link (line-seq (io/reader in))))))
 
 (defn parse-footnotes [in]
-  (let [footnotes (atom {:next-fn-id 1 :processed {} :unprocessed {}})]
-    (if (instance? StringReader in)
-      (do
-        (doseq [line (line-seq (io/reader in))]
-          (parse-footnote-link line footnotes))
-        (.reset in))
-      (doseq [line (line-seq (io/reader in))]
-        (parse-footnote-link line footnotes)))
-    @footnotes))
+  (after-reset in
+               (reduce (fn [footnotes line]
+                         (if-let [footnote (parse-footnote-link line)]
+                           (apply assoc-in footnotes footnote)
+                           footnotes))
+                       {:next-fn-id 1 :processed {} :unprocessed {}}
+                       (line-seq (io/reader in)))))
 
 (defn parse-metadata [in]
-  (let [lines    (line-seq (io/reader in))
-        metadata-and-lines (parse-metadata-headers lines)]
-    (when (instance? StringReader in)
-      (.reset in))
-    metadata-and-lines))
+  (after-reset in
+               (parse-metadata-headers (line-seq (io/reader in)))))
 
 (defn parse-params
   [params]

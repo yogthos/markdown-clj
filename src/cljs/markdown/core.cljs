@@ -24,16 +24,15 @@
   [fmt & args] (apply goog.string/format fmt args))
 
 (defn parse-references [lines]
-  (let [references (atom {})]
-    (doseq [line lines]
-      (parse-reference-link line references))
-    @references))
+  (into {} (map parse-reference-link lines)))
 
 (defn parse-footnotes [lines]
-  (let [footnotes (atom {:next-fn-id 1 :processed {} :unprocessed {}})]
-    (doseq [line lines]
-      (parse-footnote-link line footnotes))
-    @footnotes))
+  (reduce (fn [footnotes line]
+            (if-let [footnote (parse-footnote-link line)]
+              (apply assoc-in footnotes footnote)
+              footnotes))
+          {:next-fn-id 1 :processed {} :unprocessed {}}
+          lines))
 
 (defn parse-metadata [lines]
   (let [[metadata num-lines] (parse-metadata-headers lines)]
