@@ -154,11 +154,11 @@
 (defn footnote [text]
   (re-find #"^\[\^[a-zA-Z:0-9_-]+\]:" text))
 
-(defn parse-footnote-link [line footnotes]
+(defn parse-footnote-link [line]
   (let [trimmed (string/trim line)]
     (when-let [link (footnote trimmed)]
-      (swap! footnotes assoc-in [:unprocessed (subs link 0 (dec (count link)))]
-             (parse-reference trimmed (inc (count link)))))))
+      [[:unprocessed (subs link 0 (dec (count link)))]
+       (parse-reference trimmed (inc (count link)))])))
 
 (defn replace-footnote-link [footnotes footnote]
   (let [next-fn-id (:next-fn-id footnotes)

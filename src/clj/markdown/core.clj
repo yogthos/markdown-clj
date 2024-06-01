@@ -35,12 +35,17 @@
     (into {} references)))
 
 (defn parse-footnotes [in]
-  (let [footnotes (atom {:next-fn-id 1 :processed {} :unprocessed {}})]
-    (doseq [line (line-seq (io/reader in))]
-      (parse-footnote-link line footnotes))
+  (let [footnotes (reduce (fn [footnotes line]
+                            (if-let [footnote (parse-footnote-link line)]
+                              (apply assoc-in footnotes footnote)
+                              footnotes))
+                          {:next-fn-id 1 :processed {} :unprocessed {}}
+                          (line-seq (io/reader in)))]
     (if (instance? StringReader in)
       (.reset in))
-    @footnotes))
+    footnotes))
+
+(assoc-in {:a 1} [:v :w] 3)
 
 (defn parse-metadata [in]
   (let [lines    (line-seq (io/reader in))
