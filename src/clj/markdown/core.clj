@@ -30,24 +30,18 @@
 
 (defn parse-references [in]
   (let [references (atom {})]
+    (doseq [line (line-seq (io/reader in))]
+      (parse-reference-link line references))
     (if (instance? StringReader in)
-      (do
-        (doseq [line (line-seq (io/reader in))]
-          (parse-reference-link line references))
-        (.reset in))
-      (doseq [line (line-seq (io/reader in))]
-        (parse-reference-link line references)))
+      (.reset in))
     @references))
 
 (defn parse-footnotes [in]
   (let [footnotes (atom {:next-fn-id 1 :processed {} :unprocessed {}})]
+    (doseq [line (line-seq (io/reader in))]
+      (parse-footnote-link line footnotes))
     (if (instance? StringReader in)
-      (do
-        (doseq [line (line-seq (io/reader in))]
-          (parse-footnote-link line footnotes))
-        (.reset in))
-      (doseq [line (line-seq (io/reader in))]
-        (parse-footnote-link line footnotes)))
+      (.reset in))
     @footnotes))
 
 (defn parse-metadata [in]
