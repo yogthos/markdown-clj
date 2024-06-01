@@ -45,8 +45,6 @@
       (.reset in))
     footnotes))
 
-(assoc-in {:a 1} [:v :w] 3)
-
 (defn parse-metadata [in]
   (let [lines    (line-seq (io/reader in))
         metadata-and-lines (parse-metadata-headers lines)]
