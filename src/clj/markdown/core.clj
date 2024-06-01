@@ -29,12 +29,10 @@
         new-state))))
 
 (defn parse-references [in]
-  (let [references (atom {})]
-    (doseq [line (line-seq (io/reader in))]
-      (parse-reference-link line references))
+  (let [references (map parse-reference-link (line-seq (io/reader in)))] 
     (if (instance? StringReader in)
       (.reset in))
-    @references))
+    (into {} references)))
 
 (defn parse-footnotes [in]
   (let [footnotes (atom {:next-fn-id 1 :processed {} :unprocessed {}})]
