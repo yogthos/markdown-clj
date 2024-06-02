@@ -104,6 +104,9 @@
     (when-let [link (reference trimmed)]
       [(subs link 0 (dec (count link))) (parse-reference trimmed (inc (count link)))])))
 
+(defn parse-references [lines]
+  (into {} (map parse-reference-link lines)))
+
 (defn replace-reference-link [references reference]
   (let [[title id] (string/split reference #"\]\s*" 2)
         [link alt] (get references id)]
@@ -159,6 +162,14 @@
     (when-let [link (footnote trimmed)]
       [[:unprocessed (subs link 0 (dec (count link)))]
        (parse-reference trimmed (inc (count link)))])))
+
+(defn parse-footnotes [lines]
+  (reduce (fn [footnotes line]
+            (if-let [footnote (parse-footnote-link line)]
+              (apply assoc-in footnotes footnote)
+              footnotes))
+          {:next-fn-id 1 :processed {} :unprocessed {}}
+          lines))
 
 (defn replace-footnote-link [footnotes footnote]
   (let [next-fn-id (:next-fn-id footnotes)
