@@ -221,5 +221,9 @@
          (string/replace #"<code>.*</code>"
                          (fn [s](-> s
                                     (string/replace #"&mdash;" "---")
+                                    (string/replace #"&ndash;" "--"))))
+         (string/replace #"<a href='[^']*'>"
+                         (fn [s](-> s
+                                    (string/replace #"&mdash;" "---")
                                     (string/replace #"&ndash;" "--"))))))
    state])

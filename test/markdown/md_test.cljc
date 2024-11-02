@@ -245,6 +245,8 @@
          (entry-function "[github](http://github.com/^)")))
   (is (= "<p><a href='http://github.com/*'>github</a></p>"
          (entry-function "[github](http://github.com/*)")))
+  (is (= "<p><a href='http://github.com/some--stuff.html'>github</a></p>"
+         (entry-function "[github](http://github.com/some--stuff.html)")))
   (is (= "<ul><li><a href='http://github.com/*'>github</a></li></ul>"
          (entry-function "* [github](http://github.com/*)")))
   (is (= "<ul><li>hi</li></ul><p><a href='https://see-here'>a link</a></p>"
