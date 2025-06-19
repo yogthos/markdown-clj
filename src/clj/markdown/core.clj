@@ -12,6 +12,8 @@
             StringWriter
             Writer]))
 
+(set! *warn-on-reflection* true)
+
 (defn- write [^Writer writer ^String text]
   (doseq [c text] (.write writer (int c))))
 
@@ -37,7 +39,7 @@
 
 (defn- reset-reader [rdr in]
   (if (instance? StringReader in)
-    (do (.reset in)
+    (do (.reset ^StringReader in)
         rdr)
     (io/reader in)))
 
