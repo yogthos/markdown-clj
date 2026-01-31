@@ -241,8 +241,8 @@
                (str " "
                     (if code-formatter
                       (code-formatter lang)
-                      (str "class=\"" (string/join lang) "\"")))))
-            ">")
+                      (str "class=\"" (string/join lang) "\""))))
+             ">"))
           (escape-code (if (empty? s) s (str s "\n")))
           (when (and next-line-closes? (not codeblock-no-tags?))
             "</code></pre>"))
