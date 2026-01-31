@@ -195,7 +195,7 @@
              should-close? (assoc :indent-code-end true))]
           [text state])))))
 
-(defn codeblock [text {:keys [codeblock-no-escape? codeblock-buf codeblock-lang codeblock-callback codeblock codeblock-end indented-code next-line lists] :as state}]
+(defn codeblock [text {:keys [codeblock-no-escape? codeblock-no-tags? codeblock-buf codeblock-lang codeblock-callback codeblock codeblock-end indented-code next-line lists] :as state}]
   (let [trimmed           (string/trim text)
         next-line-closes? (some-> next-line string/trim (string/ends-with? "```"))]
     (cond
@@ -214,7 +214,8 @@
            (if codeblock-no-escape?
              code
              (escape-code code))
-           "</code></pre>")
+           (when (not codeblock-no-tags?)
+             "</code></pre>"))
          (assoc state :skip-next-line? (not lists)
                       :codeblock-end true
                       :last-line-empty? (not lists))])
@@ -227,19 +228,24 @@
             s         (apply str (rest code))
             code-formatter (:code-style state)
             pre-formatter (:pre-style state)]
-        [(str "<pre" 
-              (when (seq lang)
-                 (if pre-formatter
-                   (str " " (pre-formatter lang))
-                   ""))
-              "><code" 
-              (when (seq lang)
-                (str " "
-                     (if code-formatter
-                       (code-formatter lang)
-                       (str "class=\"" (string/join lang) "\"")))) ">"
-              (escape-code (if (empty? s) s (str s "\n")))
-              (when next-line-closes? "</code></pre>"))
+        [(str
+          (when (not codeblock-no-tags?)
+            (str
+             "<pre"
+             (when (seq lang)
+               (if pre-formatter
+                 (str " " (pre-formatter lang))
+                 ""))
+             "><code"
+             (when (seq lang)
+               (str " "
+                    (if code-formatter
+                      (code-formatter lang)
+                      (str "class=\"" (string/join lang) "\"")))))
+            ">")
+          (escape-code (if (empty? s) s (str s "\n")))
+          (when (and next-line-closes? (not codeblock-no-tags?))
+            "</code></pre>"))
          (if next-line-closes?
            (assoc state :codeblock-end true :skip-next-line? true)
            (assoc state :code true
