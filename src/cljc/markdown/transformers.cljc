@@ -93,29 +93,29 @@
     [text state]
     (let [currently-frozen (volatile! {:frozen-strings frozen-strings})]
       [(string/replace
-         text
-         #"<https?://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]>"
-         #(let [[url frozen-strings] (freeze-string (subs % 1 (dec (count %))) @currently-frozen)]
-            (vreset! currently-frozen frozen-strings)
-            (str "<a href=\"" url "\">" url "</a>")))
+        text
+        #"<https?://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]>"
+        #(let [[url frozen-strings] (freeze-string (subs % 1 (dec (count %))) @currently-frozen)]
+           (vreset! currently-frozen frozen-strings)
+           (str "<a href=\"" url "\">" url "</a>")))
        (merge state @currently-frozen)])))
 
 (defn autoemail-transformer [text state]
   (let [left-pad (fn [s]
                    (cond->> s
-                            (= 1 (count s)) (str "0")))
+                     (= 1 (count s)) (str "0")))
         encoder  (if (:clojurescript state)
                    (fn [c] (str "&#x" (-> c (.charCodeAt 0) (.toString 16) left-pad) ";"))
                    (fn [c] (*formatter* "&#x%02x;" (int c))))]
     [(if (or (:code state) (:codeblock state))
        text
        (string/replace
-         text
-         #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
-         #(let [encoded (->> (subs % 1 (dec (count %)))
-                             (map encoder)
-                             (apply str))]
-            (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
+        text
+        #"<[\w._%+-]+@[\w.-]+\.[\w]{2,4}>"
+        #(let [encoded (->> (subs % 1 (dec (count %)))
+                            (map encoder)
+                            (apply str))]
+           (str "<a href=\"mailto:" encoded "\">" encoded "</a>"))))
      state]))
 
 (defn set-line-state [text {:keys [inline-heading] :as state}]
@@ -211,18 +211,18 @@
       (let [buffered-code (str codeblock-buf text \newline (apply str (first (string/split next-line #"```"))))
             code (if codeblock-callback (codeblock-callback buffered-code codeblock-lang) buffered-code)]
         [(str
-           (if codeblock-no-escape?
-             code
-             (escape-code code))
-           (when (not codeblock-no-tags?)
-             "</code></pre>"))
+          (if codeblock-no-escape?
+            code
+            (escape-code code))
+          (when (not codeblock-no-tags?)
+            "</code></pre>"))
          (assoc state :skip-next-line? (not lists)
-                      :codeblock-end true
-                      :last-line-empty? (not lists))])
+                :codeblock-end true
+                :last-line-empty? (not lists))])
 
       (and
-        (not indented-code)
-        (string/starts-with? trimmed "```"))
+       (not indented-code)
+       (string/starts-with? trimmed "```"))
       (let [[lang code] (split-with (partial not= \newline) (drop 3 trimmed))
             lang      (string/trim (string/join lang))
             s         (apply str (rest code))
@@ -241,20 +241,20 @@
                (str " "
                     (if code-formatter
                       (code-formatter lang)
-                      (str "class=\"" (string/join lang) "\"")))))
-            ">")
+                      (str "class=\"" (string/join lang) "\""))))))
+          ">"
           (escape-code (if (empty? s) s (str s "\n")))
           (when (and next-line-closes? (not codeblock-no-tags?))
             "</code></pre>"))
          (if next-line-closes?
            (assoc state :codeblock-end true :skip-next-line? true)
            (assoc state :code true
-                        :codeblock true
-                        :codeblock-lang lang
-                        :codeblock-buf ""))])
+                  :codeblock true
+                  :codeblock-lang lang
+                  :codeblock-buf ""))])
 
       codeblock
-      ["" (assoc state :codeblock-buf (str codeblock-buf text \newline))] 
+      ["" (assoc state :codeblock-buf (str codeblock-buf text \newline))]
 
       :default
       [text state])))
@@ -263,10 +263,10 @@
   (if (:code state)
     [text state]
     (if (and
-          (or (empty? (drop-while #{\* \space} text))
-              (empty? (drop-while #{\- \space} text))
-              (empty? (drop-while #{\_ \space} text)))
-          (> (count (remove #{\space} text)) 2))
+         (or (empty? (drop-while #{\* \space} text))
+             (empty? (drop-while #{\- \space} text))
+             (empty? (drop-while #{\_ \space} text)))
+         (> (count (remove #{\space} text)) 2))
       [(str "<hr/>") (assoc state :hr true)]
       [text state])))
 
@@ -325,12 +325,12 @@
     (->> (:processed footnotes)
          (into (sorted-map))
          (reduce
-           (fn [footnotes [id label]]
-             (str footnotes
-                  "<li id='fn-" id "'>"
-                  (apply str (interpose " " label))
-                  "<a href='#fnref" id "'>&#8617;</a></li>"))
-           "")
+          (fn [footnotes [id label]]
+            (str footnotes
+                 "<li id='fn-" id "'>"
+                 (apply str (interpose " " label))
+                 "<a href='#fnref" id "'>&#8617;</a></li>"))
+          "")
          (#(str "<ol class='footnotes'>" % "</ol>")))))
 
 (defn parse-metadata-line
@@ -372,11 +372,11 @@
 (defn parse-wiki-metadata-headers
   [lines-seq]
   (reduce
-    (fn [acc line]
-      (if-let [parsed (parse-metadata-line line)]
-        (conj acc parsed)
-        (reduced [(flatten-metadata acc) (count acc)])))
-    [] lines-seq))
+   (fn [acc line]
+     (if-let [parsed (parse-metadata-line line)]
+       (conj acc parsed)
+       (reduced [(flatten-metadata acc) (count acc)])))
+   [] lines-seq))
 
 (defn parse-yaml-metadata-headers
   [lines-seq]
