@@ -1,3 +1,4 @@
+
 # Markdown parser written in Clojure/Script
 
 [![CircleCI](https://circleci.com/gh/yogthos/markdown-clj.svg?style=svg)](https://circleci.com/gh/yogthos/markdown-clj) [![Downloads](https://jarkeeper.com/yogthos/markdown-clj/downloads.svg)](https://jarkeeper.com/yogthos/markdown-clj)
@@ -245,13 +246,24 @@ This can also be used to add preprocessor transformers. For example, if we wante
 ### Codeblock callbacks
 
 It's possible to pass a `:codeblock-callback` function to the parser that will
-postprocess the code as follows: 
+postprocess the code as follows:
 
-You can also pass `:codeblock-no-escape? true` to disable code escaping.
+You can pass `:codeblock-no-escape? true` to disable code escaping.
 
 ```clojure
 (markdown/md-to-html-string "```python\ndef f(x):\n    return x * 2\n```"
                        :codeblock-no-escape? true
+                       :codeblock-callback (fn
+                                             [code language]
+                                             (clygments/highlight code language :html)))
+```
+
+You can also pass `:codeblock-no-tags? true` to allow the codeblock callback to provide
+its own enclosing tags, in lieu of the standard `<code><pre>...</pre></code>` tags.
+
+```clojure
+(markdown/md-to-html-string "```python\ndef f(x):\n    return x * 2\n```"
+                       :codeblock-no-tags? true
                        :codeblock-callback (fn
                                              [code language]
                                              (clygments/highlight code language :html)))
