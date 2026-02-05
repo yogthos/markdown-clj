@@ -198,6 +198,63 @@
 ```
 "))))
 
+(deftest codeblock-no-tags
+  (is (= "------------\n============\n    ------------\n    ============\n"
+         (entry-function
+           "
+```nohighlight
+------------
+============
+    ------------
+    ============
+```
+"
+           :codeblock-no-tags? true)))
+
+  (is (= "nohighlight|------------\n============\n    ------------\n    ============\n"
+         (entry-function
+           "
+```nohighlight
+------------
+============
+    ------------
+    ============
+```
+"
+           :codeblock-no-tags? true
+           :codeblock-callback (fn [code language]
+                                 (str language "|" code)))))
+
+  (is (= "&lt;div&gt;------------\n============\n    ------------\n    ============\n&lt;/div&gt;"
+         (entry-function
+           "
+```nohighlight
+------------
+============
+    ------------
+    ============
+```
+"
+           :codeblock-no-tags? true
+           :codeblock-callback (fn [code language]
+                                 (str "<div>" code "</div>")))))
+
+    (is (= "<div>------------\n============\n    ------------\n    ============\n</div>"
+         (entry-function
+           "
+```nohighlight
+------------
+============
+    ------------
+    ============
+```
+"
+           :codeblock-no-tags? true
+           :codeblock-no-escape? true
+           :codeblock-callback (fn [code language]
+                                 (str "<div>" code "</div>"))))))
+
+
 (deftest codebock-styling
   (is (= "<pre class=\"language-clojure\"><code class=\"language-clojure\">&#40;fn &#91;x &amp; xs&#93;\n  &#40;str &quot;x&quot;&#41;&#41;\n</code></pre>"
          (entry-function "```clojure\n(fn [x & xs]\n  (str \"x\"))\n```" 

@@ -258,8 +258,13 @@ You can pass `:codeblock-no-escape? true` to disable code escaping.
                                              (clygments/highlight code language :html)))
 ```
 
-You can also pass `:codeblock-no-tags? true` to allow the codeblock callback to provide
-its own enclosing tags, in lieu of the standard `<code><pre>...</pre></code>` tags.
+You can also pass `:codeblock-no-tags? true` to allow the codeblock
+callback to provide its own enclosing tags, in lieu of the standard
+`<code><pre>...</pre></code>` tags.  If you do this, you probably also
+want to specify `:codeblock-no-escape? true` to prevent tags within
+the callback's output from being escaped. This in turn means that you
+need to manually escape anything else contained within the output of
+the callback.
 
 ```clojure
 (markdown/md-to-html-string "```python\ndef f(x):\n    return x * 2\n```"
