@@ -416,6 +416,14 @@
                 :cljs goog.string/unescapeEntities)
              (entry-function "<abc_def_ghi@google.com>"))))))
 
+(deftest ul-initial-indentation
+  (is (= "<ul><li>a</li><li>b</li></ul>"
+         (entry-function " - a\n- b")))
+  (is (= "<ul><li>a</li><li>b</li></ul>"
+         (entry-function "  - a\n- b")))
+  (is (= "<ol><li>a</li><li>b</li></ol>"
+         (entry-function " 1. a\n1. b"))))
+
 (deftest not-a-list
   (is (= "<p>The fish was 192.8 lbs and was amazing to see.</p>"
          (entry-function "The fish was\n192.8 lbs and was amazing to see."))))

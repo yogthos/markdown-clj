@@ -13,11 +13,15 @@
       (< num-indents indents)
       (let [lists-to-close  (take-while #(> (second %) num-indents) (reverse (:lists state)))
             remaining-lists (vec (drop-last (count lists-to-close) (:lists state)))]
-
-        [(apply str (close-lists lists-to-close) "</li><li>" content)
-         (assoc state :lists (if (> num-indents (second (last remaining-lists)))
-                               (conj remaining-lists [row-type num-indents])
-                               remaining-lists))])
+        (if (empty? remaining-lists)
+          ;; dedenting below the root list level - close any inner lists
+          ;; but keep the outermost list open with adjusted indentation
+          [(apply str (close-lists (butlast lists-to-close)) "</li><li>" content)
+           (assoc state :lists [[row-type num-indents]])]
+          [(apply str (close-lists lists-to-close) "</li><li>" content)
+           (assoc state :lists (if (> num-indents (second (last remaining-lists)))
+                                 (conj remaining-lists [row-type num-indents])
+                                 remaining-lists))]))
 
       (> num-indents indents)
       [(str "<" (name row-type) "><li>" content)
