@@ -3,10 +3,13 @@
 
 (defn parse-table-row [text]
   (->> text
-       (#(if (= (first %) \|)
-          (apply str (rest %))
-          %))
        (string/trim)
+       (#(if (= (first %) \|)
+           (subs % 1)
+           %))
+       (#(if (and (seq %) (= (last %) \|))
+           (subs % 0 (dec (count %)))
+           %))
        (#(string/split % #"\|"))
        (map string/trim)
        (map #(identity {:text %}))))
@@ -71,40 +74,47 @@
             nil))
         divider-seq))
 
+(defn table-delimiter? [text]
+  (and (string/includes? text "|")
+       (let [cells (parse-table-row text)]
+         (and (seq cells)
+              (every? #(re-matches #":?-+:?" (:text %)) cells)))))
+
 (defn table [text state]
-  (let [table-row-re (re-find #"\|(?: [\S ]+ \|)+" text)
-        table-divider-re (re-find #"\|(?: ?:?-+:? ?\|)+" text)
-        is-table-row? (= table-row-re text)
+  (if (or (:code state) (:codeblock state))
+    [text state]
+    (let [is-table-row? (string/includes? text "|")
+          is-table-header?
+          (and is-table-row?
+               (not (get-in state [:table :in-table-body?]))
+               (table-delimiter? (or (:next-line state) "")))
+          is-table-divider?
+          (and (table-delimiter? text)
+               (get-in state [:table :in-table-body?])
+               (get-in state [:table :is-prev-header?]))]
+      (cond
         is-table-header?
-        (and is-table-row?
-             (not (get-in state [:table :in-table-body?])))
+        (let [header-seq (parse-table-row text)]
+          ["" (-> state
+                  (assoc-in [:table :is-prev-header?] true)
+                  (assoc-in [:table :in-table-body?] true)
+                  (update-in [:table :data] (fnil conj []) (vec header-seq)))])
+
         is-table-divider?
-        (and (= table-divider-re text)
-             (get-in state [:table :in-table-body?])
-             (get-in state [:table :is-prev-header?]))]
-    (cond
-      is-table-header?
-      (let [header-seq (parse-table-row text)]
-        ["" (-> state
-                (assoc-in [:table :is-prev-header?] true)
-                (assoc-in [:table :in-table-body?] true)
-                (update-in [:table :data] (fnil conj []) (vec header-seq)))])
+        (let [divider-seq (parse-table-row text)]
+          ["" (-> state
+                  (assoc-in [:table :is-prev-header?] false)
+                  (assoc-in [:table :alignment-seq]
+                            (divider-seq->alignment divider-seq)))])
 
-      is-table-divider?
-      (let [divider-seq (parse-table-row text)]
-        ["" (-> state
-                (assoc-in [:table :is-prev-header?] false)
-                (assoc-in [:table :alignment-seq]
-                          (divider-seq->alignment divider-seq)))])
+        (and is-table-row? (get-in state [:table :in-table-body?]))
+        (let [row-seq (parse-table-row text)]
+          ["" (-> state
+                  (assoc-in [:table :is-prev-header?] false)
+                  (update-in [:table :data] (fnil conj []) (vec row-seq)))])
 
-      is-table-row?
-      (let [row-seq (parse-table-row text)]
-        ["" (-> state
-                (assoc-in [:table :is-prev-header?] false)
-                (update-in [:table :data] (fnil conj []) (vec row-seq)))])
-
-      :else
-      (let [out (if (empty? (get-in state [:table :data]))
-                  text
-                  (str (table->str (:table state)) text))]
-        [out (dissoc state :table)]))))
+        :else
+        (let [out (if (empty? (get-in state [:table :data]))
+                    text
+                    (str (table->str (:table state)) text))]
+          [out (dissoc state :table)])))))

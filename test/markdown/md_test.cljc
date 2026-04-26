@@ -455,7 +455,13 @@
 (deftest parse-table-row
   (is (= (tables/parse-table-row "| table cell contents |") [{:text "table cell contents"}]))
   (is (= (tables/parse-table-row "| contents 1 | contents 2 | contents 3 | contents 4 |")
-         [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}])))
+         [{:text "contents 1"} {:text "contents 2"} {:text "contents 3"} {:text "contents 4"}]))
+  (let [expected (tables/parse-table-row "| contents 1 | contents 2 |")]
+    (is (= expected (tables/parse-table-row "contents 1 | contents 2 |")))
+    (is (= expected (tables/parse-table-row "| contents 1 | contents 2")))
+    (is (= expected (tables/parse-table-row "contents 1 | contents 2"))))
+  (let [expected (tables/parse-table-row "| a | b |")]
+    (is (= expected (tables/parse-table-row "|a|b|")))))
 
 (deftest table-row->str
   (is (= (tables/table-row->str
@@ -492,6 +498,37 @@
   (is (= (tables/divider-seq->alignment
            [{:text "-----"} {:text ":-----"} {:text "-----:"} {:text ":-----:"}])
          [nil {:alignment :left} {:alignment :right} {:alignment :center}])))
+
+(deftest table-delimiter?
+  (is (tables/table-delimiter? "| --- | --- |"))
+  (is (tables/table-delimiter? ":-: | -----------:"))
+  (is (tables/table-delimiter? "|-|-|"))
+  (is (tables/table-delimiter? "|--|"))
+  (is (tables/table-delimiter? "| :--- | ---: | :---: |"))
+  (is (not (tables/table-delimiter? "| foo | bar |")))
+  (is (not (tables/table-delimiter? "| --- | oops |")))
+  (is (not (tables/table-delimiter? "no pipes here")))
+  (is (not (tables/table-delimiter? "||"))))
+
+(deftest table-optional-pipes
+  (is (= "<table><thead><tr><th style='text-align:center'>abc</th><th style='text-align:right'>defghi</th></tr></thead><tbody><tr><td style='text-align:center'>bar</td><td style='text-align:right'>baz</td></tr></tbody></table>"
+         (entry-function "| abc | defghi |\n:-: | -----------:\nbar | baz"))))
+
+(deftest table-delimiter-no-leading-pipe
+  (is (= "<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table>"
+         (entry-function "| a | b |\n--- | ---\n| 1 | 2 |"))))
+
+(deftest table-body-no-trailing-pipe
+  (is (= "<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></tbody></table>"
+         (entry-function "| a | b |\n| --- | --- |\n| 1 | 2\n| 3 | 4 |"))))
+
+(deftest table-zero-spaces
+  (is (= "<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table>"
+         (entry-function "|a|b|\n|-|-|\n|1|2|"))))
+
+(deftest pipe-in-prose-not-a-table
+  (is (= "<p>A | B</p>" (entry-function "A | B")))
+  (is (= "<p>use foo | bar for baz</p>" (entry-function "use foo | bar for baz"))))
 
 (deftest n-dash
   (is (= "<p>boo &ndash; bar</p>" (entry-function "boo -- bar"))))
