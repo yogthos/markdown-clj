@@ -89,6 +89,11 @@
   (is (= "<pre><code>foo\n</code></pre><p>bar baz</p>"
          (entry-function "```\nfoo\n```\nbar\nbaz"))))
 
+(deftest unclosed-codeblock
+  (is (= "<pre><code></code></pre>" (entry-function "```")))
+  (is (= "<pre><code>foo\nbar\n</code></pre>" (entry-function "```\nfoo\nbar")))
+  (is (= "<pre><code class=\"go\">foo\n</code></pre>" (entry-function "```go\nfoo"))))
+
 (deftest mulitple-paragraphs
   (is (= "<p>foo bar baz</p><p>foo bar baz</p>"
          (entry-function "\nfoo bar baz\n\n\nfoo bar baz"))))
