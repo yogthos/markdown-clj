@@ -389,8 +389,14 @@
 
 (deftest escaped-characters
   (is
-    (= "<p>&#94;&#42;&#8216;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
+    (= "<p>&#94;&#42;&#96;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
        (entry-function "\\^\\*\\`\\_\\{\\}\\[\\]*foo*`test`_bar_{x}[y]"))))
+
+(deftest escaped-characters-ignored-inside-code-spans
+  (is (= "<p>a <code>\\</code> b and <code>code</code> c</p>"
+         (entry-function "a `\\` b and `code` c")))
+  (is (= "<p><code>\\&#42;not-emphasized\\&#42;</code></p>"
+         (entry-function "`\\*not-emphasized\\*`"))))
 
 (deftest paragraph-after-list
   (is (= "<ol><li>a</li><li>b</li></ol><p>test <strong>bold</strong> and <em>italic</em></p>"

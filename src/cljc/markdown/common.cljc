@@ -58,26 +58,24 @@
       (string/replace #"\)" "&#41;")
       (string/replace #"\"" "&quot;")))
 
+(def ^:private escaped-char-entities
+  ;; key is the escaped-char sequence, value is the entity for the literal char
+  {"\\\\" "&#92;" "\\`" "&#96;" "\\*" "&#42;" "\\_" "&#95;"
+   "\\{" "&#123;" "\\}" "&#125;" "\\[" "&#91;" "\\]" "&#93;"
+   "\\(" "&#40;" "\\)" "&#41;" "\\#" "&#35;" "\\+" "&#43;"
+   "\\-" "&#45;" "\\." "&#46;" "\\!" "&#33;" "\\^" "&#94;"})
+
 (defn escaped-chars [text state]
+  ;; backslash escapes are literal text inside code spans, so their content
+  ;; must be matched (and passed through) before looking for escape sequences
   [(if (or (:code state) (:codeblock state))
      text
-     (-> text
-         (string/replace #"\\\\" "&#92;")
-         (string/replace #"\\`" "&#8216;")
-         (string/replace #"\\\*" "&#42;")
-         (string/replace #"\\_" "&#95;")
-         (string/replace #"\\\{" "&#123;")
-         (string/replace #"\\\}" "&#125;")
-         (string/replace #"\\\[" "&#91;")
-         (string/replace #"\\\]" "&#93;")
-         (string/replace #"\\\(" "&#40;")
-         (string/replace #"\\\)" "&#41;")
-         (string/replace #"\\#" "&#35;")
-         (string/replace #"\\\+" "&#43;")
-         (string/replace #"\\-" "&#45;")
-         (string/replace #"\\\." "&#46;")
-         (string/replace #"\\!" "&#33;")
-         (string/replace #"\\\^" "&#94;")))
+     (string/replace text
+                     #"`[^`]*`|\\[\\`*_{}\[\]()#+\-.!^]"
+                     (fn [match]
+                       (if (= \` (first match))
+                         match
+                         (escaped-char-entities match)))))
    state])
 
 (defn open-html-tags [open? token-seq]
