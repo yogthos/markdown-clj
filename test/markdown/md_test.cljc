@@ -13,6 +13,7 @@
   (is (= "<h1>Foo</h1>" (entry-function " # Foo")))
   (is (= "<h1>foo</h1>" (entry-function "#foo")))
   (is (= "<h1>foo</h1>" (entry-function "foo\n===")))
+  (is (= "<h1>foo</h1><p>bar</p>" (entry-function "foo\n===\nbar")))
   (is (= "<h1>foo</h1>" (entry-function "#foo#")))
   (is (= "<h1>foo</h1>" (entry-function "#foo#\n")))
   (is (= "<h1>some header <code>with&#95;an&#95;underscore</code></h1>"
@@ -23,6 +24,7 @@
 (deftest heading2
   (is (= "<h2>foo</h2>" (entry-function "##foo")))
   (is (= "<h2>foo</h2>" (entry-function "foo\n---")))
+  (is (= "<h2>foo</h2><p>bar</p>" (entry-function "foo\n---\nbar")))
   (is (= "<h2>foo</h2>" (entry-function "##foo##")))
   (is (= "<h2>foo</h2>" (entry-function "##foo##\n"))))
 
@@ -42,7 +44,11 @@
   (is (= "<hr/>" (entry-function "***")))
   (is (= "<hr/>" (entry-function " * * * ")))
   (is (= "<hr/>" (entry-function " *****")))
-  (is (= "<hr/>" (entry-function "- - - "))))
+  (is (= "<hr/>" (entry-function "- - - ")))
+  (is (= "<hr/>" (entry-function "---")))
+  (is (= "<hr/>" (entry-function "___")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n___\n\nb"))))
 
 (deftest em
   (is (= "<p><em>foo</em></p>" (entry-function "*foo*"))))

@@ -42,11 +42,21 @@
 (defn h2? [text]
   (heading? text \-))
 
-(defn empty-line [text {:keys [code codeblock] :as state}]
+(defn empty-line [text {:keys [code codeblock heading] :as state}]
   (if (or code codeblock)
     [text state]
-    [(if (or (h1? text) (h2? text)) "" text)
-     (if (string/blank? text) (dissoc state :hr :heading) state)]))
+    (cond
+      ;; strip the underline of a setext heading emitted on the previous line
+      (and heading (or (h1? text) (h2? text)))
+      ["" (-> state
+              (dissoc :heading)
+              (assoc :heading-end 2))]
+
+      (string/blank? text)
+      [text (dissoc state :hr :heading)]
+
+      :default
+      [text state])))
 
 (defn superscript [text state]
   (if (:code state)
@@ -70,10 +80,10 @@
     (or codeblock code)
     [text state]
 
-    (h1? (or buf next-line))
+    (and (not (string/blank? text)) (h1? (or buf next-line)))
     [(str "<h1>" text "</h1>") (assoc state :heading true)]
 
-    (h2? (or buf next-line))
+    (and (not (string/blank? text)) (h2? (or buf next-line)))
     [(str "<h2>" text "</h2>") (assoc state :heading true)]
 
     :else
@@ -124,8 +134,12 @@
        (dissoc :inline-heading)
        (assoc-in [:temp :inline-heading] inline-heading))])
 
-(defn clear-line-state [text state]
-  [text (dissoc state :temp)])
+(defn clear-line-state [text {:keys [heading-end] :as state}]
+  [text (let [state (dissoc state :temp)]
+          (cond
+            (nil? heading-end) state
+            (= heading-end 1)  (dissoc state :heading-end)
+            :else              (assoc state :heading-end (dec heading-end))))])
 
 (defn paragraph-text [last-line-empty? text]
   (if (and (not last-line-empty?) (not-empty text))
@@ -133,7 +147,7 @@
     text))
 
 (defn open-paragraph
-  [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty?] :as state}]
+  [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty? heading-end] :as state}]
   (cond
     (and paragraph lists)
     [(str "</p>" text) (dissoc state :paragraph)]
@@ -146,7 +160,7 @@
       [(str (paragraph-text last-line-empty? text) "</p>") (dissoc state :paragraph)]
       [(paragraph-text last-line-empty? text) state])
 
-    (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty?))
+    (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty? heading-end))
     [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
 
     :default
