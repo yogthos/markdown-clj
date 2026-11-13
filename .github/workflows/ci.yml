@@ -18,7 +18,7 @@ jobs:
           java-version: '11'
 
       - name: Set up Clojure tools
-        uses: DeLaGuardo/setup-clojure@13.7
+        uses: DeLaGuardo/setup-clojure@13.7.0
         with:
           cli: latest
           lein: 2.9.3
