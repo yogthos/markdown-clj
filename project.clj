@@ -15,7 +15,7 @@
   :aliases {"test-cljs" ["shell" "bb" "test:cljs"]
             "test-bb"   ["shell" "bb" "test:bb"]
             "test-nbb"  ["shell" "bb" "test:nbb"]
-            "test"      ["do" "test" "test-cljs" "test-bb" "test-nbb"]
+            "test"      ["do" "test," "test-cljs," "test-bb," "test-nbb"]
             "cleantest" ["do" "clean," "test"]
             "install"   ["do" "clean," "install"]
             "deploy"    ["do" "clean," "deploy" "clojars"]}
