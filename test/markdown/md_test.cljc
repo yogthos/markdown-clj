@@ -48,7 +48,33 @@
   (is (= "<hr/>" (entry-function "---")))
   (is (= "<hr/>" (entry-function "___")))
   (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\n\nb")))
-  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n___\n\nb"))))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n___\n\nb")))
+  (is (= "<p>a</p><hr/><hr/><p>b</p>" (entry-function "a\n\n---\n---\n\nb"))))
+
+(deftest hr-after-list
+  (is (= "<ul><li>a</li><li>b</li></ul><hr/><p>c</p>"
+         (entry-function "- a\n- b\n---\n\nc")))
+  ;; CommonMark reads an indented --- under an item as a setext heading on the
+  ;; item's paragraph; the break inside the item is the closest well formed
+  ;; rendering, since item content is already written by the time it is seen
+  (is (= "<ul><li>a<hr/></li></ul><p>c</p>"
+         (entry-function "- a\n  ---\n\nc")))
+  (is (= "<ul><li>a</li></ul><hr/><p>c</p>"
+         (entry-function "- a\n\n- - -\n\nc")))
+  ;; an indented break sits in the item rather than ending the list
+  (is (= "<ul><li>a<hr/></li></ul><p>c</p>"
+         (entry-function "- a\n\n  ---\n\nc"))))
+
+(deftest hr-paragraph-boundary
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n***\nb")))
+  (is (= "<hr/><p>b</p>" (entry-function "---\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\nb"))))
+
+(deftest empty-list-item
+  (is (= "<ul><li>a</li><li></li></ul>" (entry-function "- a\n\n-")))
+  (is (= "<ul><li>a</li><li></li><li>b</li></ul>" (entry-function "- a\n-\n- b")))
+  (is (= "<ol><li>a</li><li></li></ol>" (entry-function "1. a\n\n1.")))
+  (is (= "<ul><li>a</li></ul><p>&ndash;</p>" (entry-function "- a\n\n--"))))
 
 (deftest em
   (is (= "<p><em>foo</em></p>" (entry-function "*foo*"))))
