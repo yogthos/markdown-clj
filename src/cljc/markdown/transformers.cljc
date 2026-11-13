@@ -45,12 +45,25 @@
 (defn leading-spaces [text]
   (count (take-while (partial = \space) (or text ""))))
 
+(def ^:private closing-tag-re
+  #"^(?:</(?:p|li|ul|ol|blockquote|pre|code|table|thead|tbody|tr|th|td|dl|dt|dd|h[1-6])>\s*)+$")
+
+(defn closing-tag-text?
+  "True when the line's text is closing markup that an earlier transformer
+  emitted for a block ending here, not content from the source line. Closing
+  a list or blockquote on a blank line leaves text such as `</li></ul>` or
+  `</p></blockquote>`: wrapping that in a paragraph, or using it as the body
+  of a setext heading, nests the tags and swallows the line that follows."
+  [text]
+  (some? (re-matches closing-tag-re (string/trim (or text "")))))
+
 (defn setext-underline
   "Returns :h1 or :h2 when the following line underlines text, nil otherwise.
   List content only counts when the underline is indented past the item's
   marker, and a line that already produced list markup is never underlined."
   [text {:keys [next-line hr lists list-line]}]
   (when (and (not (string/blank? text))
+             (not (closing-tag-text? text))
              (not hr)
              (not list-line)
              (>= (leading-spaces next-line) (content-indent lists)))
@@ -170,6 +183,8 @@
       (and paragraph lists)
       [(str "</p>" text) (dissoc state :paragraph)]
 
+      ;; leftover closing markup of a block that just ended is already block
+      ;; level output, so it must not be wrapped in a paragraph of its own
       (or heading inline-heading hr code lists blockquote)
       [text state]
 
@@ -178,7 +193,10 @@
         [(str (paragraph-text starts-block? text) "</p>") (dissoc state :paragraph)]
         [(paragraph-text starts-block? text) state])
 
-      (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) starts-block? heading-end))
+      ;; leftover closing markup of a block that just ended is already block
+      ;; level output, so it must not be wrapped in a paragraph of its own
+      (and (not eof) (not (string/blank? text)) (not (closing-tag-text? text))
+           (or (:inline-heading temp) starts-block? heading-end))
       [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
 
       :default

@@ -70,6 +70,65 @@
   (is (= "<hr/><p>b</p>" (entry-function "---\nb")))
   (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\nb"))))
 
+;; The two problem cases from the follow-up comment on issue #216
+;; (issuecomment-6865910736), transcribed verbatim. Both come from the same
+;; bug: a block that ends on a blank line leaves its closing markup on a line
+;; of its own, and that line was treated as ordinary paragraph text, so it was
+;; wrapped in a <p> (case 2) or used as the body of a setext heading (case 1).
+(deftest hr-comment-case-1-two-blank-lines-before-thematic-break
+  ;; 1. List, two blank lines, then `---`:
+  ;;   "- a\n\n\n---\n\nb"
+  ;; used to render "<ul><li>a<h2></li></ul></h2><p>b</p>" (broken nesting)
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n\n---\n\nb")))
+  ;; the comment's own comparison case, one blank line, quoted verbatim
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n---\n\nb")))
+  ;; more than two blank lines, and `***` rather than `---`
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n\n\n---\n\nb")))
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n\n***\n\nb"))))
+
+(deftest hr-comment-case-2-blockquote-directly-followed-by-thematic-break
+  ;; 2. Blockquote directly followed by `***`, no blank line:
+  ;;   "> a\n***\n\nb"
+  ;; expected (the 1.12.9 output quoted in the comment):
+  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+         (entry-function "> a\n***\n\nb")))
+  ;; same with `---`, expected is the comment's quoted 1.12.9 output:
+  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+         (entry-function "> a\n---\n\nb")))
+  ;; adjacent: `___` breaks, and an empty blockquote line before the break
+  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+         (entry-function "> a\n___\n\nb")))
+  ;; adjacent: an unmarked continuation line stays in the blockquote (lazy
+  ;; continuation), and the break does not spawn a stray paragraph
+  (is (= "<blockquote><p> a <hr/>  b </p></blockquote>"
+         (entry-function "> a\n***\n b")))
+  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p> b</p>"
+         (entry-function "> a\n---\n b"))))
+
+(deftest hr-comment-case-1-and-2-crlf
+  ;; the same two cases with CRLF line endings must not reintroduce the bug
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\r\n\r\n\r\n---\r\n\r\nb")))
+  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+         (entry-function "> a\r\n***\r\n\r\nb")))
+  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+         (entry-function "> a\r\n---\r\n\r\nb"))))
+
+;; the cases from the examples file attached to the #216 thread, kept so the
+;; closing-markup fix is not undone by a later change to the same stage; the
+;; list cases must never nest the heading or rule inside the <li>
+(deftest hr-attached-examples
+  (is (= "<ul><li>a</li><li></li></ul>" (entry-function "- a\n\n-")))
+  (is (= "<ul><li>a</li></ul><p>&ndash;</p>" (entry-function "- a\n\n--")))
+  (is (= "<ul><li>a</li><li>b</li></ul><hr/><p>c</p>"
+         (entry-function "- a\n- b\n---\n\nc")))
+  (is (= "<p>a</p><hr/><hr/><p>b</p>" (entry-function "a\n\n---\n---\n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\n\nb"))))
+
 (deftest empty-list-item
   (is (= "<ul><li>a</li><li></li></ul>" (entry-function "- a\n\n-")))
   (is (= "<ul><li>a</li><li></li><li>b</li></ul>" (entry-function "- a\n-\n- b")))
