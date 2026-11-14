@@ -60,16 +60,21 @@
 (defn setext-underline
   "Returns :h1 or :h2 when the following line underlines text, nil otherwise.
   List content only counts when the underline is indented past the item's
-  marker, and a line that already produced list markup is never underlined."
-  [text {:keys [next-line hr lists list-line]}]
-  (when (and (not (string/blank? text))
-             (not (closing-tag-text? text))
-             (not hr)
-             (not list-line)
-             (>= (leading-spaces next-line) (content-indent lists)))
-    (cond
-      (h1? next-line) :h1
-      (h2? next-line) :h2)))
+  marker, a line that already produced list markup is never underlined, and an
+  unmarked line continuing a blockquote is lazy continuation text, which no
+  underline may attach to."
+  [text {:keys [next-line hr lists list-line blockquote]}]
+  (let [quoted? (or blockquote (string/starts-with? (string/triml (or text "")) ">"))]
+    (when (and (not (string/blank? text))
+               (not (closing-tag-text? text))
+               (not hr)
+               (not list-line)
+               (not (and quoted?
+                         (not (string/starts-with? (string/triml (or next-line "")) ">"))))
+               (>= (leading-spaces next-line) (content-indent lists)))
+      (cond
+        (h1? next-line) :h1
+        (h2? next-line) :h2))))
 
 (defn empty-line [text {:keys [code codeblock heading] :as state}]
   (if (or code codeblock)
@@ -327,7 +332,7 @@
            (empty? (drop-while #{\_ \space} text)))
        (> (count (remove #{\space} text)) 2)))
 
-(defn hr [text {:keys [code lists paragraph] :as state}]
+(defn hr [text {:keys [code lists paragraph blockquote blockquote-paragraph] :as state}]
   (if (or code (not (thematic-break? text)))
     [text state]
     (let [;; a break shallower than the innermost item's content column cannot
@@ -335,10 +340,14 @@
           close? (and (seq lists) (< (leading-spaces text) (content-indent lists)))]
       [(str (when paragraph "</p>")
             (when close? (close-lists (reverse lists)))
+            ;; a break is not paragraph text: an open blockquote and its
+            ;; paragraph close ahead of it instead of wrapping the rule
+            (when blockquote (str (when blockquote-paragraph "</p>") "</blockquote>"))
             "<hr/>")
        (cond-> (assoc state :hr true :hr-end 2)
-         paragraph (dissoc :paragraph)
-         close?    (dissoc :lists))])))
+         paragraph  (dissoc :paragraph)
+         blockquote (dissoc :blockquote :blockquote-paragraph :blockquote-end)
+         close?     (dissoc :lists))])))
 
 (defn- blockquote-open
   "Starts a blockquote on `text`. A blockquote cannot start inside a paragraph

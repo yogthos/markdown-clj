@@ -93,29 +93,33 @@
 (deftest hr-comment-case-2-blockquote-directly-followed-by-thematic-break
   ;; 2. Blockquote directly followed by `***`, no blank line:
   ;;   "> a\n***\n\nb"
-  ;; expected (the 1.12.9 output quoted in the comment):
-  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+  ;; a break is not paragraph text, so it ends the blockquote instead of being
+  ;; wrapped inside the quote's paragraph
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p>b</p>"
          (entry-function "> a\n***\n\nb")))
-  ;; same with `---`, expected is the comment's quoted 1.12.9 output:
-  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+  ;; `---` reads the same way: a setext underline cannot be the lazy
+  ;; continuation of a quoted paragraph, so it is a break, not an <h2>
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p>b</p>"
          (entry-function "> a\n---\n\nb")))
-  ;; adjacent: `___` breaks, and an empty blockquote line before the break
-  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+  ;; adjacent: `___` breaks too
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p>b</p>"
          (entry-function "> a\n___\n\nb")))
-  ;; adjacent: an unmarked continuation line stays in the blockquote (lazy
-  ;; continuation), and the break does not spawn a stray paragraph
-  (is (= "<blockquote><p> a <hr/>  b </p></blockquote>"
+  ;; a marked continuation line stays in the quote; an unmarked one is lazy
+  ;; continuation only while the quote's paragraph is still open
+  (is (= "<blockquote><p> a  b </p></blockquote><p>c</p>"
+         (entry-function "> a\n b\n\nc")))
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p> b</p>"
          (entry-function "> a\n***\n b")))
-  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p> b</p>"
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p> b</p>"
          (entry-function "> a\n---\n b"))))
 
 (deftest hr-comment-case-1-and-2-crlf
   ;; the same two cases with CRLF line endings must not reintroduce the bug
   (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
          (entry-function "- a\r\n\r\n\r\n---\r\n\r\nb")))
-  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p>b</p>"
          (entry-function "> a\r\n***\r\n\r\nb")))
-  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p>b</p>"
          (entry-function "> a\r\n---\r\n\r\nb"))))
 
 ;; The follow-up comment's case 1 is a *comparison*: two blank lines before the
@@ -137,24 +141,26 @@
         (str blanks " CRLF blank line(s) before " marker " after a list"))))
 
 ;; The comment's case 2 is a blockquote directly followed by a marker, with no
-;; blank line between them. `---` is the setext reading (the comment's quoted
-;; 1.12.9 output), the other markers are breaks; neither may leak out of the
-;; blockquote or spawn a stray paragraph.
+;; blank line between them. Every marker reads as a break and closes the
+;; blockquote: nothing may nest a <hr/> or an <h2> inside the quote's <p>, and
+;; the marker's line must not survive as loose text.
 (deftest hr-marker-directly-after-a-blockquote
-  (doseq [marker ["***" "___" "* * *" "- - -"]]
-    (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+  (doseq [marker ["***" "___" "* * *" "- - -" "-- -"]]
+    (is (= "<blockquote><p> a </p></blockquote><hr/><p>b</p>"
            (entry-function (str "> a\n" marker "\n\nb")))
         (str "blockquote followed directly by " marker)))
-  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+  ;; a contiguous run of dashes is an underline where a paragraph may take one
+  (is (= "<h2>a</h2>" (entry-function "a\n---"))
+      "`---` under a plain paragraph is still a setext underline")
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\n\nb"))
+      "`---` after a blank line is still a break")
+  ;; but a quoted paragraph cannot be underlined by an unmarked line, so this
+  ;; reads as a break rather than as an <h2> swallowed into the <blockquote>
+  (is (= "<blockquote><p> a </p></blockquote><hr/><p>b</p>"
          (entry-function "> a\n---\n\nb"))
-      "`---` is a setext underline here, not a break")
-  ;; an underline with spaces between the dashes is not a setext underline at
-  ;; all, so these stay breaks: what distinguishes the two readings is the
-  ;; contiguous run, not the character
-  (doseq [marker ["- - -" "-- -"]]
-    (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
-           (entry-function (str "> a\n" marker "\n\nb")))
-        (str "spaced dashes " marker " after a blockquote are a break"))))
+      "`---` cannot underline a quoted paragraph")
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>" (entry-function "- a\n---\n\nb"))
+      "`---` does not underline list content either"))
 
 ;; the cases from the examples file attached to the #216 thread, kept so the
 ;; closing-markup fix is not undone by a later change to the same stage; the
