@@ -118,6 +118,44 @@
   (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
          (entry-function "> a\r\n---\r\n\r\nb"))))
 
+;; The follow-up comment's case 1 is a *comparison*: two blank lines before the
+;; break must render exactly like one blank line. These rows take that as the
+;; invariant and hold everything else fixed, varying only the run of blank
+;; lines and the marker, so the equality the comment asserts is checked for
+;; every member of the family rather than the single reported pair.
+(deftest hr-blank-run-before-thematic-break
+  (doseq [blanks [1 2 3 4]
+          marker ["---" "***" "___"]]
+    (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+           (entry-function (str "- a\n" (apply str (repeat blanks "\n")) marker "\n\nb")))
+        (str blanks " blank line(s) before " marker " after a list")))
+  ;; and the same family with CRLF line endings
+  (doseq [blanks [1 2 3]
+          marker ["---" "***"]]
+    (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+           (entry-function (str "- a\r\n" (apply str (repeat blanks "\r\n")) marker "\r\n\r\nb")))
+        (str blanks " CRLF blank line(s) before " marker " after a list"))))
+
+;; The comment's case 2 is a blockquote directly followed by a marker, with no
+;; blank line between them. `---` is the setext reading (the comment's quoted
+;; 1.12.9 output), the other markers are breaks; neither may leak out of the
+;; blockquote or spawn a stray paragraph.
+(deftest hr-marker-directly-after-a-blockquote
+  (doseq [marker ["***" "___" "* * *" "- - -"]]
+    (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+           (entry-function (str "> a\n" marker "\n\nb")))
+        (str "blockquote followed directly by " marker)))
+  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+         (entry-function "> a\n---\n\nb"))
+      "`---` is a setext underline here, not a break")
+  ;; an underline with spaces between the dashes is not a setext underline at
+  ;; all, so these stay breaks: what distinguishes the two readings is the
+  ;; contiguous run, not the character
+  (doseq [marker ["- - -" "-- -"]]
+    (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+           (entry-function (str "> a\n" marker "\n\nb")))
+        (str "spaced dashes " marker " after a blockquote are a break"))))
+
 ;; the cases from the examples file attached to the #216 thread, kept so the
 ;; closing-markup fix is not undone by a later change to the same stage; the
 ;; list cases must never nest the heading or rule inside the <li>
@@ -511,6 +549,40 @@
          (entry-function "> ## Foo\n>bar baz")))
   (is (= "<blockquote><p> Foo <h2>bar</h2> baz </p></blockquote>"
          (entry-function "> Foo\n>## bar\n> baz"))))
+
+(deftest blockquote-after-list
+  (is (= "<ul><li>a</li><li>b</li></ul><blockquote><p> quote </p></blockquote><p>after</p>"
+         (entry-function "- a\n- b\n\n> quote\n\nafter"))))
+
+(deftest blockquote-without-blank-line-before
+  (is (= "<p>intro:</p><blockquote><p> quote </p></blockquote><p>after</p>"
+         (entry-function "intro:\n> quote\n\nafter"))))
+
+(deftest less-than-that-cannot-start-a-tag
+  (is (= "<p>Fat &lt;0.5g</p>" (entry-function "Fat <0.5g")))
+  (is (= "<p>children &lt; 3 years</p>" (entry-function "children < 3 years"))))
+
+(deftest html-comment
+  (is (= "<p>text <!-- note --> more</p>" (entry-function "text <!-- note --> more"))))
+
+(deftest less-than-in-raw-html
+  ;; a `<` inside raw html is part of that markup, escaping it would change it
+  (is (= "<p><script>if (a<0) {}</script></p>"
+         (entry-function "<script>if (a<0) {}</script>")))
+  (is (= "<p><script> if (a<0) {} </script></p>"
+         (entry-function "<script>\nif (a<0) {}\n</script>")))
+  (is (= "<p><style> a < b {} </style></p>"
+         (entry-function "<style>\na < b {}\n</style>")))
+  (is (= "<p><pre> a < b </pre></p>"
+         (entry-function "<pre>\na < b\n</pre>")))
+  (is (= "<p><!-- 1 < 2 --></p>" (entry-function "<!-- 1 < 2 -->")))
+  (is (= "<p>text <!-- a<b and -- stays --> more</p>"
+         (entry-function "text <!-- a<b and -- stays --> more")))
+  ;; text around raw html is still escaped
+  (is (= "<p><script>if (a<0) {}</script> and 1 &lt; 2</p>"
+         (entry-function "<script>if (a<0) {}</script> and 1 < 2")))
+  (is (= "<p><script> if (a<0) {} </script> 1 &lt; 2</p>"
+         (entry-function "<script>\nif (a<0) {}\n</script>\n1 < 2"))))
 
 (deftest escaped-characters
   (is
