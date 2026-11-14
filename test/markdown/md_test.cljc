@@ -129,6 +129,40 @@
   (is (= "<p>a</p><hr/><hr/><p>b</p>" (entry-function "a\n\n---\n---\n\nb")))
   (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\n\nb"))))
 
+;; shapes of `---` found in real content, around other block elements
+(deftest hr-between-blocks
+  (is (= "<hr/><p>a</p>" (entry-function "---\n\na")))
+  (is (= "<p>a</p><hr/>" (entry-function "a\n\n---")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n--- \n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n----------\n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\r\n\r\n---\r\n\r\nb")))
+  ;; the line before the break holds only whitespace
+  (is (= "<p>a  </p><hr/><p>b</p>" (entry-function "a\n \n---\n\nb")))
+  (is (= "<p><strong>a</strong></p><hr/><p><em>b</em></p>"
+         (entry-function "**a**\n\n---\n\n*b*")))
+  (is (= "<h2>h</h2><hr/><h2>h2</h2>" (entry-function "## h\n\n---\n\n## h2")))
+  (is (= "<blockquote><p> q </p></blockquote><hr/><p>b</p>"
+         (entry-function "> q\n\n---\n\nb")))
+  (is (= "<p>a</p><hr/><blockquote><p> b </p></blockquote>"
+         (entry-function "a\n\n---\n\n> b")))
+  (is (= (str "<table><thead><tr><th>a</th><th>b</th></tr></thead>"
+              "<tbody><tr><td>1</td><td>2</td></tr></tbody></table><hr/><p>b</p>")
+         (entry-function "| a | b |\n|---|---|\n| 1 | 2 |\n\n---\n\nb")))
+  (is (= "<pre><code>a\n---\nb\n</code></pre>" (entry-function "```\na\n---\nb\n```"))))
+
+(deftest hr-around-lists
+  (is (= "<ol><li>a</li><li>b</li></ol><hr/><p>c</p>"
+         (entry-function "1. a\n2. b\n\n---\n\nc")))
+  (is (= "<ol><li>a</li></ol><hr/><p>c</p>" (entry-function "1. a\n---\nc")))
+  (is (= "<ul><li>a<ul><li>b</li></ul></li></ul><hr/><p>c</p>"
+         (entry-function "- a\n  - b\n---\nc")))
+  (is (= "<ul><li>a</li></ul><hr/><p>c</p>" (entry-function "- a\n\n***\n\nc")))
+  (is (= "<ul><li>a</li></ul><hr/><ul><li>b</li></ul>" (entry-function "- a\n***\n- b")))
+  (is (= "<ul><li>a</li><li>b</li></ul><hr/><ul><li>c</li></ul>"
+         (entry-function "- a\n- b\n---\n- c")))
+  (is (= "<p>a</p><hr/><ul><li>b</li><li>c</li></ul>"
+         (entry-function "a\n\n---\n\n- b\n- c"))))
+
 (deftest empty-list-item
   (is (= "<ul><li>a</li><li></li></ul>" (entry-function "- a\n\n-")))
   (is (= "<ul><li>a</li><li></li><li>b</li></ul>" (entry-function "- a\n-\n- b")))
