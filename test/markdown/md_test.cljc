@@ -13,6 +13,7 @@
   (is (= "<h1>Foo</h1>" (entry-function " # Foo")))
   (is (= "<h1>foo</h1>" (entry-function "#foo")))
   (is (= "<h1>foo</h1>" (entry-function "foo\n===")))
+  (is (= "<h1>foo</h1><p>bar</p>" (entry-function "foo\n===\nbar")))
   (is (= "<h1>foo</h1>" (entry-function "#foo#")))
   (is (= "<h1>foo</h1>" (entry-function "#foo#\n")))
   (is (= "<h1>some header <code>with&#95;an&#95;underscore</code></h1>"
@@ -23,6 +24,7 @@
 (deftest heading2
   (is (= "<h2>foo</h2>" (entry-function "##foo")))
   (is (= "<h2>foo</h2>" (entry-function "foo\n---")))
+  (is (= "<h2>foo</h2><p>bar</p>" (entry-function "foo\n---\nbar")))
   (is (= "<h2>foo</h2>" (entry-function "##foo##")))
   (is (= "<h2>foo</h2>" (entry-function "##foo##\n"))))
 
@@ -42,7 +44,130 @@
   (is (= "<hr/>" (entry-function "***")))
   (is (= "<hr/>" (entry-function " * * * ")))
   (is (= "<hr/>" (entry-function " *****")))
-  (is (= "<hr/>" (entry-function "- - - "))))
+  (is (= "<hr/>" (entry-function "- - - ")))
+  (is (= "<hr/>" (entry-function "---")))
+  (is (= "<hr/>" (entry-function "___")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n___\n\nb")))
+  (is (= "<p>a</p><hr/><hr/><p>b</p>" (entry-function "a\n\n---\n---\n\nb"))))
+
+(deftest hr-after-list
+  (is (= "<ul><li>a</li><li>b</li></ul><hr/><p>c</p>"
+         (entry-function "- a\n- b\n---\n\nc")))
+  ;; CommonMark reads an indented --- under an item as a setext heading on the
+  ;; item's paragraph; the break inside the item is the closest well formed
+  ;; rendering, since item content is already written by the time it is seen
+  (is (= "<ul><li>a<hr/></li></ul><p>c</p>"
+         (entry-function "- a\n  ---\n\nc")))
+  (is (= "<ul><li>a</li></ul><hr/><p>c</p>"
+         (entry-function "- a\n\n- - -\n\nc")))
+  ;; an indented break sits in the item rather than ending the list
+  (is (= "<ul><li>a<hr/></li></ul><p>c</p>"
+         (entry-function "- a\n\n  ---\n\nc"))))
+
+(deftest hr-paragraph-boundary
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n***\nb")))
+  (is (= "<hr/><p>b</p>" (entry-function "---\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\nb"))))
+
+;; The two problem cases from the follow-up comment on issue #216
+;; (issuecomment-6865910736), transcribed verbatim. Both come from the same
+;; bug: a block that ends on a blank line leaves its closing markup on a line
+;; of its own, and that line was treated as ordinary paragraph text, so it was
+;; wrapped in a <p> (case 2) or used as the body of a setext heading (case 1).
+(deftest hr-comment-case-1-two-blank-lines-before-thematic-break
+  ;; 1. List, two blank lines, then `---`:
+  ;;   "- a\n\n\n---\n\nb"
+  ;; used to render "<ul><li>a<h2></li></ul></h2><p>b</p>" (broken nesting)
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n\n---\n\nb")))
+  ;; the comment's own comparison case, one blank line, quoted verbatim
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n---\n\nb")))
+  ;; more than two blank lines, and `***` rather than `---`
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n\n\n---\n\nb")))
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\n\n\n***\n\nb"))))
+
+(deftest hr-comment-case-2-blockquote-directly-followed-by-thematic-break
+  ;; 2. Blockquote directly followed by `***`, no blank line:
+  ;;   "> a\n***\n\nb"
+  ;; expected (the 1.12.9 output quoted in the comment):
+  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+         (entry-function "> a\n***\n\nb")))
+  ;; same with `---`, expected is the comment's quoted 1.12.9 output:
+  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+         (entry-function "> a\n---\n\nb")))
+  ;; adjacent: `___` breaks, and an empty blockquote line before the break
+  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+         (entry-function "> a\n___\n\nb")))
+  ;; adjacent: an unmarked continuation line stays in the blockquote (lazy
+  ;; continuation), and the break does not spawn a stray paragraph
+  (is (= "<blockquote><p> a <hr/>  b </p></blockquote>"
+         (entry-function "> a\n***\n b")))
+  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p> b</p>"
+         (entry-function "> a\n---\n b"))))
+
+(deftest hr-comment-case-1-and-2-crlf
+  ;; the same two cases with CRLF line endings must not reintroduce the bug
+  (is (= "<ul><li>a</li></ul><hr/><p>b</p>"
+         (entry-function "- a\r\n\r\n\r\n---\r\n\r\nb")))
+  (is (= "<blockquote><p> a <hr/> </p></blockquote><p>b</p>"
+         (entry-function "> a\r\n***\r\n\r\nb")))
+  (is (= "<blockquote><p><h2> a </h2></p></blockquote><p>b</p>"
+         (entry-function "> a\r\n---\r\n\r\nb"))))
+
+;; the cases from the examples file attached to the #216 thread, kept so the
+;; closing-markup fix is not undone by a later change to the same stage; the
+;; list cases must never nest the heading or rule inside the <li>
+(deftest hr-attached-examples
+  (is (= "<ul><li>a</li><li></li></ul>" (entry-function "- a\n\n-")))
+  (is (= "<ul><li>a</li></ul><p>&ndash;</p>" (entry-function "- a\n\n--")))
+  (is (= "<ul><li>a</li><li>b</li></ul><hr/><p>c</p>"
+         (entry-function "- a\n- b\n---\n\nc")))
+  (is (= "<p>a</p><hr/><hr/><p>b</p>" (entry-function "a\n\n---\n---\n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n---\n\nb"))))
+
+;; shapes of `---` found in real content, around other block elements
+(deftest hr-between-blocks
+  (is (= "<hr/><p>a</p>" (entry-function "---\n\na")))
+  (is (= "<p>a</p><hr/>" (entry-function "a\n\n---")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n--- \n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\n\n----------\n\nb")))
+  (is (= "<p>a</p><hr/><p>b</p>" (entry-function "a\r\n\r\n---\r\n\r\nb")))
+  ;; the line before the break holds only whitespace
+  (is (= "<p>a  </p><hr/><p>b</p>" (entry-function "a\n \n---\n\nb")))
+  (is (= "<p><strong>a</strong></p><hr/><p><em>b</em></p>"
+         (entry-function "**a**\n\n---\n\n*b*")))
+  (is (= "<h2>h</h2><hr/><h2>h2</h2>" (entry-function "## h\n\n---\n\n## h2")))
+  (is (= "<blockquote><p> q </p></blockquote><hr/><p>b</p>"
+         (entry-function "> q\n\n---\n\nb")))
+  (is (= "<p>a</p><hr/><blockquote><p> b </p></blockquote>"
+         (entry-function "a\n\n---\n\n> b")))
+  (is (= (str "<table><thead><tr><th>a</th><th>b</th></tr></thead>"
+              "<tbody><tr><td>1</td><td>2</td></tr></tbody></table><hr/><p>b</p>")
+         (entry-function "| a | b |\n|---|---|\n| 1 | 2 |\n\n---\n\nb")))
+  (is (= "<pre><code>a\n---\nb\n</code></pre>" (entry-function "```\na\n---\nb\n```"))))
+
+(deftest hr-around-lists
+  (is (= "<ol><li>a</li><li>b</li></ol><hr/><p>c</p>"
+         (entry-function "1. a\n2. b\n\n---\n\nc")))
+  (is (= "<ol><li>a</li></ol><hr/><p>c</p>" (entry-function "1. a\n---\nc")))
+  (is (= "<ul><li>a<ul><li>b</li></ul></li></ul><hr/><p>c</p>"
+         (entry-function "- a\n  - b\n---\nc")))
+  (is (= "<ul><li>a</li></ul><hr/><p>c</p>" (entry-function "- a\n\n***\n\nc")))
+  (is (= "<ul><li>a</li></ul><hr/><ul><li>b</li></ul>" (entry-function "- a\n***\n- b")))
+  (is (= "<ul><li>a</li><li>b</li></ul><hr/><ul><li>c</li></ul>"
+         (entry-function "- a\n- b\n---\n- c")))
+  (is (= "<p>a</p><hr/><ul><li>b</li><li>c</li></ul>"
+         (entry-function "a\n\n---\n\n- b\n- c"))))
+
+(deftest empty-list-item
+  (is (= "<ul><li>a</li><li></li></ul>" (entry-function "- a\n\n-")))
+  (is (= "<ul><li>a</li><li></li><li>b</li></ul>" (entry-function "- a\n-\n- b")))
+  (is (= "<ol><li>a</li><li></li></ol>" (entry-function "1. a\n\n1.")))
+  (is (= "<ul><li>a</li></ul><p>&ndash;</p>" (entry-function "- a\n\n--"))))
 
 (deftest em
   (is (= "<p><em>foo</em></p>" (entry-function "*foo*"))))

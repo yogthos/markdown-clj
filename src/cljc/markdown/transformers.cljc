@@ -8,7 +8,7 @@
                      image-reference-link
                      implicit-reference-link
                      footnote-link]]
-            [markdown.lists :refer [li]]
+            [markdown.lists :refer [li close-lists content-indent]]
             [markdown.tables :refer [table]]
             [markdown.common
              :refer
@@ -42,11 +42,50 @@
 (defn h2? [text]
   (heading? text \-))
 
-(defn empty-line [text {:keys [code codeblock] :as state}]
+(defn leading-spaces [text]
+  (count (take-while (partial = \space) (or text ""))))
+
+(def ^:private closing-tag-re
+  #"^(?:</(?:p|li|ul|ol|blockquote|pre|code|table|thead|tbody|tr|th|td|dl|dt|dd|h[1-6])>\s*)+$")
+
+(defn closing-tag-text?
+  "True when the line's text is closing markup that an earlier transformer
+  emitted for a block ending here, not content from the source line. Closing
+  a list or blockquote on a blank line leaves text such as `</li></ul>` or
+  `</p></blockquote>`: wrapping that in a paragraph, or using it as the body
+  of a setext heading, nests the tags and swallows the line that follows."
+  [text]
+  (some? (re-matches closing-tag-re (string/trim (or text "")))))
+
+(defn setext-underline
+  "Returns :h1 or :h2 when the following line underlines text, nil otherwise.
+  List content only counts when the underline is indented past the item's
+  marker, and a line that already produced list markup is never underlined."
+  [text {:keys [next-line hr lists list-line]}]
+  (when (and (not (string/blank? text))
+             (not (closing-tag-text? text))
+             (not hr)
+             (not list-line)
+             (>= (leading-spaces next-line) (content-indent lists)))
+    (cond
+      (h1? next-line) :h1
+      (h2? next-line) :h2)))
+
+(defn empty-line [text {:keys [code codeblock heading] :as state}]
   (if (or code codeblock)
     [text state]
-    [(if (or (h1? text) (h2? text)) "" text)
-     (if (string/blank? text) (dissoc state :hr :heading) state)]))
+    (cond
+      ;; strip the underline of a setext heading emitted on the previous line
+      (and heading (or (h1? text) (h2? text)))
+      ["" (-> state
+              (dissoc :heading)
+              (assoc :heading-end 2))]
+
+      (string/blank? text)
+      [text (dissoc state :hr :heading)]
+
+      :default
+      [text state])))
 
 (defn superscript [text state]
   (if (:code state)
@@ -65,21 +104,14 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
-(defn heading [text {:keys [buf next-line code codeblock heading-anchors] :as state}]
-  (cond
-    (or codeblock code)
+(defn heading [text {:keys [code codeblock heading-anchors] :as state}]
+  (if (or codeblock code)
     [text state]
-
-    (h1? (or buf next-line))
-    [(str "<h1>" text "</h1>") (assoc state :heading true)]
-
-    (h2? (or buf next-line))
-    [(str "<h2>" text "</h2>") (assoc state :heading true)]
-
-    :else
-    (if-let [heading (make-heading text heading-anchors)]
-      [heading (assoc state :inline-heading true)]
-      [text state])))
+    (if-let [level (setext-underline text state)]
+      [(str "<" (name level) ">" text "</" (name level) ">") (assoc state :heading true)]
+      (if-let [heading (make-heading text heading-anchors)]
+        [heading (assoc state :inline-heading true)]
+        [text state]))))
 
 (defn br [text {:keys [code lists] :as state}]
   [(if (and (= [\space \space] (take-last 2 text))
@@ -124,8 +156,20 @@
        (dissoc :inline-heading)
        (assoc-in [:temp :inline-heading] inline-heading))])
 
+(defn tick
+  "Count a multi-line state flag down, clearing it once a line has seen it."
+  [state k]
+  (let [n (get state k)]
+    (cond
+      (nil? n) state
+      (= 1 n)  (dissoc state k)
+      :else    (assoc state k (dec n)))))
+
 (defn clear-line-state [text state]
-  [text (dissoc state :temp)])
+  [text (-> state
+            (dissoc :temp :hr :list-line)
+            (tick :heading-end)
+            (tick :hr-end))])
 
 (defn paragraph-text [last-line-empty? text]
   (if (and (not last-line-empty?) (not-empty text))
@@ -133,24 +177,30 @@
     text))
 
 (defn open-paragraph
-  [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty?] :as state}]
-  (cond
-    (and paragraph lists)
-    [(str "</p>" text) (dissoc state :paragraph)]
+  [text {:keys [eof heading inline-heading temp hr hr-end code lists blockquote paragraph last-line-empty? heading-end] :as state}]
+  (let [starts-block? (or last-line-empty? hr-end)]
+    (cond
+      (and paragraph lists)
+      [(str "</p>" text) (dissoc state :paragraph)]
 
-    (or heading inline-heading hr code lists blockquote)
-    [text state]
+      ;; leftover closing markup of a block that just ended is already block
+      ;; level output, so it must not be wrapped in a paragraph of its own
+      (or heading inline-heading hr code lists blockquote)
+      [text state]
 
-    paragraph
-    (if (or eof (empty? (string/trim text)))
-      [(str (paragraph-text last-line-empty? text) "</p>") (dissoc state :paragraph)]
-      [(paragraph-text last-line-empty? text) state])
+      paragraph
+      (if (or eof (empty? (string/trim text)))
+        [(str (paragraph-text starts-block? text) "</p>") (dissoc state :paragraph)]
+        [(paragraph-text starts-block? text) state])
 
-    (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty?))
-    [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
+      ;; leftover closing markup of a block that just ended is already block
+      ;; level output, so it must not be wrapped in a paragraph of its own
+      (and (not eof) (not (string/blank? text)) (not (closing-tag-text? text))
+           (or (:inline-heading temp) starts-block? heading-end))
+      [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
 
-    :default
-    [text state]))
+      :default
+      [text state])))
 
 (defn close-paragraph [text {:keys [next-line paragraph] :as state}]
   (if (and paragraph (some-> next-line string/trim (string/ends-with? "```")))
@@ -271,16 +321,24 @@
       :default
       [text state])))
 
-(defn hr [text state]
-  (if (:code state)
+(defn thematic-break? [text]
+  (and (or (empty? (drop-while #{\* \space} text))
+           (empty? (drop-while #{\- \space} text))
+           (empty? (drop-while #{\_ \space} text)))
+       (> (count (remove #{\space} text)) 2)))
+
+(defn hr [text {:keys [code lists paragraph] :as state}]
+  (if (or code (not (thematic-break? text)))
     [text state]
-    (if (and
-         (or (empty? (drop-while #{\* \space} text))
-             (empty? (drop-while #{\- \space} text))
-             (empty? (drop-while #{\_ \space} text)))
-         (> (count (remove #{\space} text)) 2))
-      [(str "<hr/>") (assoc state :hr true)]
-      [text state])))
+    (let [;; a break shallower than the innermost item's content column cannot
+          ;; belong to the item, so it ends the list instead
+          close? (and (seq lists) (< (leading-spaces text) (content-indent lists)))]
+      [(str (when paragraph "</p>")
+            (when close? (close-lists (reverse lists)))
+            "<hr/>")
+       (cond-> (assoc state :hr true :hr-end 2)
+         paragraph (dissoc :paragraph)
+         close?    (dissoc :lists))])))
 
 (defn blockquote-1
   "Check for blockquotes and signal to blockquote-2 function with
