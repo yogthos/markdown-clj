@@ -34,7 +34,7 @@
     (let [params      (some->> params
                                (partition 2)
                                (reduce (fn [m [k v]] (assoc m (keyword k) v)) {}))
-          lines       (.split (str text "\n") "\n")
+          lines       (.split (str text "\n") #"\r?\n")
           html        (goog.string.StringBuffer. "")
           references  (when (:reference-links? params) (parse-references lines))
           footnotes   (when (:footnotes? params) (parse-footnotes lines))

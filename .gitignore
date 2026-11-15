@@ -12,3 +12,4 @@ node_modules
 .calva/
 .envrc
 .direnv
+.samizdat/

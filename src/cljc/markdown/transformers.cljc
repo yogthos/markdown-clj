@@ -8,7 +8,7 @@
                      image-reference-link
                      implicit-reference-link
                      footnote-link]]
-            [markdown.lists :refer [li]]
+            [markdown.lists :refer [li close-lists content-indent]]
             [markdown.tables :refer [table]]
             [markdown.common
              :refer
@@ -42,11 +42,55 @@
 (defn h2? [text]
   (heading? text \-))
 
-(defn empty-line [text {:keys [code codeblock] :as state}]
+(defn leading-spaces [text]
+  (count (take-while (partial = \space) (or text ""))))
+
+(def ^:private closing-tag-re
+  #"^(?:</(?:p|li|ul|ol|blockquote|pre|code|table|thead|tbody|tr|th|td|dl|dt|dd|h[1-6])>\s*)+$")
+
+(defn closing-tag-text?
+  "True when the line's text is closing markup that an earlier transformer
+  emitted for a block ending here, not content from the source line. Closing
+  a list or blockquote on a blank line leaves text such as `</li></ul>` or
+  `</p></blockquote>`: wrapping that in a paragraph, or using it as the body
+  of a setext heading, nests the tags and swallows the line that follows."
+  [text]
+  (some? (re-matches closing-tag-re (string/trim (or text "")))))
+
+(defn setext-underline
+  "Returns :h1 or :h2 when the following line underlines text, nil otherwise.
+  List content only counts when the underline is indented past the item's
+  marker, a line that already produced list markup is never underlined, and an
+  unmarked line continuing a blockquote is lazy continuation text, which no
+  underline may attach to."
+  [text {:keys [next-line hr lists list-line blockquote]}]
+  (let [quoted? (or blockquote (string/starts-with? (string/triml (or text "")) ">"))]
+    (when (and (not (string/blank? text))
+               (not (closing-tag-text? text))
+               (not hr)
+               (not list-line)
+               (not (and quoted?
+                         (not (string/starts-with? (string/triml (or next-line "")) ">"))))
+               (>= (leading-spaces next-line) (content-indent lists)))
+      (cond
+        (h1? next-line) :h1
+        (h2? next-line) :h2))))
+
+(defn empty-line [text {:keys [code codeblock heading] :as state}]
   (if (or code codeblock)
     [text state]
-    [(if (or (h1? text) (h2? text)) "" text)
-     (if (string/blank? text) (dissoc state :hr :heading) state)]))
+    (cond
+      ;; strip the underline of a setext heading emitted on the previous line
+      (and heading (or (h1? text) (h2? text)))
+      ["" (-> state
+              (dissoc :heading)
+              (assoc :heading-end 2))]
+
+      (string/blank? text)
+      [text (dissoc state :hr :heading)]
+
+      :default
+      [text state])))
 
 (defn superscript [text state]
   (if (:code state)
@@ -65,21 +109,14 @@
           :default
           (recur (into buf (first remaining)) (rest remaining)))))))
 
-(defn heading [text {:keys [buf next-line code codeblock heading-anchors] :as state}]
-  (cond
-    (or codeblock code)
+(defn heading [text {:keys [code codeblock heading-anchors] :as state}]
+  (if (or codeblock code)
     [text state]
-
-    (h1? (or buf next-line))
-    [(str "<h1>" text "</h1>") (assoc state :heading true)]
-
-    (h2? (or buf next-line))
-    [(str "<h2>" text "</h2>") (assoc state :heading true)]
-
-    :else
-    (if-let [heading (make-heading text heading-anchors)]
-      [heading (assoc state :inline-heading true)]
-      [text state])))
+    (if-let [level (setext-underline text state)]
+      [(str "<" (name level) ">" text "</" (name level) ">") (assoc state :heading true)]
+      (if-let [heading (make-heading text heading-anchors)]
+        [heading (assoc state :inline-heading true)]
+        [text state]))))
 
 (defn br [text {:keys [code lists] :as state}]
   [(if (and (= [\space \space] (take-last 2 text))
@@ -124,8 +161,20 @@
        (dissoc :inline-heading)
        (assoc-in [:temp :inline-heading] inline-heading))])
 
+(defn tick
+  "Count a multi-line state flag down, clearing it once a line has seen it."
+  [state k]
+  (let [n (get state k)]
+    (cond
+      (nil? n) state
+      (= 1 n)  (dissoc state k)
+      :else    (assoc state k (dec n)))))
+
 (defn clear-line-state [text state]
-  [text (dissoc state :temp)])
+  [text (-> state
+            (dissoc :temp :hr :list-line)
+            (tick :heading-end)
+            (tick :hr-end))])
 
 (defn paragraph-text [last-line-empty? text]
   (if (and (not last-line-empty?) (not-empty text))
@@ -133,24 +182,30 @@
     text))
 
 (defn open-paragraph
-  [text {:keys [eof heading inline-heading temp hr code lists blockquote paragraph last-line-empty?] :as state}]
-  (cond
-    (and paragraph lists)
-    [(str "</p>" text) (dissoc state :paragraph)]
+  [text {:keys [eof heading inline-heading temp hr hr-end code lists blockquote paragraph last-line-empty? heading-end] :as state}]
+  (let [starts-block? (or last-line-empty? hr-end)]
+    (cond
+      (and paragraph lists)
+      [(str "</p>" text) (dissoc state :paragraph)]
 
-    (or heading inline-heading hr code lists blockquote)
-    [text state]
+      ;; leftover closing markup of a block that just ended is already block
+      ;; level output, so it must not be wrapped in a paragraph of its own
+      (or heading inline-heading hr code lists blockquote)
+      [text state]
 
-    paragraph
-    (if (or eof (empty? (string/trim text)))
-      [(str (paragraph-text last-line-empty? text) "</p>") (dissoc state :paragraph)]
-      [(paragraph-text last-line-empty? text) state])
+      paragraph
+      (if (or eof (empty? (string/trim text)))
+        [(str (paragraph-text starts-block? text) "</p>") (dissoc state :paragraph)]
+        [(paragraph-text starts-block? text) state])
 
-    (and (not eof) (not (string/blank? text)) (or (:inline-heading temp) last-line-empty?))
-    [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
+      ;; leftover closing markup of a block that just ended is already block
+      ;; level output, so it must not be wrapped in a paragraph of its own
+      (and (not eof) (not (string/blank? text)) (not (closing-tag-text? text))
+           (or (:inline-heading temp) starts-block? heading-end))
+      [(str "<p>" text) (assoc state :paragraph true :last-line-empty? false)]
 
-    :default
-    [text state]))
+      :default
+      [text state])))
 
 (defn close-paragraph [text {:keys [next-line paragraph] :as state}]
   (if (and paragraph (some-> next-line string/trim (string/ends-with? "```")))
@@ -271,48 +326,79 @@
       :default
       [text state])))
 
-(defn hr [text state]
-  (if (:code state)
+(defn thematic-break? [text]
+  (and (or (empty? (drop-while #{\* \space} text))
+           (empty? (drop-while #{\- \space} text))
+           (empty? (drop-while #{\_ \space} text)))
+       (> (count (remove #{\space} text)) 2)))
+
+(defn hr [text {:keys [code lists paragraph blockquote blockquote-paragraph] :as state}]
+  (if (or code (not (thematic-break? text)))
     [text state]
-    (if (and
-         (or (empty? (drop-while #{\* \space} text))
-             (empty? (drop-while #{\- \space} text))
-             (empty? (drop-while #{\_ \space} text)))
-         (> (count (remove #{\space} text)) 2))
-      [(str "<hr/>") (assoc state :hr true)]
-      [text state])))
+    (let [;; a break shallower than the innermost item's content column cannot
+          ;; belong to the item, so it ends the list instead
+          close? (and (seq lists) (< (leading-spaces text) (content-indent lists)))]
+      [(str (when paragraph "</p>")
+            (when close? (close-lists (reverse lists)))
+            ;; a break is not paragraph text: an open blockquote and its
+            ;; paragraph close ahead of it instead of wrapping the rule
+            (when blockquote (str (when blockquote-paragraph "</p>") "</blockquote>"))
+            "<hr/>")
+       (cond-> (assoc state :hr true :hr-end 2)
+         paragraph  (dissoc :paragraph)
+         blockquote (dissoc :blockquote :blockquote-paragraph :blockquote-end)
+         close?     (dissoc :lists))])))
+
+(defn- blockquote-open
+  "Starts a blockquote on `text`. A blockquote cannot start inside a paragraph
+  or a list item, so any block still open is closed ahead of the quote tags."
+  [text state]
+  (let [open-lists (seq (:lists state))]
+    [(str (string/join (rest text)) " ")
+     (cond-> (assoc state
+                    :blockquote-start true :blockquote true :blockquote-paragraph true
+                    :blockquote-pre (str (when (:paragraph state) "</p>")
+                                         (when open-lists (close-lists (reverse open-lists)))))
+       (:paragraph state) (dissoc :paragraph)
+       open-lists         (dissoc :lists))]))
+
+(defn- blockquote-continue
+  "Renders one line of an already open blockquote."
+  [text {:keys [blockquote-paragraph] :as state} trimmed]
+  (cond
+    (= ">" trimmed)
+    [(str (when blockquote-paragraph "</p>") "<p>") (assoc state :blockquote-paragraph true)]
+
+    (and (>= (count trimmed) 2) (= ">-" (subs trimmed 0 2)))
+    [(str (when blockquote-paragraph "</p>") "<footer>" (subs text 2) "</footer>")
+     (assoc state :blockquote-paragraph false)]
+
+    (= ">" (subs trimmed 0 1))
+    [(str (when-not blockquote-paragraph "<p>") (subs text 1) " ")
+     (assoc state :blockquote-paragraph true)]
+
+    :default
+    [(str (when-not blockquote-paragraph "<p>") text " ")
+     (assoc state :blockquote-paragraph true)]))
 
 (defn blockquote-1
   "Check for blockquotes and signal to blockquote-2 function with
   states blockquote-start and blockquote-end so that tags can be added.
   This approach enables lists to be included in blockquotes."
-  [text {:keys [eof code codeblock] :as state}]
+  [text {:keys [eof code codeblock blockquote] :as state}]
   (let [trimmed (string/trim text)]
     (cond
       (or code codeblock)
       [text state]
 
-      (:blockquote state)
-      (cond (or eof (empty? trimmed))
-            [text (assoc state :blockquote-end true :blockquote false)]
+      (not blockquote)
+      (if (= \> (first text)) (blockquote-open text state) [text state])
 
-            (= ">" trimmed)
-            [(str (when (:blockquote-paragraph state) "</p>") "<p>") (assoc state :blockquote-paragraph true)]
-
-            (and (>= (count trimmed) 2) (= ">-" (subs trimmed 0 2)))
-            [(str (when (:blockquote-paragraph state) "</p>") "<footer>" (subs text 2) "</footer>") (assoc state :blockquote-paragraph false)]
-
-            (= ">" (subs trimmed 0 1))
-            [(str (when-not (:blockquote-paragraph state) "<p>") (subs text 1) " ") (assoc state :blockquote-paragraph true)]
-
-            :default
-            [(str (when-not (:blockquote-paragraph state) "<p>") text " ") (assoc state :blockquote-paragraph true)])
+      (or eof (empty? trimmed))
+      [text (assoc state :blockquote-end true :blockquote false)]
 
       :default
-      (if (= \> (first text))
-        [(str (string/join (rest text)) " ")
-         (assoc state :blockquote-start true :blockquote true :blockquote-paragraph true)]
-        [text state]))))
+      (blockquote-continue text state trimmed))))
 
 (defn blockquote-2
   "Check for change in blockquote states and add start or end tags.
@@ -321,8 +407,8 @@
   [text {:keys [blockquote-start blockquote-end blockquote-paragraph lists] :as state}]
   (let [not-in-list (or (not lists) (empty? lists))]
     (cond blockquote-start
-          [(str "<blockquote><p>" text)
-           (dissoc state :blockquote-start)]
+          [(str (:blockquote-pre state) "<blockquote><p>" text)
+           (dissoc state :blockquote-start :blockquote-pre)]
 
           (and blockquote-end not-in-list)
           [(str text (when blockquote-paragraph "</p>") "</blockquote>")
@@ -438,6 +524,112 @@
     (re-matches #"\{.*" (first lines-seq))
     (parse-edn-metadata-headers lines-seq)))
 
+(def ^:private not-a-tag-start-re
+  ;; a `<` not followed by a tag name, `/`, `!` (comment, doctype) or `?`
+  ;; (processing instruction) cannot begin an html tag, it is literal text
+  #"<(?=[^a-zA-Z/!?]|$)")
+
+;; the content of these elements is raw text as far as the browser is
+;; concerned, so a `<` inside them is part of that markup and not prose
+(def ^:private raw-html-tags ["script" "style" "pre" "textarea"])
+
+(def ^:private raw-html-token-re #"\u0002raw-html-([0-9]+)\u0002")
+
+(defn- raw-html-token [i]
+  (str "\u0002raw-html-" i "\u0002"))
+
+(defn- tag-boundary?
+  "True when the character at `i` can follow a tag name in `lower`."
+  [lower i]
+  (or (>= i (count lower))
+      (contains? #{">" "/" " " "\t" "\n" "\r"} (subs lower i (inc i)))))
+
+(defn- next-raw-open
+  "Finds the earliest raw html region opening at or after `from` in the
+  lowercased text `lower`. Returns [index kind], where kind is :comment or the
+  tag name, or nil when there is none."
+  [lower from]
+  (let [comment (string/index-of lower "<!--" from)
+        tags    (keep (fn [tag]
+                        (let [i (string/index-of lower (str "<" tag) from)]
+                          (when (and i
+                                     (tag-boundary? lower (+ i 1 (count tag))))
+                            [i tag])))
+                      raw-html-tags)]
+    (first (sort-by first (concat (when comment [[comment :comment]]) tags)))))
+
+(defn- raw-html-regions
+  "Finds the raw html regions (comments and script/style/pre/textarea
+  elements) in `text` as a vector of [start end) index pairs. Returns
+  [regions unclosed-marker], where unclosed-marker is the marker that closes a
+  region left open at the end of the line, or nil."
+  [text]
+  (let [lower (string/lower-case text)
+        n     (count lower)]
+    (loop [from 0 regions []]
+      (if-let [[i kind] (next-raw-open lower from)]
+        (if (= :comment kind)
+          (if-let [end (string/index-of lower "-->" (+ i 4))]
+            (recur (+ end 3) (conj regions [i (+ end 3)]))
+            [(conj regions [i n]) "-->"])
+          (let [open-end (string/index-of lower ">" i)
+                close    (when open-end
+                           (string/index-of lower (str "</" kind) open-end))
+                close-end (when close (string/index-of lower ">" close))]
+            (if close-end
+              (recur (inc close-end) (conj regions [i (inc close-end)]))
+              [(conj regions [i n]) (str "</" kind)])))
+        [regions nil]))))
+
+(defn- mask-regions
+  "Replaces each [start end) region of `text` with a placeholder token."
+  [text regions]
+  (loop [regions (map-indexed vector regions) pos 0 parts []]
+    (if-let [[i [start end]] (first regions)]
+      (recur (rest regions) end
+             (conj parts (subs text pos start) (raw-html-token i)))
+      (apply str (conj parts (subs text pos))))))
+
+(defn- unmask-regions
+  "Puts the `regions` (in the same order they were masked) back into `text`."
+  [text regions]
+  (string/replace text raw-html-token-re
+                  (fn [[_ i]]
+                    (nth regions (#?(:clj Long/parseLong :cljs js/parseInt) i)))))
+
+(defn- escape-lt-chars [text]
+  (string/replace text not-a-tag-start-re "&lt;"))
+
+(defn escape-lt
+  "Escapes `<` characters that cannot start an html tag so they show up as
+  literal text instead of being emitted raw into the output.
+
+  Raw html is left alone: a `<` inside a comment, script, style, pre or
+  textarea is part of that markup, escaping it would change it. Those regions
+  are masked while the rest of the line is escaped, and one left open at the
+  end of a line keeps the following lines raw until its closing marker."
+  [text {:keys [code codeblock raw-html-close] :as state}]
+  (cond
+    (or code codeblock)
+    [text state]
+
+    raw-html-close
+    (if-let [i (string/index-of (string/lower-case text) raw-html-close)]
+      (let [cut (+ i (count raw-html-close))]
+        [(str (subs text 0 cut) (escape-lt-chars (subs text cut)))
+         (dissoc state :raw-html-close)])
+      [text state])
+
+    :else
+    (let [[regions unclosed] (raw-html-regions text)]
+      [(if (seq regions)
+         (-> (mask-regions text regions)
+             escape-lt-chars
+             (unmask-regions (mapv (fn [[start end]] (subs text start end))
+                                   regions)))
+         (escape-lt-chars text))
+       (cond-> state unclosed (assoc :raw-html-close unclosed))])))
+
 (def transformer-vector
   [set-line-state
    empty-line
@@ -447,6 +639,7 @@
    codeblock
    escaped-chars
    inline-code
+   escape-lt
    autoemail-transformer
    autourl-transformer
    image

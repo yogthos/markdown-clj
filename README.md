@@ -3,10 +3,6 @@
 
 [![CircleCI](https://circleci.com/gh/yogthos/markdown-clj.svg?style=svg)](https://circleci.com/gh/yogthos/markdown-clj) [![Downloads](https://jarkeeper.com/yogthos/markdown-clj/downloads.svg)](https://jarkeeper.com/yogthos/markdown-clj)
 
-## Demo
-
-You can try out the parser [here](https://rawgit.com/yogthos/markdown-clj/master/demo/markdown.html).
-
 ## Building Js artifact
 
 run `lein with-profile js cljsbuild once` this will create a standalone `js/markdown.js` artifact.

@@ -210,18 +210,34 @@
       (str "<h" heading (when anchor (str " id=\"" anchor "\"")) ">"
            htext "</h" heading ">"))))
 
+(def ^:private html-comment-re
+  ;; an html comment swallows the dashes in its delimiters, they are not
+  ;; typographic dashes and must not be turned into entities
+  #"<!--.*?-->")
+
+(def ^:private html-comment-token-re #"\u0002html-comment-([0-9]+)\u0002")
+
 (defn dashes [text state]
   [(if (or (:code state) (:codeblock state))
      text
-     (-> text
-         (string/replace #"\-\-\-" "&mdash;")
-         (string/replace #"\-\-" "&ndash;")
-         (string/replace #"<code>.*</code>"
-                         (fn [s](-> s
-                                    (string/replace #"&mdash;" "---")
-                                    (string/replace #"&ndash;" "--"))))
-         (string/replace #"<a href='[^']*'>"
-                         (fn [s](-> s
-                                    (string/replace #"&mdash;" "---")
-                                    (string/replace #"&ndash;" "--"))))))
+     (let [comments (atom [])
+           text'    (string/replace
+                     text html-comment-re
+                     (fn [comment]
+                       (swap! comments conj comment)
+                       (str "\u0002html-comment-" (dec (count @comments)) "\u0002")))]
+       (-> text'
+           (string/replace #"\-\-\-" "&mdash;")
+           (string/replace #"\-\-" "&ndash;")
+           (string/replace #"<code>.*</code>"
+                           (fn [s](-> s
+                                      (string/replace #"&mdash;" "---")
+                                      (string/replace #"&ndash;" "--"))))
+           (string/replace #"<a href='[^']*'>"
+                           (fn [s](-> s
+                                      (string/replace #"&mdash;" "---")
+                                      (string/replace #"&ndash;" "--"))))
+           (string/replace html-comment-token-re
+                           (fn [[_ n]]
+                             (nth @comments (#?(:clj Long/parseLong :cljs js/parseInt) n)))))))
    state])
