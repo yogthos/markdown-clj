@@ -11,6 +11,7 @@
                    :benchmark :benchmark
                    :all       (constantly true)}
   :auto-clean false
+  :pom-location "target/"
 
   :aliases {"test-cljs" ["shell" "bb" "test:cljs"]
             "test-bb"   ["shell" "bb" "test:bb"]
