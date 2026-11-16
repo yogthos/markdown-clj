@@ -93,7 +93,8 @@
       [text state])))
 
 (defn superscript [text state]
-  (if (:code state)
+  (if (or (:code state)
+          (and (string? text) (not (string/includes? text "^"))))
     [text state]
     (let [tokens (partition-by (partial contains? #{\^ \space}) text)]
       (loop [buf       []
