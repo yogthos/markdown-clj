@@ -213,6 +213,20 @@
   (is (= "<ol><li>a</li><li></li></ol>" (entry-function "1. a\n\n1.")))
   (is (= "<ul><li>a</li></ul><p>&ndash;</p>" (entry-function "- a\n\n--"))))
 
+(deftest empty-list-item-does-not-interrupt-text
+  ;; the first item of a list cannot interrupt a paragraph when it is empty
+  (is (= "<p>The total is 2025.</p>" (entry-function "The total is\n2025.")))
+  (is (= "<p>a *</p>" (entry-function "a\n*")))
+  (is (= "<ul><li>The total is 2025.</li></ul>" (entry-function "- The total is\n2025.")))
+  (is (= "<ul><li>a 1.</li></ul>" (entry-function "- a\n  1.")))
+  (is (= "<p>text</p><ol><li></li></ol>" (entry-function "text\n\n1.")))
+  (is (= "<h1>h</h1><ol><li></li></ol>" (entry-function "# h\n1.")))
+  (is (= "<ol><li>a</li><li></li><li>b</li></ol>" (entry-function "1. a\n2.\n3. b"))))
+
+(deftest list-item-lazy-continuation
+  (is (= "<ul><li>a b</li></ul>" (entry-function "- a\nb")))
+  (is (= "<ol><li>a b</li></ol>" (entry-function "1. a\nb"))))
+
 (deftest em
   (is (= "<p><em>foo</em></p>" (entry-function "*foo*"))))
 
@@ -588,7 +602,13 @@
   (is (= "<p><script>if (a<0) {}</script> and 1 &lt; 2</p>"
          (entry-function "<script>if (a<0) {}</script> and 1 < 2")))
   (is (= "<p><script> if (a<0) {} </script> 1 &lt; 2</p>"
-         (entry-function "<script>\nif (a<0) {}\n</script>\n1 < 2"))))
+         (entry-function "<script>\nif (a<0) {}\n</script>\n1 < 2")))
+  ;; characters whose lowercase form is longer (`İ`) must not shift offsets
+  (is (= "<p><!-- İ --></p>" (entry-function "<!-- İ -->")))
+  (is (= "<p><pre>İ</pre></p>" (entry-function "<pre>İ</pre>")))
+  (is (= "<p>İ <!-- note --> a &lt; b</p>" (entry-function "İ <!-- note --> a < b")))
+  (is (= "<p><pre> İ a < b </pre> 1 &lt; 2</p>"
+         (entry-function "<pre>\nİ a < b\n</pre>\n1 < 2"))))
 
 (deftest multiline-html-tag
   ;; a `>` on its own line closes the open tag, it does not start a blockquote
