@@ -17,6 +17,7 @@
             "test-bb"   ["shell" "bb" "test:bb"]
             "test-nbb"  ["shell" "bb" "test:nbb"]
             "test"      ["do" "test," "test-cljs," "test-bb," "test-nbb"]
+            "perf"      ["run" "-m" "markdown.perf"]
             "cleantest" ["do" "clean," "test"]
             "build-js"  ["with-profile" "js" "cljsbuild" "once" "main"]
             "jar"       ["do" "build-js," "jar"]
