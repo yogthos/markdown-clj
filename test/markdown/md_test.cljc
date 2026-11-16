@@ -590,6 +590,16 @@
   (is (= "<p><script> if (a<0) {} </script> 1 &lt; 2</p>"
          (entry-function "<script>\nif (a<0) {}\n</script>\n1 < 2"))))
 
+(deftest multiline-html-tag
+  ;; a `>` on its own line closes the open tag, it does not start a blockquote
+  (is (= "<p><img     src=\"a.png\"     alt=\"a\" ></p>"
+         (entry-function "<img\n    src=\"a.png\"\n    alt=\"a\"\n>")))
+  (is (= "<p><div   id=\"modal\" > text </div></p>"
+         (entry-function "<div\n  id=\"modal\"\n>\ntext\n</div>")))
+  ;; indented attributes of a nested tag are not a code block
+  (is (= "<p><div   id=\"modal\" >   <img     src=\"a.png\"     alt=\"a\"   > </div></p>"
+         (entry-function "<div\n  id=\"modal\"\n>\n  <img\n    src=\"a.png\"\n    alt=\"a\"\n  >\n</div>"))))
+
 (deftest escaped-characters
   (is
     (= "<p>&#94;&#42;&#96;&#95;&#123;&#125;&#91;&#93;<em>foo</em><code>test</code><i>bar</i>{x}[y]</p>"
