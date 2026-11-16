@@ -215,12 +215,16 @@
 (defn paragraph [text state]
   (apply close-paragraph (open-paragraph text state)))
 
-(defn code [text {:keys [eof indent-code-end next-line lists code codeblock paragraph] :as state}]
+(defn code [text {:keys [eof indent-code-end next-line lists code codeblock paragraph html-tag-open] :as state}]
   (let [should-close? (or eof
                           (not (or (string/blank? next-line)
                                    (string/starts-with? next-line "    "))))]
     (cond
       (or lists codeblock)
+      [text state]
+
+      ;; indented attributes of a multiline html tag are not a code block
+      (and html-tag-open (not code))
       [text state]
 
       indent-code-end
@@ -385,10 +389,14 @@
   "Check for blockquotes and signal to blockquote-2 function with
   states blockquote-start and blockquote-end so that tags can be added.
   This approach enables lists to be included in blockquotes."
-  [text {:keys [eof code codeblock blockquote] :as state}]
+  [text {:keys [eof code codeblock blockquote html-tag-open] :as state}]
   (let [trimmed (string/trim text)]
     (cond
       (or code codeblock)
+      [text state]
+
+      ;; a `>` closing a multiline html tag does not start a blockquote
+      (and html-tag-open (not blockquote))
       [text state]
 
       (not blockquote)
@@ -399,6 +407,51 @@
 
       :default
       (blockquote-continue text state trimmed))))
+
+(defn- scan-html-tag
+  "Scans `text` for html tag syntax starting from `open`, the tag state left
+  by the previous line: nil outside a tag, :tag inside one, or the quote
+  character of an attribute value left open. Returns the state at the end of
+  the line, so a tag whose `>` is on a later line keeps it non-nil."
+  [text open]
+  (let [n (count text)]
+    (loop [i 0 open open]
+      (if (>= i n)
+        open
+        (let [c (nth text i)]
+          (cond
+            (#{\" \'} open)
+            (recur (inc i) (if (= c open) :tag open))
+
+            (= :tag open)
+            (cond
+              (#{\" \'} c) (recur (inc i) c)
+              (= \> c)      (recur (inc i) nil)
+              :else         (recur (inc i) open))
+
+            (and (= \< c) (< (inc i) n)
+                 (re-matches #"[a-zA-Z/]" (str (nth text (inc i)))))
+            (recur (+ i 2) :tag)
+
+            :else
+            (recur (inc i) open)))))))
+
+(defn html-tag
+  "Tracks an html tag left open at the end of a line, such as `<img` followed
+  by attributes on the lines below. Those lines are part of the tag: an
+  indented attribute is not a code block and the closing `>` on a line of
+  its own is not a blockquote. A blank line ends the tag as far as markdown
+  is concerned, which keeps a stray `<` in prose from leaking further."
+  [text {:keys [code codeblock raw-html-close html-tag-open] :as state}]
+  (cond
+    (or code codeblock raw-html-close (string/blank? text))
+    [text (dissoc state :html-tag-open)]
+
+    :else
+    (let [open (scan-html-tag text html-tag-open)]
+      [text (if open
+              (assoc state :html-tag-open open)
+              (dissoc state :html-tag-open))])))
 
 (defn blockquote-2
   "Check for change in blockquote states and add start or end tags.
@@ -650,6 +703,7 @@
    footnote-link
    hr
    blockquote-1
+   html-tag
    li
    heading
    blockquote-2
