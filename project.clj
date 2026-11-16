@@ -18,10 +18,13 @@
             "test-nbb"  ["shell" "bb" "test:nbb"]
             "test"      ["do" "test," "test-cljs," "test-bb," "test-nbb"]
             "cleantest" ["do" "clean," "test"]
-            "install"   ["do" "clean," "install"]
-            "deploy"    ["do" "clean," "deploy" "clojars"]}
+            "build-js"  ["with-profile" "js" "cljsbuild" "once" "main"]
+            "jar"       ["do" "build-js," "jar"]
+            "install"   ["do" "clean," "build-js," "install"]
+            "deploy"    ["do" "clean," "build-js," "deploy" "clojars"]}
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
+  :resource-paths ["target/generated-resources"]
 
   :profiles
   {:dev
@@ -36,7 +39,7 @@
     {:builds {:main
               {:source-paths ["src/cljc" "src/cljs"]
                :jar          true
-               :compiler     {:output-to     "js/markdown.js"
+               :compiler     {:output-to     "target/generated-resources/js/markdown-clj.js"
                               :optimizations :advanced
                               :pretty-print  false}}
               :dev
