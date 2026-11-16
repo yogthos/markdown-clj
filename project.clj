@@ -1,4 +1,4 @@
-(defproject markdown-clj "1.12.13"
+(defproject markdown-clj "1.12.14-SNAPSHOT"
   :description "Markdown parser"
   :url "https://github.com/yogthos/markdown-clj"
   :license {:name "Eclipse Public License"
@@ -11,16 +11,20 @@
                    :benchmark :benchmark
                    :all       (constantly true)}
   :auto-clean false
+  :pom-location "target/"
 
   :aliases {"test-cljs" ["shell" "bb" "test:cljs"]
             "test-bb"   ["shell" "bb" "test:bb"]
             "test-nbb"  ["shell" "bb" "test:nbb"]
             "test"      ["do" "test," "test-cljs," "test-bb," "test-nbb"]
             "cleantest" ["do" "clean," "test"]
-            "install"   ["do" "clean," "install"]
-            "deploy"    ["do" "clean," "deploy" "clojars"]}
+            "build-js"  ["with-profile" "js" "cljsbuild" "once" "main"]
+            "jar"       ["do" "build-js," "jar"]
+            "install"   ["do" "clean," "build-js," "install"]
+            "deploy"    ["do" "clean," "build-js," "deploy" "clojars"]}
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
+  :resource-paths ["target/generated-resources"]
 
   :profiles
   {:dev
@@ -35,7 +39,7 @@
     {:builds {:main
               {:source-paths ["src/cljc" "src/cljs"]
                :jar          true
-               :compiler     {:output-to     "js/markdown.js"
+               :compiler     {:output-to     "target/generated-resources/js/markdown-clj.js"
                               :optimizations :advanced
                               :pretty-print  false}}
               :dev

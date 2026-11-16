@@ -5,7 +5,7 @@
 
 ## Building Js artifact
 
-run `lein with-profile js cljsbuild once` this will create a standalone `js/markdown.js` artifact.
+run `lein build-js` this will create a standalone `target/generated-resources/js/markdown-clj.js` artifact.
 
 ## Installation
 
@@ -298,6 +298,8 @@ console.log(markdown.core.mdToHtml("##This is a heading\nwith a paragraph follow
 console.log(markdown.core.mdToHtml("##This is a heading\nwith a paragraph following it", "heading-anchors", true));
 
 ```
+
+A self-contained JavaScript file can be found inside the jar at `js/markdown-clj.js`.
 
 ## Supported syntax
 
