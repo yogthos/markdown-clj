@@ -56,6 +56,23 @@
     (add-row :ol list-type num-indents indents (+ num-indents marker 1)
              (or (make-heading content false) content) state)))
 
+(defn- continues-list?
+  "True when a marker of `list-type` at `indents` adds an item to a list that
+  is already open, rather than starting a new one."
+  [lists list-type indents]
+  (some (fn [[open-type open-indents]]
+          (and (= open-type list-type) (= open-indents indents)))
+        lists))
+
+(defn- empty-item-interrupts-text?
+  "CommonMark: the first item of a list cannot interrupt a paragraph when the
+  item is empty. A line such as `2025.` that follows paragraph or list item
+  text is therefore a continuation of that text, not an empty list item."
+  [list-type indents {:keys [last-line-empty? paragraph lists]}]
+  (and (not last-line-empty?)
+       (or paragraph (seq lists))
+       (not (continues-list? lists list-type indents))))
+
 (defn li [text {:keys [codeblock last-line-empty? eof lists hr] :as state}]
   (cond
 
@@ -82,8 +99,14 @@
     :else
     (let [indents  (if last-line-empty? 0 (count (take-while (partial = \space) text)))
           trimmed  (string/trim text)
-          in-list? (:lists state)]
+          spaces   (count (take-while (partial = \space) text))
+          empty-item (cond
+                       (re-matches #"[\*\+-]" trimmed) :ul
+                       (re-matches #"[0-9]+\." trimmed) :ol)]
       (cond
+        (and empty-item (empty-item-interrupts-text? empty-item spaces state))
+        [(if (seq lists) (str " " trimmed) text) state]
+
         ;; a marker with no content is an empty list item, not a blank line
         (re-find #"^[\*\+-](?: |$)" trimmed)
         (let [[text state] (ul text state)]
@@ -100,6 +123,10 @@
              (not-empty lists))
         [(close-lists (reverse lists))
          (assoc state :lists [] :buf text :list-line true)]
+
+        ;; a lazy continuation line of a list item's text
+        (and (seq lists) (not last-line-empty?) (not (string/blank? text)))
+        [(str " " text) state]
 
         :else
         [text state]))))

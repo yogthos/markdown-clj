@@ -597,6 +597,13 @@
   (or (>= i (count lower))
       (contains? #{">" "/" " " "\t" "\n" "\r"} (subs lower i (inc i)))))
 
+(defn- ascii-lower-case
+  "Lowercases only the ASCII letters in `text`. Unlike string/lower-case this
+  never changes the length of the string (e.g. `İ` lowercases to two chars),
+  so indexes found in the result are valid in `text`."
+  [text]
+  (string/replace text #"[A-Z]+" string/lower-case))
+
 (defn- next-raw-open
   "Finds the earliest raw html region opening at or after `from` in the
   lowercased text `lower`. Returns [index kind], where kind is :comment or the
@@ -617,7 +624,7 @@
   [regions unclosed-marker], where unclosed-marker is the marker that closes a
   region left open at the end of the line, or nil."
   [text]
-  (let [lower (string/lower-case text)
+  (let [lower (ascii-lower-case text)
         n     (count lower)]
     (loop [from 0 regions []]
       (if-let [[i kind] (next-raw-open lower from)]
@@ -667,7 +674,7 @@
     [text state]
 
     raw-html-close
-    (if-let [i (string/index-of (string/lower-case text) raw-html-close)]
+    (if-let [i (string/index-of (ascii-lower-case text) raw-html-close)]
       (let [cut (+ i (count raw-html-close))]
         [(str (subs text 0 cut) (escape-lt-chars (subs text cut)))
          (dissoc state :raw-html-close)])
