@@ -47,7 +47,10 @@
 (defn make-link
   [img?]
   (fn link [text {:keys [code codeblock] :as state}]
-    (if (or code codeblock)
+    (if (or code
+            codeblock
+            ;; every link and image has a [ in it
+            (and (string? text) (not (string/includes? text "["))))
       [text state]
       (loop [out []
              tokens (seq text)
