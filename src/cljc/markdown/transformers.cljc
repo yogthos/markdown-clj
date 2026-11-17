@@ -350,7 +350,7 @@
             "<hr/>")
        (cond-> (assoc state :hr true :hr-end 2)
          paragraph  (dissoc :paragraph)
-         blockquote (dissoc :blockquote :blockquote-paragraph :blockquote-end)
+         blockquote (dissoc :blockquote :blockquote-paragraph :blockquote-end :blockquote-in-list)
          close?     (dissoc :lists))])))
 
 (defn- blockquote-open
@@ -365,6 +365,38 @@
                                          (when open-lists (close-lists (reverse open-lists)))))
        (:paragraph state) (dissoc :paragraph)
        open-lists         (dissoc :lists))]))
+
+;; list items whose content starts at or before `indent`
+(defn- lists-holding [lists indent]
+  (vec (take-while #(<= (or (nth % 2 nil) (second %)) indent) lists)))
+
+(defn- list-item-quote?
+  "True when `text` is a `>` line indented into the content of an open list
+  item, which makes the quote part of that item. Four or more spaces past the
+  content column would be an indented code block, so those are left alone."
+  [text {:keys [lists]}]
+  (let [indent (leading-spaces text)
+        holding (lists-holding lists indent)]
+    (and (seq holding)
+         (< (- indent (content-indent holding)) 4)
+         (= \> (nth text indent nil)))))
+
+(defn- blockquote-open-in-list
+  "Starts a blockquote inside the list item whose content column `text` is
+  indented to. Lists nested deeper than that are closed ahead of the quote."
+  [text {:keys [lists] :as state}]
+  (let [indent  (leading-spaces text)
+        holding (lists-holding lists indent)
+        deeper  (drop (count holding) lists)]
+    [(str (subs text (inc indent)) " ")
+     (assoc state
+            :blockquote-start true :blockquote true :blockquote-paragraph true
+            :blockquote-in-list true
+            :blockquote-pre (when (seq deeper) (close-lists (reverse deeper)))
+            :lists holding)]))
+
+(defn- list-marker? [trimmed]
+  (boolean (re-find #"^(?:[\*\+-]|[0-9]+\.)(?: |$)" trimmed)))
 
 (defn- blockquote-continue
   "Renders one line of an already open blockquote."
@@ -400,10 +432,20 @@
       [text state]
 
       (not blockquote)
-      (if (= \> (first text)) (blockquote-open text state) [text state])
+      (cond
+        (= \> (first text))           (blockquote-open text state)
+        (list-item-quote? text state) (blockquote-open-in-list text state)
+        :else                         [text state])
 
       (or eof (empty? trimmed))
       [text (assoc state :blockquote-end true :blockquote false)]
+
+      ;; a new list item ends a quote nested in the previous item
+      (and (:blockquote-in-list state) (list-marker? trimmed))
+      [text (assoc state :blockquote-end true :blockquote false)]
+
+      (:blockquote-in-list state)
+      (blockquote-continue (string/triml text) state trimmed)
 
       :default
       (blockquote-continue text state trimmed))))
@@ -457,11 +499,17 @@
   "Check for change in blockquote states and add start or end tags.
   Closing a blockquote with a list in it is a bit more complex,
   as the list is not closed until the following blank line."
-  [text {:keys [blockquote-start blockquote-end blockquote-paragraph lists] :as state}]
+  [text {:keys [blockquote-start blockquote-end blockquote-paragraph blockquote-in-list lists] :as state}]
   (let [not-in-list (or (not lists) (empty? lists))]
     (cond blockquote-start
           [(str (:blockquote-pre state) "<blockquote><p>" text)
            (dissoc state :blockquote-start :blockquote-pre)]
+
+          ;; a quote nested in a list item closes ahead of whatever the
+          ;; line did to the list, such as starting the next item
+          (and blockquote-end blockquote-in-list)
+          [(str (when blockquote-paragraph "</p>") "</blockquote>" text)
+           (dissoc state :blockquote :blockquote-paragraph :blockquote-end :blockquote-in-list)]
 
           (and blockquote-end not-in-list)
           [(str text (when blockquote-paragraph "</p>") "</blockquote>")
