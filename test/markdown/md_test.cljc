@@ -816,3 +816,26 @@
 
 (deftest whitespace-paragraphs
   (is (= "<p>foo  </p><p>bar</p>" (entry-function "foo\n \nbar"))))
+
+(deftest blockquote-in-list-item
+  ;; a quote indented to the item's content column belongs to the item
+  (is (= "<ul><li>item<blockquote><p> quote </p></blockquote></li></ul>"
+         (entry-function "- item\n\n  > quote\n")))
+  (is (= "<ul><li>item<blockquote><p> quote </p></blockquote></li></ul>"
+         (entry-function "- item\n  > quote")))
+  (is (= "<ol><li>item<blockquote><p> quote </p></blockquote></li></ol>"
+         (entry-function "1. item\n\n   > quote\n")))
+  (is (= "<ul><li>item<blockquote><p> a  b </p></blockquote></li></ul>"
+         (entry-function "- item\n\n  > a\n  > b\n"))))
+
+(deftest blockquote-in-list-item-then-more-items
+  (is (= "<ul><li>item<blockquote><p> quote </p></blockquote></li><li>next</li></ul>"
+         (entry-function "- item\n\n  > quote\n- next")))
+  (is (= "<ul><li>item<blockquote><p> quote </p></blockquote></li><li>next</li></ul>"
+         (entry-function "- item\n\n  > quote\n\n- next")))
+  (is (= "<ul><li>item<blockquote><p> quote </p></blockquote></li></ul><p>after</p>"
+         (entry-function "- item\n\n  > quote\n\nafter"))))
+
+(deftest blockquote-in-nested-list-item
+  (is (= "<ul><li>a<ul><li>b<blockquote><p> quote </p></blockquote></li></ul></li></ul>"
+         (entry-function "- a\n  - b\n\n    > quote\n"))))

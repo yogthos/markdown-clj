@@ -79,6 +79,10 @@
     codeblock
     [text state]
 
+    ;; the line belongs to a quote nested in the open item
+    (and (:blockquote state) (:blockquote-in-list state))
+    [text state]
+
     ;; the hr transformer already decided whether the break ends the list, so
     ;; the rendered break is left to sit in the open item
     hr
