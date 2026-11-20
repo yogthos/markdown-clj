@@ -41,7 +41,7 @@
   (first
     (reduce
       #(apply %2 %1)
-      [title state]
+      [(string/join title) state]
       [italics em strong bold strikethrough])))
 
 (defn make-link
