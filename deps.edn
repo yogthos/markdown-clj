@@ -9,6 +9,9 @@
                 commons-lang/commons-lang {:mvn/version "2.6"}}
    :main-opts ["-m" "cognitect.test-runner"]
    :exec-fn cognitect.test-runner.api/test}
+  :perf
+  {:extra-paths ["test"]
+   :main-opts ["-m" "markdown.perf"]}
   :cljs-test
   {:extra-paths ["test"]
    :extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}

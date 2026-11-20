@@ -78,68 +78,84 @@
                          (escaped-char-entities match)))))
    state])
 
-(defn open-html-tags [open? token-seq]
-  (= :open (reduce (fn [state token]
-                     (case token
-                       \< :open
-                       \> :closed
-                       state))
-                   (if open? :open :closed)
-                   token-seq)))
+(defn- tag-open-after?
+  "Whether an html tag is open at the end of `text`, given whether one was open
+   at its start."
+  [open? text]
+  (let [lt (string/last-index-of text "<")
+        gt (string/last-index-of text ">")]
+    (if (or lt gt)
+      (> (or lt -1) (or gt -1))
+      open?)))
+
+(defn- run-starts
+  "The start index of every run of the character `ch` in `text` that is exactly
+   `n` characters long."
+  [text ch n]
+  ;; (run-starts "a **b** *c ***" \* 2)  =>  [2 5]
+  ;;
+  ;;   a **b** *c ***
+  ;;     ^^ ^^ ^  ^^^     the runs of *
+  ;;     2  5  8  11      where each one starts
+  ;;     2  2  1  3       how long each one is
+  ;;     |  |             exactly 2 long, so kept
+  (let [length (count text)]
+    (loop [from 0 starts []]
+      (if-let [start (string/index-of text ch from)]
+        ;; `end` is one past the last `ch` of the run that starts here
+        (let [end (loop [i start]
+                    (if (and (< i length) (= ch (nth text i)))
+                      (recur (inc i))
+                      i))]
+          (recur end (if (= n (- end start)) (conj starts start) starts)))
+        starts))))
+
+(defn- drop-in-tag
+  "Drops the leading `starts` that are inside an html tag opened in `text` at or
+   after `from`."
+  [text from starts]
+  ;; `in-tag?` is carried from one start to the next, so that each stretch of
+  ;; the text is only looked at once
+  (loop [from from in-tag? false starts starts]
+    (if (and (seq starts)
+             (tag-open-after? in-tag? (subs text from (first starts))))
+      (recur (first starts) true (rest starts))
+      starts)))
 
 (defn make-separator
   "Return a transformer to
-   - find all the chunks of the string delimited by the `separator',
-   - wrap the output with the `open' and `close' markers, and
-   - apply the `transformer' to the text inside the chunk."
+   - find all the chunks of the string delimited by the `separator`,
+   - wrap the output with the `open` and `close` markers, and
+   - apply the `chunk-transformer` to the text inside the chunk."
   ([separator open close]
-   (make-separator separator open close identity))
-  ([separator open close transformer]
-   (let [separator (seq separator)]  ;; allow char seq or string
+   ;; a chunk-transformer takes and returns [text state], this one changes nothing
+   (make-separator separator open close (fn [text state] [text state])))
+  ([separator open close chunk-transformer]
+   (when-not (and (seq separator) (apply = separator))
+     (throw (ex-info "A separator must be one character repeated"
+                     {:separator separator})))
+   (let [first-sep-char (first separator)
+         sep-length     (count separator)]
      (fn [text state]
        (if (:code state)
-         [text state]
-         (loop [out       []
-                buf       []
-                tokens    (partition-by (partial = (first separator)) (seq text))
-                cur-state (assoc state :found-token false :in-tag? false)]
-           (cond
-             (empty? tokens)
-             [(string/join (into (if (:found-token cur-state) (into out separator) out) buf))
-              (dissoc cur-state :found-token)]
-
-             (:found-token cur-state)
-             (if (= (first tokens) separator)
-               (let [[new-buf new-state]
-                     (if (identical? transformer identity)
-                       ;; Skip the buf->string->buf conversions in the common
-                       ;; case.
-                       [buf cur-state]
-                       (let [[s new-state] (transformer (string/join buf) cur-state)]
-                         [(seq s) new-state]))]
-                 (recur (vec (concat out (seq open) new-buf (seq close)))
-                        []
-                        (rest tokens)
-                        (assoc new-state :found-token false)))
-               (recur out
-                      (into buf (first tokens))
-                      (rest tokens)
-                      cur-state))
-
-             (and (= (first tokens) separator) (not (:in-tag? cur-state)))
-             (recur out buf (rest tokens) (assoc cur-state :found-token true))
-
-             :default
-             (recur (into out (first tokens)) buf (rest tokens) (assoc cur-state :in-tag? (open-html-tags (:in-tag? cur-state) (first tokens)))))))))))
+         [text state] ; No changes in code blocks
+         (loop [out    []  ;the pieces of the result, joined at the end
+                pos    0  ;where the text that is not in `out` yet starts
+                starts (run-starts text first-sep-char sep-length)  ;the separators not used yet
+                state  state]
+           ;; the first two separators left are a pair, `starts` becomes the rest
+           (let [[opening closing & starts] (drop-in-tag text pos starts)]
+             (if closing
+               (let [[chunk state] (chunk-transformer (subs text (+ opening sep-length) closing) state)]
+                 (recur (conj out (subs text pos opening) open chunk close)
+                        (+ closing sep-length)  ;just past the closing separator
+                        starts
+                        state))
+               ;; a separator that is never closed stays in the text as it is
+               [(string/join (conj out (subs text pos))) state]))))))))
 
 (defn escape-code-transformer [text state]
   [(escape-code text) state])
-
-;; Not used any more internally; kept around just in case third party code
-;; depends on this.
-(defn separator [escape? text open close separator state]
-  ((make-separator separator open close (if escape? escape-code-transformer identity))
-   text state))
 
 (def strong (make-separator "**" "<strong>" "</strong>"))
 
