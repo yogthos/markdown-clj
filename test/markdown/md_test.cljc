@@ -839,3 +839,8 @@
 (deftest blockquote-in-nested-list-item
   (is (= "<ul><li>a<ul><li>b<blockquote><p> quote </p></blockquote></li></ul></li></ul>"
          (entry-function "- a\n  - b\n\n    > quote\n"))))
+
+(deftest characters-outside-the-basic-multilingual-plane
+  (is (= "<p>locked 🔒 and played 🎮</p>"
+         (entry-function "locked 🔒 and played 🎮")))
+  (is (= "<h2>𝔸 heading</h2>" (entry-function "## 𝔸 heading"))))
