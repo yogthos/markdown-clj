@@ -15,7 +15,7 @@
 (set! *warn-on-reflection* true)
 
 (defn- write [^Writer writer ^String text]
-  (doseq [c text] (.write writer (int c))))
+  (.write writer text))
 
 (defn- init-transformer [writer {:keys [replacement-transformers custom-transformers inhibit-separator]}]
   (fn [line next-line state]
